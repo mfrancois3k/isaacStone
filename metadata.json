@@ -1,0 +1,6 @@
+{
+  "name": "ISAAC STONE AND TILE LLC",
+  "description": "Tiles tailored to your home by ISAAC STONE AND TILE LLC. Bespoke architectural tiling, quarried marble, and granite craftsmanship with consultation booking and automated AI estimates.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
