@@ -5,7 +5,7 @@ import {
   buildLead,
   missingFieldsMessage,
   missingLeadFields,
-} from '../../shared/leads';
+} from '../../shared/leads.js';
 
 /**
  * Estimate requests, on the hosted deployment.

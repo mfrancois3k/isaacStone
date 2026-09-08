@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { GoogleGenAI } from '@google/genai';
-import { GEMINI_MODEL, SYSTEM_PROMPT, keywordFallback } from '../shared/consultant';
+import { GEMINI_MODEL, SYSTEM_PROMPT, keywordFallback } from '../shared/consultant.js';
 
 interface HistoryItem {
   sender?: string;

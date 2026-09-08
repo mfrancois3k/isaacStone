@@ -4,7 +4,7 @@ import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
-import { GEMINI_MODEL, SYSTEM_PROMPT, keywordFallback } from "./shared/consultant";
+import { GEMINI_MODEL, SYSTEM_PROMPT, keywordFallback } from "./shared/consultant.js";
 import {
   LEAD_ACCEPTED_MESSAGE,
   LEAD_FAILED_MESSAGE,
@@ -12,7 +12,7 @@ import {
   buildLead,
   missingFieldsMessage,
   missingLeadFields,
-} from "./shared/leads";
+} from "./shared/leads.js";
 
 dotenv.config();
 
