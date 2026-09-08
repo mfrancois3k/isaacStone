@@ -1,481 +1,540 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Mic, 
-  MicOff, 
-  Volume2, 
-  VolumeX, 
-  X, 
-  Send, 
-  Sparkles, 
-  Phone, 
-  Layers, 
-  CheckCircle2, 
-  RotateCcw,
-  Headphones,
-  Maximize2,
-  Minimize2,
-  AlertCircle
-} from 'lucide-react';
-import { BrandLogo } from './BrandLogo';
+import { BUSINESS } from '../data/site';
+
+/**
+ * The estimate helper. It asks four things — name, phone, room/material and
+ * rough timing — then hands them to Jonathan.
+ *
+ * Everything it *claims* about the business comes from the server prompt in
+ * server.ts, which is held to src/data/site.ts. Nothing in this file should ever
+ * put a price, a deposit or a timeline on the screen.
+ */
 
 interface ChatMessage {
   id: string;
   sender: 'user' | 'bot';
   text: string;
-  timestamp: string;
 }
 
-const SUGGESTED_PROMPTS = [
-  "What is your 50% mobilization deposit policy?",
-  "How much to install a 10ft marble waterfall island?",
-  "Do you work with Calacatta Viola & Quartzite?",
-  "What towns in Long Island do you service?",
-  "How do I schedule on-site laser templating?"
+const GREETING =
+  "Hi — I can take your details and pass them to Jonathan. What room are you looking at?";
+
+/** Launcher teases. Rotated on a timer while the drawer is closed. */
+const HINTS = [
+  { tag: 'ESTIMATE', text: 'Want a free on-site visit? Tell me the room and I will pass it on.' },
+  { tag: 'SERVICES', text: 'Not sure whether you need granite or marble? Tell me the room.' },
+  { tag: 'THE CREW', text: 'Want Jonathan to call you instead? Tell me the best time.' },
+  { tag: 'CONTACT', text: 'I can take your details in about thirty seconds. Want to try?' },
 ];
 
-export const VoiceChatBot: React.FC = () => {
+// ---------------------------------------------------------------------------
+// What the visitor has told us. Read straight out of their own messages, so the
+// summary block can only ever show words they typed.
+//
+// ponytail: keyword + regex capture, deliberately conservative. It misses
+// phrasings it does not know, which is why the drawer prints what is still
+// missing rather than pretending it has everything. Move this server-side if
+// the miss rate starts costing leads.
+// ---------------------------------------------------------------------------
+
+const PHONE_RE = /(?:\+?1[\s.-]?)?\(?\d{3}\)?[\s.-]?\d{3}[\s.-]?\d{4}/;
+const EMAIL_RE = /[^\s@]+@[^\s@]+\.[a-z]{2,}/i;
+const NAME_RE = /\b(?:my name is|i am|i'm|this is|it's)\s+([A-Za-z][\w'-]+(?: [A-Za-z][\w'-]+)?)/i;
+const NAME_STOPWORDS = new Set([
+  'looking', 'thinking', 'trying', 'just', 'not', 'interested', 'wondering',
+  'hoping', 'planning', 'calling', 'in', 'at', 'a', 'the', 'doing', 'after',
+  'about', 'going', 'redoing', 'ready',
+]);
+const MATERIALS = ['tile', 'granite', 'marble', 'foundation', 'superstructure', 'stone'];
+const ROOMS = [
+  'kitchen', 'bathroom', 'bath', 'shower', 'floor', 'patio', 'basement',
+  'hallway', 'entryway', 'countertop', 'backsplash', 'fireplace', 'stairs',
+  'laundry', 'porch', 'deck', 'foyer',
+];
+const TIMING_WORDS = [
+  'asap', 'as soon as', 'right away', 'this week', 'next week', 'this month',
+  'next month', 'spring', 'summer', 'autumn', 'fall', 'winter', 'january',
+  'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september',
+  'october', 'november', 'december', 'no rush', 'flexible',
+];
+const TIMING_RE = /\b\d+\s*(?:day|week|month)s?\b/i;
+
+export interface CapturedDetails {
+  name?: string;
+  phone?: string;
+  email?: string;
+  project?: string;
+  timing?: string;
+}
+
+/** Pure — exported so it can be checked without rendering anything. */
+export function captureDetails(userMessages: readonly string[]): CapturedDetails {
+  const found: CapturedDetails = {};
+  const project = new Set<string>();
+
+  for (const raw of userMessages) {
+    const text = raw.trim();
+    const lower = text.toLowerCase();
+
+    const phone = found.phone ?? text.match(PHONE_RE)?.[0].trim();
+    if (phone) found.phone = phone;
+    const email = found.email ?? text.match(EMAIL_RE)?.[0].trim();
+    if (email) found.email = email;
+
+    if (!found.name) {
+      const candidate = text.match(NAME_RE)?.[1]?.trim();
+      if (candidate && !NAME_STOPWORDS.has(candidate.split(' ')[0].toLowerCase())) {
+        found.name = candidate;
+      }
+    }
+
+    for (const word of [...ROOMS, ...MATERIALS]) {
+      if (lower.includes(word)) project.add(word);
+    }
+
+    const timing =
+      found.timing ??
+      TIMING_WORDS.find((w) => lower.includes(w)) ??
+      text.match(TIMING_RE)?.[0].toLowerCase();
+    if (timing) found.timing = timing;
+  }
+
+  if (project.size) found.project = [...project].join(', ');
+  return found;
+}
+
+function summarise(details: CapturedDetails): string {
+  return [details.name, details.phone, details.email, details.project, details.timing]
+    .filter(Boolean)
+    .join(' · ');
+}
+
+const LABEL = 'font-mono text-[9px] uppercase tracking-[0.16em]';
+const FOCUS = 'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand';
+
+export function VoiceChatBot() {
   const [isOpen, setIsOpen] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
-  const [isMuted, setIsMuted] = useState(false);
-  const [inputText, setInputText] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [speechSupported, setSpeechSupported] = useState(true);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'welcome-1',
-      sender: 'bot',
-      text: "Greetings. I am the Isaac Stone & Tile AI voice consultant. Speak into your microphone or type below to inquire about Italian marble, diamond miters, or our 50% mobilization deposit schedule.",
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }
+    { id: 'greeting', sender: 'bot', text: GREETING },
   ]);
+  const [draft, setDraft] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(true);
+  const [micError, setMicError] = useState('');
+  const [speakOn, setSpeakOn] = useState(false);
+  const [hintIndex, setHintIndex] = useState(0);
+  const [hintDismissed, setHintDismissed] = useState(false);
+  const [handoff, setHandoff] = useState<{ state: 'idle' | 'sending' | 'sent' | 'error'; note: string }>(
+    { state: 'idle', note: '' },
+  );
 
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<any>(null);
-  const synthRef = useRef<SpeechSynthesis | null>(null);
+  const launcherRef = useRef<HTMLButtonElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const transcriptEndRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<{ start: () => void; stop: () => void; abort: () => void } | null>(null);
+  const speakOnRef = useRef(speakOn);
+  speakOnRef.current = speakOn;
 
-  // Initialize Speech Recognition & Synthesis
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-      if (SpeechRecognition) {
-        const recognition = new SpeechRecognition();
-        recognition.continuous = false;
-        recognition.interimResults = true;
-        recognition.lang = 'en-US';
+  const details = useMemo(
+    () => captureDetails(messages.filter((m) => m.sender === 'user').map((m) => m.text)),
+    [messages],
+  );
+  const summary = summarise(details);
+  const missing = (['name', 'phone', 'email'] as const).filter((k) => !details[k]);
 
-        recognition.onstart = () => {
-          setIsListening(true);
-        };
-
-        recognition.onresult = (event: any) => {
-          const current = event.resultIndex;
-          const transcript = event.results[current][0].transcript;
-          setInputText(transcript);
-          if (event.results[current].isFinal) {
-            handleSendMessage(transcript);
-            setIsListening(false);
-          }
-        };
-
-        recognition.onerror = (event: any) => {
-          console.warn("Speech recognition error:", event.error);
-          setIsListening(false);
-        };
-
-        recognition.onend = () => {
-          setIsListening(false);
-        };
-
-        recognitionRef.current = recognition;
-      } else {
-        setSpeechSupported(false);
-      }
-
-      if ('speechSynthesis' in window) {
-        synthRef.current = window.speechSynthesis;
-      }
-    }
-
-    // Event listener to open voice assistant from navbar or hero
-    const handleOpenExternal = () => {
-      setIsOpen(true);
-    };
-    window.addEventListener('open-voice-bot', handleOpenExternal);
-
-    return () => {
-      window.removeEventListener('open-voice-bot', handleOpenExternal);
-      if (recognitionRef.current) {
-        try {
-          recognitionRef.current.abort();
-        } catch {
-          // ignore
-        }
-      }
-      if (synthRef.current) {
-        synthRef.current.cancel();
-      }
-    };
+  const speak = useCallback((text: string) => {
+    if (!speakOnRef.current || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
   }, []);
 
-  // Auto-scroll messages to bottom
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, isLoading]);
+  const pushMessage = useCallback((sender: 'user' | 'bot', text: string) => {
+    setMessages((prev) => [...prev, { id: `${sender}-${Date.now()}-${prev.length}`, sender, text }]);
+  }, []);
 
-  // Text-To-Speech Output Function
-  const speakText = (text: string) => {
-    if (isMuted || !synthRef.current) return;
+  const sendMessage = useCallback(
+    async (text: string) => {
+      const content = text.trim();
+      if (!content || isLoading) return;
 
-    try {
-      synthRef.current.cancel(); // Stop any previous speech
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1.0;
-      utterance.pitch = 0.98;
+      const history = messages.slice(-5).map((m) => ({ sender: m.sender, text: m.text }));
+      pushMessage('user', content);
+      setDraft('');
+      setIsLoading(true);
 
-      // Prefer high-quality natural English voice if available
-      const voices = synthRef.current.getVoices();
-      const naturalVoice = voices.find(v => 
-        (v.name.includes('Natural') || v.name.includes('Google') || v.name.includes('Samantha') || v.name.includes('Daniel') || v.name.includes('Guy')) && v.lang.startsWith('en')
-      );
-      if (naturalVoice) {
-        utterance.voice = naturalVoice;
-      }
-
-      utterance.onstart = () => setIsSpeaking(true);
-      utterance.onend = () => setIsSpeaking(false);
-      utterance.onerror = () => setIsSpeaking(false);
-
-      synthRef.current.speak(utterance);
-    } catch (e) {
-      console.warn("Speech synthesis error:", e);
-      setIsSpeaking(false);
-    }
-  };
-
-  const toggleListening = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-    } else {
-      // Stop speech if speaking
-      if (synthRef.current) {
-        synthRef.current.cancel();
-        setIsSpeaking(false);
-      }
       try {
-        recognitionRef.current?.start();
-      } catch (err) {
-        console.warn("Could not start recognition:", err);
+        const response = await fetch('/api/voice-consultant', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: content, conversationHistory: history }),
+        });
+        const data = await response.json();
+        const reply =
+          typeof data.reply === 'string' && data.reply.trim()
+            ? data.reply
+            : `I did not catch that. You can always call ${BUSINESS.phone}.`;
+        pushMessage('bot', reply);
+        speak(reply);
+      } catch {
+        const reply = `Something went wrong on our end — sorry. Call ${BUSINESS.phone} and Jonathan will pick up, Monday to Saturday.`;
+        pushMessage('bot', reply);
+        speak(reply);
+      } finally {
+        setIsLoading(false);
       }
+    },
+    [isLoading, messages, pushMessage, speak],
+  );
+
+  // Latest sender, so the recognition instance below is built once and never
+  // torn down mid-utterance just because a message arrived.
+  const sendMessageRef = useRef(sendMessage);
+  sendMessageRef.current = sendMessage;
+
+  // --- Web Speech API. Absent in Firefox and elsewhere; the drawer stays a text chat.
+  useEffect(() => {
+    const SpeechRecognitionCtor =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognitionCtor) {
+      setSpeechSupported(false);
+      return;
+    }
+    const recognition = new SpeechRecognitionCtor();
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.onstart = () => {
+      setMicError('');
+      setIsListening(true);
+    };
+    recognition.onresult = (event: any) => {
+      const result = event.results[event.resultIndex];
+      setDraft(result[0].transcript);
+      if (result.isFinal) {
+        setIsListening(false);
+        void sendMessageRef.current(result[0].transcript);
+      }
+    };
+    recognition.onerror = (event: any) => {
+      setIsListening(false);
+      setMicError(
+        event.error === 'not-allowed' || event.error === 'service-not-allowed'
+          ? 'No microphone access — type your answer instead, or just call us.'
+          : 'The microphone did not catch that. Try again, or type it below.',
+      );
+    };
+    recognition.onend = () => setIsListening(false);
+    recognitionRef.current = recognition;
+    return () => recognition.abort();
+  }, []);
+
+  // Opened from the navbar / hero CTA.
+  useEffect(() => {
+    const open = () => setIsOpen(true);
+    window.addEventListener('open-voice-bot', open);
+    return () => window.removeEventListener('open-voice-bot', open);
+  }, []);
+
+  // ponytail: hints rotate on a timer. The prototype keyed them to the section
+  // in view; that needs an observer over sections this component does not own.
+  useEffect(() => {
+    if (isOpen || hintDismissed) return;
+    const id = window.setInterval(() => setHintIndex((i) => (i + 1) % HINTS.length), 7000);
+    return () => window.clearInterval(id);
+  }, [isOpen, hintDismissed]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    closeRef.current?.focus();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setIsOpen(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) transcriptEndRef.current?.scrollIntoView({ block: 'nearest' });
+  }, [messages, isOpen, isLoading]);
+
+  const closeDrawer = () => {
+    recognitionRef.current?.abort();
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+    setIsListening(false);
+    setIsOpen(false);
+    launcherRef.current?.focus();
+  };
+
+  const toggleMic = () => {
+    if (!recognitionRef.current) return;
+    if (isListening) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+      return;
+    }
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
+    try {
+      recognitionRef.current.start();
+    } catch {
+      setMicError('The microphone is already running. Give it a moment.');
     }
   };
 
-  const handleSendMessage = async (textToSend?: string) => {
-    const messageContent = (textToSend || inputText).trim();
-    if (!messageContent || isLoading) return;
-
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      sender: 'user',
-      text: messageContent,
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setInputText('');
-    setIsLoading(true);
-
+  const sendToJonathan = async () => {
+    setHandoff({ state: 'sending', note: '' });
     try {
-      const response = await fetch('/api/voice-consultant', {
+      const response = await fetch('/api/leads/book-call', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: messageContent,
-          conversationHistory: messages.slice(-5)
-        })
+          name: details.name ?? '',
+          email: details.email ?? '',
+          phone: details.phone ?? '',
+          projectType: details.project ?? '',
+          preferredCallTime: details.timing ?? '',
+          notes: `From the AI agent: ${summary}`,
+        }),
       });
-
       const data = await response.json();
-      const botReply = data.reply || "Thank you for inquiring. You can reach our master mason directly at (631) 530-5883.";
-
-      const botMessage: ChatMessage = {
-        id: `bot-${Date.now()}`,
-        sender: 'bot',
-        text: botReply,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-
-      setMessages(prev => [...prev, botMessage]);
-      speakText(botReply);
-    } catch (err) {
-      console.error("Consultant API call failed:", err);
-      const fallbackReply = "Our master mason is available directly at (631) 530-5883 to discuss your stone and tile specifications. All projects require a standard 50% mobilization deposit.";
-      setMessages(prev => [
-        ...prev,
-        {
-          id: `bot-${Date.now()}`,
-          sender: 'bot',
-          text: fallbackReply,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
-      speakText(fallbackReply);
-    } finally {
-      setIsLoading(false);
+      if (!response.ok) {
+        setHandoff({
+          state: 'error',
+          note:
+            typeof data?.error === 'string'
+              ? `${data.error} Or call ${BUSINESS.phone}.`
+              : `That did not go through. Please call ${BUSINESS.phone}.`,
+        });
+        return;
+      }
+      // Deliberately not echoing the server's own message back — it describes an
+      // email dispatch this build does not perform.
+      setHandoff({
+        state: 'sent',
+        note: `Sent. If you have not heard back today, call ${BUSINESS.phone}.`,
+      });
+    } catch {
+      setHandoff({
+        state: 'error',
+        note: `That did not go through — no connection. Please call ${BUSINESS.phone}.`,
+      });
     }
   };
 
+  const hint = HINTS[hintIndex];
+
   return (
-    <>
-      {/* Floating Activation Pill / Trigger Button */}
-      <div className="fixed bottom-6 right-6 z-40">
-        <motion.button
-          onClick={() => setIsOpen(true)}
-          whileHover={{ scale: 1.04 }}
-          whileTap={{ scale: 0.96 }}
-          className={`flex items-center gap-3 px-4 py-3 bg-white text-[#0F172A] border-2 border-[#0F172A] shadow-xl hover:shadow-2xl transition-all duration-200 group font-mono ${
-            isOpen ? 'hidden' : 'flex'
-          }`}
-          aria-label="Open Voice Consultant"
-        >
-          <div className="relative flex items-center justify-center w-8 h-8 bg-[#DC2626] text-white">
-            <Mic className="w-4 h-4 animate-pulse" />
-            <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-green-500 border-2 border-white rounded-full" />
-          </div>
-
-          <div className="flex flex-col text-left">
-            <span className="text-[10px] text-[#DC2626] font-bold uppercase tracking-wider">
-              [ AI VOICE DISPATCH ]
+    <div className="fixed bottom-[72px] right-4 z-50 flex max-w-[calc(100vw-2rem)] flex-col items-end gap-3 md:bottom-6 md:right-6">
+      <AnimatePresence>
+        {!isOpen && !hintDismissed && (
+          <motion.button
+            key="hint"
+            type="button"
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 8 }}
+            onClick={() => {
+              setHintDismissed(true);
+              setIsOpen(true);
+            }}
+            className={`relative hidden max-w-[min(340px,calc(100vw-40px))] items-start gap-3 border border-ink-deep bg-paper px-4 py-3.5 text-left text-ink shadow-[0_18px_44px_rgba(0,0,0,.28)] md:flex ${FOCUS}`}
+          >
+            <span className="absolute inset-x-0 top-0 h-0.5 bg-brand" />
+            <span className="mt-0.5 flex h-[34px] w-[34px] flex-none items-center justify-center rounded-full bg-ink-deep">
+              <span className="h-2 w-2 rounded-full bg-brand" />
             </span>
-            <span className="text-xs font-black uppercase text-[#0F172A] tracking-tight flex items-center gap-1.5">
-              CONSULTANT ONLINE
-              <span className="inline-block w-1.5 h-1.5 bg-[#DC2626] rounded-full animate-ping" />
+            <span className="flex min-w-0 flex-col gap-1">
+              <span className={`${LABEL} text-brand`}>AI AGENT · {hint.tag}</span>
+              <span className="font-sans text-[16px] leading-[1.35]">{hint.text}</span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-mute-2">
+                TAP TO ANSWER →
+              </span>
             </span>
-          </div>
-        </motion.button>
-      </div>
+          </motion.button>
+        )}
+      </AnimatePresence>
 
-      {/* Voice Consultant Modal / Drawer */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, y: 40, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 30, scale: 0.95 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-32px)] sm:w-[440px] max-h-[85vh] h-[620px] bg-white border-2 border-[#0F172A] shadow-2xl z-50 flex flex-col font-mono overflow-hidden text-[#0F172A]"
+            key="drawer"
+            role="dialog"
+            aria-modal="false"
+            aria-label="AI voice agent — estimate helper"
+            initial={{ opacity: 0, y: 24 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 16 }}
+            transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+            className="flex max-h-[calc(100vh-92px)] w-[min(352px,calc(100vw-32px))] min-h-0 flex-col border border-ink-deep bg-paper shadow-[0_22px_58px_rgba(0,0,0,.28)]"
           >
-            {/* Header */}
-            <div className="bg-[#0F172A] text-white p-4 flex items-center justify-between border-b border-white/10 shrink-0">
-              <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 bg-[#DC2626] flex items-center justify-center text-white font-bold text-xs">
-                  <Mic className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="text-[9px] text-[#DC2626] font-bold tracking-widest uppercase">
-                    GEMINI 3.8 &bull; FIELD INTELLIGENCE
-                  </div>
-                  <h3 className="text-sm font-black tracking-tight uppercase flex items-center gap-2">
-                    STONE &amp; TILE VOICE AGENT
-                    {isSpeaking && (
-                      <span className="text-[10px] px-1.5 py-0.2 bg-[#DC2626] text-white animate-pulse">
-                        SPEAKING
-                      </span>
-                    )}
-                    {isListening && (
-                      <span className="text-[10px] px-1.5 py-0.2 bg-green-500 text-white animate-pulse">
-                        LISTENING
-                      </span>
-                    )}
-                  </h3>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1.5">
-                {/* Audio Mute/Unmute */}
+            <div className="relative flex flex-none items-center justify-between gap-2.5 bg-ink-deep px-4 py-3 text-paper">
+              <span className="absolute inset-x-0 top-0 h-0.5 bg-brand" />
+              <span className="flex flex-col gap-0.5">
+                <span className={`${LABEL} text-brand`}>AI VOICE AGENT</span>
+                <span className="font-display text-[20px] leading-none">Estimate helper</span>
+              </span>
+              <span className="flex gap-1.5">
                 <button
+                  type="button"
                   onClick={() => {
-                    if (synthRef.current) synthRef.current.cancel();
-                    setIsSpeaking(false);
-                    setIsMuted(!isMuted);
+                    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+                    setSpeakOn((on) => !on);
                   }}
-                  className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-                  title={isMuted ? "Unmute Voice" : "Mute Voice"}
+                  aria-pressed={speakOn}
+                  className={`h-[34px] border border-ink-line-2 px-2.5 font-mono text-[9px] uppercase tracking-[0.14em] text-paper ${FOCUS} ${speakOn ? 'bg-brand' : 'bg-transparent'}`}
                 >
-                  {isMuted ? <VolumeX className="w-4 h-4 text-[#DC2626]" /> : <Volume2 className="w-4 h-4 text-green-400" />}
+                  {speakOn ? 'Voice on' : 'Voice off'}
                 </button>
-
-                {/* Close */}
                 <button
-                  onClick={() => {
-                    if (synthRef.current) synthRef.current.cancel();
-                    if (recognitionRef.current) recognitionRef.current.abort();
-                    setIsSpeaking(false);
-                    setIsListening(false);
-                    setIsOpen(false);
-                  }}
-                  className="p-1.5 text-white/70 hover:text-white hover:bg-white/10 transition-colors"
-                  title="Close Voice Assistant"
+                  ref={closeRef}
+                  type="button"
+                  onClick={closeDrawer}
+                  aria-label="Close the estimate helper"
+                  className={`flex h-[34px] w-[34px] items-center justify-center border border-ink-line-2 text-[17px] leading-none text-paper ${FOCUS}`}
                 >
-                  <X className="w-4 h-4" />
+                  ✕
                 </button>
-              </div>
+              </span>
             </div>
 
-            {/* Active Voice Visualization Banner */}
-            <div className="bg-[#F8F9FA] border-b border-[#E2E8F0] p-3 flex items-center justify-between text-xs shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="flex items-end gap-1 h-5">
-                  {[40, 75, 100, 60, 85, 45, 95, 30].map((h, i) => (
-                    <motion.span
-                      key={i}
-                      animate={
-                        isSpeaking
-                          ? { height: ['20%', `${h}%`, '30%'] }
-                          : isListening
-                          ? { height: ['15%', `${h * 0.7}%`, '20%'] }
-                          : { height: '20%' }
-                      }
-                      transition={{
-                        repeat: Infinity,
-                        duration: 0.6 + (i % 3) * 0.2,
-                        ease: 'easeInOut',
-                      }}
-                      className={`w-1 rounded-full ${
-                        isSpeaking
-                          ? 'bg-[#DC2626]'
-                          : isListening
-                          ? 'bg-green-600'
-                          : 'bg-[#CBD5E1]'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <span className="text-[11px] font-bold text-[#475569] uppercase">
-                  {isSpeaking
-                    ? "VOCALIZING RESPONSE..."
-                    : isListening
-                    ? "LISTENING TO MICROPHONE..."
-                    : "TAP MIC OR SELECT PROMPT"}
-                </span>
-              </div>
-
-              <a
-                href="tel:6315305883"
-                className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#0F172A] text-white text-[10px] font-bold uppercase hover:bg-[#DC2626] transition-colors"
-              >
-                <Phone className="w-2.5 h-2.5" />
-                <span>(631) 530-5883</span>
-              </a>
-            </div>
-
-            {/* Messages Scroll Area */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-[#FFFFFF]">
+            <div
+              role="log"
+              aria-live="polite"
+              aria-label="Conversation"
+              className="flex min-h-[140px] flex-1 flex-col gap-2.5 overflow-y-auto p-4"
+            >
               {messages.map((msg) => (
-                <div
+                <p
                   key={msg.id}
-                  className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}
-                >
-                  <div
-                    className={`max-w-[85%] p-3.5 border ${
-                      msg.sender === 'user'
-                        ? 'bg-[#0F172A] text-white border-[#0F172A]'
-                        : 'bg-[#F8F9FA] text-[#0F172A] border-[#E2E8F0]'
-                    }`}
-                  >
-                    <div className="text-[9px] font-bold uppercase tracking-wider mb-1 flex items-center justify-between gap-4 opacity-70">
-                      <span>{msg.sender === 'user' ? 'CLIENT SPECIFICATION' : 'ISAAC STONE AGENT'}</span>
-                      <span>{msg.timestamp}</span>
-                    </div>
-                    <p className="text-xs sm:text-sm font-sans leading-relaxed">
-                      {msg.text}
-                    </p>
-                  </div>
-                </div>
-              ))}
-
-              {isLoading && (
-                <div className="flex flex-col items-start">
-                  <div className="max-w-[85%] p-3.5 bg-[#F8F9FA] border border-[#E2E8F0]">
-                    <div className="flex items-center gap-2 text-xs text-[#DC2626] font-bold">
-                      <span className="w-2 h-2 bg-[#DC2626] rounded-full animate-ping" />
-                      <span>ANALYZING MASONRY DATABASE...</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Suggested Prompts Carousel */}
-            <div className="p-2.5 bg-[#F8F9FA] border-t border-[#E2E8F0] overflow-x-auto whitespace-nowrap scrollbar-none flex gap-2 shrink-0">
-              {SUGGESTED_PROMPTS.map((prompt, idx) => (
-                <button
-                  key={idx}
-                  onClick={() => {
-                    setInputText(prompt);
-                    handleSendMessage(prompt);
-                  }}
-                  className="px-2.5 py-1 text-[10px] bg-white border border-[#CBD5E1] text-[#334155] hover:border-[#DC2626] hover:text-[#DC2626] transition-colors shrink-0 font-sans"
-                >
-                  &rarr; {prompt}
-                </button>
-              ))}
-            </div>
-
-            {/* Bottom Input Controls */}
-            <div className="p-3 bg-white border-t-2 border-[#0F172A] flex items-center gap-2 shrink-0">
-              {/* Mic Toggle Button */}
-              {speechSupported ? (
-                <button
-                  onClick={toggleListening}
-                  className={`w-11 h-11 shrink-0 flex items-center justify-center border-2 transition-all duration-150 ${
-                    isListening
-                      ? 'bg-green-600 text-white border-green-700 animate-pulse'
-                      : 'bg-[#DC2626] text-white border-[#DC2626] hover:bg-[#B91C1C]'
+                  className={`max-w-[86%] px-3.5 py-2.5 font-sans text-[15px] leading-[1.45] ${
+                    msg.sender === 'user'
+                      ? 'self-end bg-ink text-paper'
+                      : 'self-start bg-paper-2 text-ink'
                   }`}
-                  title={isListening ? "Stop Listening" : "Start Voice Input"}
                 >
-                  {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-                </button>
+                  <span className="sr-only">{msg.sender === 'user' ? 'You said: ' : 'Agent: '}</span>
+                  {msg.text}
+                </p>
+              ))}
+              {isLoading && (
+                <p className="self-start bg-paper-2 px-3.5 py-2.5 font-sans text-[15px] text-mute-3">
+                  Typing…
+                </p>
+              )}
+              <div ref={transcriptEndRef} />
+            </div>
+
+            {summary && (
+              <div className="mx-4 flex flex-none flex-col gap-1.5 border-l-[3px] border-brand bg-paper-2 px-3.5 py-3">
+                <span className="font-mono text-[9px] uppercase tracking-[0.16em] text-mute-2">
+                  Captured so far
+                </span>
+                <span className="font-sans text-[16px] leading-[1.45]">{summary}</span>
+              </div>
+            )}
+
+            <div className="flex flex-none flex-col gap-3 px-4 pb-4 pt-3.5">
+              {speechSupported ? (
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={toggleMic}
+                    aria-label={isListening ? 'Stop listening' : 'Start talking'}
+                    aria-pressed={isListening}
+                    className={`relative flex h-12 w-12 flex-none items-center justify-center rounded-full text-white ${FOCUS} ${isListening ? 'bg-brand' : 'bg-ink'}`}
+                  >
+                    <span className="text-[15px] leading-none">●</span>
+                  </button>
+                  <span className="min-w-0 flex-1 font-sans text-[15px] leading-[1.35] text-mute-3">
+                    {micError ||
+                      (isListening ? (
+                        <span className="font-medium text-brand">● listening — speak now, or tap again to stop.</span>
+                      ) : (
+                        'Tap to talk, or type below. Nothing is recorded until you tap.'
+                      ))}
+                  </span>
+                </div>
               ) : (
-                <button
-                  disabled
-                  className="w-11 h-11 shrink-0 flex items-center justify-center border-2 bg-gray-200 text-gray-400 border-gray-300"
-                  title="Speech not supported in browser"
-                >
-                  <MicOff className="w-5 h-5" />
-                </button>
+                <p className="font-sans text-[15px] leading-[1.35] text-mute-3">
+                  This browser does not support voice input, so type your answer below — it works
+                  exactly the same. Or call {BUSINESS.phone}.
+                </p>
               )}
 
-              {/* Text Input */}
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  value={inputText}
-                  onChange={(e) => setInputText(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') handleSendMessage();
-                  }}
-                  placeholder={isListening ? "Listening to your voice..." : "Type or speak your masonry question..."}
-                  className="w-full h-11 px-3 bg-[#F8F9FA] border border-[#CBD5E1] text-xs text-[#0F172A] placeholder-[#94A3B8] focus:outline-none focus:border-[#DC2626] font-sans"
-                />
-              </div>
-
-              {/* Send Button */}
-              <button
-                onClick={() => handleSendMessage()}
-                disabled={!inputText.trim() || isLoading}
-                className="w-11 h-11 shrink-0 bg-[#0F172A] text-white flex items-center justify-center hover:bg-[#DC2626] transition-colors disabled:opacity-40 disabled:hover:bg-[#0F172A]"
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  void sendMessage(draft);
+                }}
+                className="flex gap-2"
               >
-                <Send className="w-4 h-4" />
-              </button>
+                <label htmlFor="voice-agent-input" className="sr-only">
+                  Type your answer
+                </label>
+                <input
+                  id="voice-agent-input"
+                  type="text"
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder="or type your answer"
+                  autoComplete="off"
+                  className={`min-h-[46px] min-w-0 flex-1 border-[1.5px] border-mute-light bg-white px-3.5 font-sans text-[15px] text-ink ${FOCUS}`}
+                />
+                <button
+                  type="submit"
+                  disabled={!draft.trim() || isLoading}
+                  className={`min-h-[46px] bg-ink px-4 font-sans text-[15px] font-bold text-white disabled:opacity-40 ${FOCUS}`}
+                >
+                  Send
+                </button>
+              </form>
+
+              <div className="flex flex-col gap-2.5 border-t border-sand pt-2.5">
+                <button
+                  type="button"
+                  onClick={sendToJonathan}
+                  disabled={handoff.state === 'sending'}
+                  className={`flex min-h-12 items-center justify-center bg-brand px-3 font-sans text-[15px] font-bold text-white disabled:opacity-60 ${FOCUS}`}
+                >
+                  {handoff.state === 'sending' ? 'Sending…' : 'Send this to Jonathan'}
+                </button>
+                {handoff.state === 'idle' && missing.length > 0 && (
+                  <p className="font-sans text-[13px] leading-snug text-mute-3">
+                    Still needed before this can go through: {missing.join(', ')}. Type it above and
+                    I will add it.
+                  </p>
+                )}
+                {handoff.note && (
+                  <p
+                    role="status"
+                    className={`font-sans text-[13px] leading-snug ${handoff.state === 'error' ? 'text-brand' : 'text-mute-3'}`}
+                  >
+                    {handoff.note}
+                  </p>
+                )}
+                <a
+                  href={BUSINESS.phoneHref}
+                  className={`flex min-h-12 items-center justify-center border-[1.5px] border-ink px-3 font-sans text-[15px] font-bold text-ink no-underline ${FOCUS}`}
+                >
+                  Or call {BUSINESS.phone}
+                </a>
+              </div>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+
+      <button
+        ref={launcherRef}
+        type="button"
+        onClick={() => (isOpen ? closeDrawer() : setIsOpen(true))}
+        aria-expanded={isOpen}
+        className={`flex min-h-[50px] items-center gap-2.5 bg-ink-deep px-5 py-3.5 font-sans text-[16px] font-bold text-paper shadow-[0_8px_24px_rgba(0,0,0,.26)] ${FOCUS}`}
+      >
+        <span className="h-2.5 w-2.5 flex-none rounded-full bg-brand" />
+        <span>{isOpen ? 'Hide the agent' : 'Talk to our AI agent'}</span>
+      </button>
+    </div>
   );
-};
+}

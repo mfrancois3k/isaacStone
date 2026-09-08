@@ -1,6 +1,6 @@
 {
-  "name": "ISAAC STONE AND TILE LLC",
-  "description": "Tiles tailored to your home by ISAAC STONE AND TILE LLC. Bespoke architectural tiling, quarried marble, and granite craftsmanship with consultation booking and automated AI estimates.",
+  "name": "Isaac Stone and Tile LLC",
+  "description": "Tile, granite and marble installation across Long Island, New York City and South Florida. Twenty-five years, one crew, free on-site estimates, and an AI estimate helper that hands off to the owner.",
   "requestFramePermissions": ["microphone"],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

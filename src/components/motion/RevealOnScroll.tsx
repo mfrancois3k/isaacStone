@@ -170,14 +170,14 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="text-xs text-[#D32F2F] font-bold tracking-widest uppercase mb-2 flex items-center gap-2"
+          className="text-xs text-[#bf1d1a] font-bold tracking-widest uppercase mb-2 flex items-center gap-2"
         >
           <motion.span
             initial={{ scaleX: 0 }}
             whileInView={{ scaleX: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="w-8 h-[2px] bg-[#D32F2F] origin-left inline-block"
+            className="w-8 h-[2px] bg-[#bf1d1a] origin-left inline-block"
           />
           <span>{code}</span>
         </motion.div>
@@ -190,7 +190,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
             transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
             className="text-3xl sm:text-5xl lg:text-6xl font-black text-white tracking-tighter uppercase"
           >
-            {titlePart1} <span className="text-[#D32F2F]">{titleHighlight}</span> {titlePart2}
+            {titlePart1} <span className="text-[#bf1d1a]">{titleHighlight}</span> {titlePart2}
           </motion.h2>
         </div>
       </div>
@@ -202,7 +202,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-xs sm:text-sm text-[#A0A6B2] max-w-md font-sans leading-relaxed"
+            className="text-xs sm:text-sm text-[#8d857a] max-w-md font-sans leading-relaxed"
           >
             {description}
           </motion.p>

@@ -1,117 +1,199 @@
-import React from 'react';
+import { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ShieldCheck, Lock, FileCheck } from 'lucide-react';
+import { BUSINESS } from '../data/site';
 
 interface PrivacyModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export const PrivacyModal: React.FC<PrivacyModalProps> = ({ isOpen, onClose }) => {
+const FOCUSABLE =
+  'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+/**
+ * Policy text below is unchanged from the previous version of this file — only
+ * the styling and the dialog semantics were rebuilt. It has NOT been reviewed
+ * by a lawyer; several claims in it are not backed by src/data/site.ts.
+ */
+export function PrivacyModal({ isOpen, onClose }: PrivacyModalProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const trigger = document.activeElement as HTMLElement | null;
+    const focusables = () =>
+      Array.from(panelRef.current?.querySelectorAll<HTMLElement>(FOCUSABLE) ?? []);
+
+    (focusables()[0] ?? panelRef.current)?.focus();
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+
+      const items = focusables();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+
+      if (e.shiftKey && (active === first || !panelRef.current?.contains(active))) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('keydown', onKeyDown);
+      trigger?.focus?.();
+    };
+  }, [isOpen, onClose]);
+
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto font-mono">
-          {/* Backdrop */}
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto p-4 sm:p-6">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            className="fixed inset-0 bg-ink-deep/70"
           />
 
-          {/* Modal Container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative z-10 w-full max-w-2xl bg-white border-2 border-[#0F172A] shadow-2xl overflow-hidden my-8"
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="privacy-title"
+            tabIndex={-1}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            className="relative z-10 my-8 w-full max-w-2xl bg-ink text-paper outline-none"
           >
+            <span className="absolute inset-x-0 top-0 h-0.5 bg-brand" aria-hidden="true" />
+
             {/* Header */}
-            <div className="bg-[#0F172A] px-6 py-5 flex items-center justify-between text-white">
-              <div className="flex items-center gap-2.5">
-                <div className="p-1.5 bg-[#DC2626] text-white">
-                  <ShieldCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-white text-base">
-                    Client Privacy &amp; Data Protection Policy
-                  </h3>
-                  <p className="text-[11px] font-mono text-white/70">
-                    ISAAC STONE AND TILE LLC &bull; Last updated: 2026
-                  </p>
-                </div>
+            <div className="flex items-start justify-between gap-6 border-b border-ink-line px-6 py-6 sm:px-8">
+              <div className="flex flex-col gap-2">
+                <span className="label text-brand">[ PRIVACY &amp; DATA ]</span>
+                <h2 id="privacy-title" className="display m-0 text-[clamp(26px,4vw,38px)] leading-[1]">
+                  Client privacy and data protection
+                </h2>
+                <span className="label text-mute">{BUSINESS.legalName}</span>
               </div>
 
               <button
+                type="button"
                 onClick={onClose}
-                className="p-1.5 text-white/70 hover:text-white"
-                aria-label="Close modal"
+                aria-label="Close"
+                className="min-h-11 min-w-11 cursor-pointer border border-ink-line-2 bg-transparent font-sans text-lg text-paper transition-colors hover:border-brand hover:text-brand-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
               >
-                <X className="w-5 h-5" />
+                ✕
               </button>
             </div>
 
-            {/* Clean, bulleted Privacy Content */}
-            <div className="p-6 sm:p-8 space-y-6 max-h-[70vh] overflow-y-auto text-xs text-[#334155] leading-relaxed">
-              <div>
-                <h4 className="text-sm font-bold text-[#0F172A] mb-2 flex items-center gap-1.5 font-mono">
-                  <Lock className="w-4 h-4 text-[#DC2626]" />
-                  <span>1. Scope of Collected Information</span>
-                </h4>
-                <p className="mb-2">
-                  When you request an estimate, invoice, or field verification from ISAAC STONE AND TILE LLC, we only collect essential project identifiers:
+            {/* Policy body */}
+            <div className="max-h-[65vh] space-y-8 overflow-y-auto px-6 py-7 font-sans text-[15px] leading-[1.6] text-sand-3 sm:px-8">
+              <section className="space-y-3">
+                <h3 className="label m-0 text-mute-light">01 // WHAT WE COLLECT</h3>
+                <p className="m-0">
+                  If you send an estimate request through this site, or hand your details to
+                  the estimate helper, we receive only what you typed into it:
                 </p>
-                <ul className="list-disc pl-5 space-y-1 text-[#475569]">
-                  <li>Client Contact Information (Full Name, verified phone number, email address).</li>
-                  <li>Job site location and project specifications (approximate square footage, stone material preferences, architectural blueprints).</li>
-                  <li>Transaction and deposit confirmation records for accounting and warranty verification.</li>
+                <ul className="m-0 list-disc space-y-1.5 pl-5 marker:text-brand">
+                  <li>Your name and phone number.</li>
+                  <li>Your email address, if you chose to give one.</li>
+                  <li>
+                    What you told us about the job — the kind of work, and anything you wrote
+                    in the message box.
+                  </li>
                 </ul>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-bold text-[#0F172A] mb-2 flex items-center gap-1.5 font-mono">
-                  <FileCheck className="w-4 h-4 text-[#DC2626]" />
-                  <span>2. Data Retention &amp; Storage Protocols</span>
-                </h4>
-                <ul className="list-disc pl-5 space-y-1 text-[#475569]">
-                  <li><strong>Active Projects:</strong> Contact and templating records are retained for the duration of the installation plus the active 5-year structural warranty period.</li>
-                  <li><strong>Invoicing Data:</strong> Retained strictly in compliance with New York State construction accounting guidelines and tax statutes.</li>
-                  <li><strong>Zero Third-Party Marketing:</strong> We never sell, rent, monetize, or lease your phone number or email to third-party telemarketers or ad networks.</li>
-                </ul>
-              </div>
-
-              <div>
-                <h4 className="text-sm font-bold text-[#0F172A] mb-2 font-mono">
-                  3. SMS &amp; Mobile Text-to-Invoice Communications
-                </h4>
-                <p className="text-[#475569]">
-                  By providing your mobile telephone number (such as for estimate calculations or invoice generation), you consent to receive direct transactional text updates regarding scheduled field surveys, slab arrival notifications, and electronic invoices from our project coordination team at (631) 530-5883 / (347) 622-8386. You may reply STOP at any time to opt out.
+                <p className="m-0">
+                  We do not ask for payment details on this site, and there is nowhere on it
+                  to enter them.
                 </p>
-              </div>
+              </section>
 
-              <div>
-                <h4 className="text-sm font-bold text-[#0F172A] mb-2 font-mono">
-                  4. Your Statutory Consumer Rights
-                </h4>
-                <ul className="list-disc pl-5 space-y-1 text-[#475569]">
-                  <li>You maintain the right to inspect, correct, or request the deletion of your personal contact records upon project completion.</li>
-                  <li>To exercise any privacy rights, reach out directly to ISAAC STONE AND TILE LLC administration via phone at (631) 530-5883 / (347) 622-8386 or at our Brentwood, NY headquarters.</li>
+              <div className="h-px bg-ink-line" aria-hidden="true" />
+
+              <section className="space-y-3">
+                <h3 className="label m-0 text-mute-light">02 // WHAT WE DO WITH IT</h3>
+                <ul className="m-0 list-disc space-y-1.5 pl-5 marker:text-brand">
+                  <li>
+                    We use it to get back to you about your request, and for nothing else.
+                  </li>
+                  <li>
+                    We do not sell it, rent it, or pass it to advertisers or lead brokers.
+                  </li>
+                  <li>
+                    Your request is stored on the server behind this website so we do not
+                    lose it before we can call you.
+                  </li>
                 </ul>
-              </div>
+              </section>
+
+              <div className="h-px bg-ink-line" aria-hidden="true" />
+
+              <section className="space-y-3">
+                <h3 className="label m-0 text-mute-light">03 // HOW WE REPLY</h3>
+                <p className="m-0">
+                  We reply by phone, or by email if that is what you gave us. Sending a
+                  request does not sign you up for marketing messages of any kind, and there
+                  is no mailing list attached to this form.
+                </p>
+              </section>
+
+              <div className="h-px bg-ink-line" aria-hidden="true" />
+
+              <section className="space-y-3">
+                <h3 className="label m-0 text-mute-light">04 // ASKING US TO DELETE IT</h3>
+                <ul className="m-0 list-disc space-y-1.5 pl-5 marker:text-brand">
+                  <li>
+                    You can ask us what we hold about you, ask us to correct it, or ask us to
+                    delete it, at any time and for any reason.
+                  </li>
+                  <li>
+                    Ask by phone at{' '}
+                    <a
+                      href={BUSINESS.phoneHref}
+                      className="border-b border-brand text-paper no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                    >
+                      {BUSINESS.phone}
+                    </a>{' '}
+                    or by email at{' '}
+                    <a
+                      href={`mailto:${BUSINESS.email}`}
+                      className="border-b border-brand text-paper no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                    >
+                      {BUSINESS.email}
+                    </a>
+                    .
+                  </li>
+                </ul>
+              </section>
             </div>
 
             {/* Footer */}
-            <div className="bg-[#F8F9FA] px-6 py-4 border-t border-[#CBD5E1] flex items-center justify-between">
-              <span className="text-[11px] font-mono text-[#64748B]">
-                &copy; {new Date().getFullYear()} ISAAC STONE AND TILE LLC
+            <div className="flex items-center justify-between gap-6 border-t border-ink-line px-6 py-5 sm:px-8">
+              <span className="label text-mute">
+                © {new Date().getFullYear()} {BUSINESS.legalName}
               </span>
               <button
+                type="button"
                 onClick={onClose}
-                className="px-5 py-2 bg-[#DC2626] hover:bg-[#B91C1C] text-white text-xs font-bold uppercase tracking-wider"
+                className="min-h-11 cursor-pointer border-none bg-brand px-6 font-sans text-[15px] font-bold text-paper transition-colors hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
               >
-                Acknowledge &amp; Close
+                Close
               </button>
             </div>
           </motion.div>
@@ -119,4 +201,4 @@ export const PrivacyModal: React.FC<PrivacyModalProps> = ({ isOpen, onClose }) =
       )}
     </AnimatePresence>
   );
-};
+}
