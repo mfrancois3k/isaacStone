@@ -44,10 +44,10 @@ export const ParallaxImage: React.FC<ParallaxImageProps> = ({
       {/* Brutalist Corner Registration L-Brackets */}
       {showCrosshairs && (
         <>
-          <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-[#D32F2F] pointer-events-none" />
-          <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-[#D32F2F] pointer-events-none" />
-          <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-[#D32F2F] pointer-events-none" />
-          <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-[#D32F2F] pointer-events-none" />
+          <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-[#bf1d1a] pointer-events-none" />
+          <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-[#bf1d1a] pointer-events-none" />
+          <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-[#bf1d1a] pointer-events-none" />
+          <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-[#bf1d1a] pointer-events-none" />
         </>
       )}
 

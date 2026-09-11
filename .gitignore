@@ -6,3 +6,9 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Customer lead submissions — real names and phone numbers. Never commit.
+data/leads.jsonl
+data/
+
+.vercel

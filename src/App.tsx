@@ -1,119 +1,88 @@
-import React, { useState, useEffect } from 'react';
-import { LayoutGroup, AnimatePresence, motion } from 'motion/react';
+import { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+
 import { PageLoader } from './components/PageLoader';
 import { Navbar } from './components/Navbar';
 import { Hero } from './components/Hero';
-import { BeforeAfterShowcase } from './components/BeforeAfterShowcase';
+import { FirmBand } from './components/FirmBand';
 import { Services } from './components/Services';
-import { Portfolio } from './components/Portfolio';
-import { EstimateCalculator } from './components/EstimateCalculator';
+import { Work } from './components/Work';
+import { Reviews } from './components/Reviews';
 import { AboutCraftsmanship } from './components/AboutCraftsmanship';
+import { BeforeAfterShowcase } from './components/BeforeAfterShowcase';
+import { Process } from './components/Process';
 import { ContactSection } from './components/ContactSection';
 import { Footer } from './components/Footer';
 import { PrivacyModal } from './components/PrivacyModal';
+import { VoiceChatBot } from './components/VoiceChatBot';
 import { ScrollProgressHUD } from './components/motion/ScrollProgressHUD';
 import { ArchitecturalCursor } from './components/motion/ArchitecturalCursor';
-import { VoiceChatBot } from './components/VoiceChatBot';
 
 export default function App() {
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [privacyModalOpen, setPrivacyModalOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [privacyOpen, setPrivacyOpen] = useState(false);
 
+  // Hold the page still behind the intro, then hand scrolling back.
   useEffect(() => {
-    if (isLoading) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    document.body.style.overflow = isLoading ? 'hidden' : '';
     return () => {
-      document.body.style.overflow = 'unset';
+      document.body.style.overflow = '';
     };
   }, [isLoading]);
 
-  const handleReplayLoader = () => {
-    setIsLoading(true);
+  const replayLoader = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setIsLoading(true);
   };
 
-  const handleScrollToCalculator = () => {
-    const el = document.getElementById('calculator');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth' });
-    }
+  const scrollToContact = () => {
+    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <LayoutGroup id="wrongakram-stone-transition-group">
-      <div className="min-h-screen bg-white text-[#0F172A] relative selection:bg-[#DC2626] selection:text-white antialiased font-mono">
-        
-        <AnimatePresence mode="wait">
-          {/* Dynamic Image Page Loader */}
-          {isLoading ? (
-            <PageLoader key="pageloader" onComplete={() => setIsLoading(false)} />
-          ) : (
-            <motion.div
-              key="main-site-content"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-              className="w-full"
-            >
-              {/* Precision Architectural Crosshair Cursor (Desktop) */}
-              <ArchitecturalCursor />
+    <div className="relative min-h-screen bg-paper text-ink antialiased">
+      <a
+        href="#contact"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-3 focus:left-3 focus:z-[100] focus:bg-ink focus:px-4 focus:py-2 focus:text-paper"
+      >
+        Skip to contact
+      </a>
 
-              {/* Pinned Top Scroll Progress Bar & Right Section Nav HUD */}
-              <ScrollProgressHUD />
+      <AnimatePresence mode="wait">
+        {isLoading ? (
+          <PageLoader key="loader" onComplete={() => setIsLoading(false)} />
+        ) : (
+          <motion.div
+            key="site"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <ArchitecturalCursor />
+            <ScrollProgressHUD />
 
-              {/* Sticky Top Navigation */}
-              <Navbar 
-                onReplayLoader={handleReplayLoader}
-                onOpenPrivacy={() => setPrivacyModalOpen(true)}
-              />
+            <Navbar onReplayLoader={replayLoader} />
 
-              {/* Main Content Flow */}
-              <main>
-                {/* Hero Section with Kinetic Banner & Docked Shared Transition Image */}
-                <Hero onOpenCalculator={handleScrollToCalculator} />
+            <main>
+              <Hero onRequestEstimate={scrollToContact} />
+              <FirmBand />
+              <Services />
+              <Work />
+              <Reviews />
+              <AboutCraftsmanship />
+              <BeforeAfterShowcase />
+              <Process />
+              <ContactSection />
+            </main>
 
-                {/* Interactive Before & After Video Reel Transformation Showcase */}
-                <BeforeAfterShowcase />
+            <Footer onOpenPrivacy={() => setPrivacyOpen(true)} />
 
-                {/* Services Section with Interactive Pillars & Standard Rate Card */}
-                <Services />
+            <VoiceChatBot />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-                {/* Portfolio Grid with Verified Long Island & NY Properties */}
-                <Portfolio />
-
-                {/* Instant Estimate & 50% Deposit Text-to-Invoice System */}
-                <EstimateCalculator />
-
-                {/* About / Master Masonry Craftsmanship & Formia Stone Alliance */}
-                <AboutCraftsmanship />
-
-                {/* Direct Field Contact & Survey Dispatch */}
-                <ContactSection />
-              </main>
-
-              {/* Footer with Copyright & Links */}
-              <Footer 
-                onOpenPrivacy={() => setPrivacyModalOpen(true)} 
-                onReplayLoader={handleReplayLoader}
-              />
-
-              {/* AI Voice Consultant Bot Drawer & Trigger */}
-              <VoiceChatBot />
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Legal / Terms of Work Modal */}
-        <PrivacyModal 
-          isOpen={privacyModalOpen} 
-          onClose={() => setPrivacyModalOpen(false)} 
-        />
-
-      </div>
-    </LayoutGroup>
+      <PrivacyModal isOpen={privacyOpen} onClose={() => setPrivacyOpen(false)} />
+    </div>
   );
 }

@@ -1,39 +1,98 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------
+   Isaac Stone and Tile — design tokens
+   Palette recovered from the client's own brand (Elementor kit):
+   brand red #bf1d1a, paper #faf8f5, ink #1a1815.
+   --------------------------------------------------------------- */
+@theme {
+  --color-ink: #1a1815;
+  --color-ink-deep: #0f0e0d;
+  --color-ink-soft: #1e1c19;
+  --color-ink-line: #322e28;
+  --color-ink-line-2: #3e392f;
+
+  --color-paper: #faf8f5;
+  --color-paper-2: #efeae1;
+  --color-paper-3: #e9e7e2;
+  --color-paper-4: #e6e1d9;
+  --color-sand: #ddd6ca;
+  --color-sand-2: #d8d1c4;
+  --color-sand-3: #d6cfc4;
+
+  --color-mute: #8d857a;
+  --color-mute-2: #6b6459;
+  --color-mute-3: #5a544b;
+  --color-mute-light: #b3aa9c;
+  --color-mute-light-2: #a89f92;
+
+  --color-brand: #bf1d1a;
+  --color-brand-deep: #8f1613;
+  --color-brand-soft: #e8a49f;
+
+  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Source Sans 3', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
 @layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
   body {
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    background-color: #FFFFFF;
-    color: #0F172A;
+    font-family: var(--font-sans);
+    background-color: var(--color-paper);
+    color: var(--color-ink);
     overflow-x: hidden;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  ::selection {
+    background: var(--color-brand);
+    color: var(--color-paper);
   }
 }
 
-/* Custom subtle scrollbar for clean white theme */
-::-webkit-scrollbar {
-  width: 8px;
-}
-::-webkit-scrollbar-track {
-  background: #F1F5F9;
-}
-::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #DC2626;
+/* Component-layer so Tailwind utilities can still override these.
+   Unlayered rules beat every layered utility, which silently swallowed
+   per-use text-[10px] / tracking / leading overrides. */
+@layer components {
+  /* Small uppercase mono label — used for every [ 00 // SECTION ] marker */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    line-height: 1;
+  }
+
+  /* Editorial display heading */
+  .display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+  }
 }
 
-/* Custom pattern for stone / architectural grid (Light mode) */
-.bg-stone-grid {
-  background-size: 32px 32px;
-  background-image: 
-    linear-gradient(to right, rgba(15, 23, 42, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(15, 23, 42, 0.04) 1px, transparent 1px);
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: var(--color-paper-2); }
+::-webkit-scrollbar-thumb { background: var(--color-sand-2); }
+::-webkit-scrollbar-thumb:hover { background: var(--color-brand); }
+
+/* Blueprint grid used behind dark sections */
+.bg-blueprint {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(250, 248, 245, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(250, 248, 245, 0.04) 1px, transparent 1px);
 }
 
-.bg-radial-vignette {
-  background: radial-gradient(circle at 50% 20%, rgba(220, 38, 38, 0.05) 0%, rgba(255, 255, 255, 0) 70%);
+.bg-blueprint-light {
+  background-size: 40px 40px;
+  background-image:
+    linear-gradient(to right, rgba(26, 24, 21, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(26, 24, 21, 0.05) 1px, transparent 1px);
 }
 
 @keyframes marquee {
@@ -44,9 +103,15 @@
 .animate-marquee {
   display: flex;
   width: max-content;
-  animation: marquee 28s linear infinite;
+  animation: marquee 38s linear infinite;
 }
 
-.animate-marquee:hover {
-  animation-play-state: paused;
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee { animation: none; }
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

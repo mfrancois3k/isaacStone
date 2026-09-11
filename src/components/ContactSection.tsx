@@ -1,182 +1,390 @@
-import React from 'react';
-import { motion } from 'motion/react';
-import { 
-  Phone, 
-  MapPin, 
-  Clock, 
-  Building2,
-  Instagram,
-  ExternalLink
-} from 'lucide-react';
+import { useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
+import { BUSINESS, CONTACT } from '../data/site';
 
-export const ContactSection: React.FC = () => {
+const EASE = [0.16, 1, 0.3, 1] as const;
+
+type FieldKey = 'name' | 'phone' | 'email';
+type Status = 'idle' | 'sending' | 'sent' | 'error';
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const INPUT_CLASS =
+  'min-h-12 w-full border-0 border-b-[1.5px] border-mute-light bg-transparent px-0 py-3 font-sans text-[17px] text-ink outline-none focus:border-brand focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand aria-[invalid=true]:border-brand';
+
+const LABEL_CLASS = 'font-sans text-[15px] font-semibold text-ink';
+
+/** Mono-keyed row in the contact definition list. */
+function InfoRow({ term, children }: { term: string; children: React.ReactNode }) {
   return (
-    <section id="contact" className="py-20 md:py-28 bg-[#F8F9FA] text-[#0F172A] relative border-b border-[#CBD5E1] font-mono">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Section Header */}
-        <div className="border-b-2 border-[#CBD5E1] pb-6 mb-12">
-          <motion.div 
-            initial={{ opacity: 0, x: -15 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="text-xs text-[#DC2626] font-bold tracking-widest uppercase mb-2 flex items-center gap-2"
-          >
-            <motion.span 
-              initial={{ scaleX: 0 }}
-              whileInView={{ scaleX: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-              className="w-8 h-[2px] bg-[#DC2626] origin-left"
-            />
-            <span>[ 07 // DIRECT DISPATCH &amp; FIELD SURVEY ]</span>
-          </motion.div>
-          <div className="overflow-hidden">
-            <motion.h2 
-              initial={{ y: '100%' }}
-              whileInView={{ y: '0%' }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.0, ease: [0.16, 1, 0.3, 1] }}
-              className="text-3xl sm:text-5xl lg:text-6xl font-black text-[#0F172A] tracking-tighter uppercase"
-            >
-              FIELD <span className="text-[#DC2626]">COMMUNICATIONS</span>
-            </motion.h2>
-          </div>
-        </div>
+    <div className="flex flex-wrap items-baseline gap-4">
+      <dt className="label w-16 shrink-0 text-mute">{term}</dt>
+      <dd className="m-0 min-w-0">{children}</dd>
+    </div>
+  );
+}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-          
-          {/* Left Column: Direct Info */}
-          <motion.div 
-            initial={{ opacity: 0, x: -30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-6"
+export function ContactSection() {
+  const reduced = useReducedMotion();
+
+  const [values, setValues] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    jobType: CONTACT.jobTypes[0] as string,
+    message: '',
+  });
+  const [photoName, setPhotoName] = useState('');
+  const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({});
+  const [status, setStatus] = useState<Status>('idle');
+
+  const fieldRefs = useRef<Partial<Record<FieldKey, HTMLInputElement | null>>>({});
+
+  const set = (key: keyof typeof values, value: string) =>
+    setValues((v) => ({ ...v, [key]: value }));
+
+  function validate() {
+    const next: Partial<Record<FieldKey, string>> = {};
+    if (!values.name.trim()) next.name = 'Please enter your name.';
+    if (values.phone.replace(/\D/g, '').length < 10)
+      next.phone = 'Please enter a phone number we can call you back on.';
+    if (!EMAIL_RE.test(values.email.trim()))
+      next.email = 'Please enter an email address so we can send the estimate.';
+    return next;
+  }
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (status === 'sending') return;
+
+    const found = validate();
+    setErrors(found);
+    const firstInvalid = (['name', 'phone', 'email'] as FieldKey[]).find((k) => found[k]);
+    if (firstInvalid) {
+      setStatus('idle');
+      fieldRefs.current[firstInvalid]?.focus();
+      return;
+    }
+
+    setStatus('sending');
+    try {
+      const res = await fetch('/api/leads/book-call', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: values.name.trim(),
+          phone: values.phone.trim(),
+          email: values.email.trim(),
+          projectType: values.jobType,
+          notes: values.message.trim(),
+        }),
+      });
+      if (!res.ok) throw new Error(String(res.status));
+      setStatus('sent');
+      setValues((v) => ({ ...v, name: '', phone: '', email: '', message: '' }));
+      setPhotoName('');
+    } catch {
+      setStatus('error');
+    }
+  }
+
+  const sending = status === 'sending';
+  const phoneParts = BUSINESS.phone.split(/[\s-]+/);
+
+  const rise = {
+    initial: { opacity: 0, y: reduced ? 0 : 40 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: 0.15 },
+  };
+
+  return (
+    <section
+      id="contact"
+      aria-labelledby="contact-heading"
+      className="bg-blueprint relative bg-ink py-[clamp(100px,14vw,180px)] text-paper"
+    >
+      <div className="mx-auto flex max-w-[1400px] flex-col gap-[clamp(40px,5vw,72px)] px-7">
+        {/* Header — headline over the phone number set very large */}
+        <motion.div className="flex flex-col gap-5" {...rise} transition={{ duration: 0.9, ease: EASE }}>
+          <span className="label flex items-center gap-2.5 text-brand">
+            <span className="h-0.5 w-[26px] bg-brand" aria-hidden="true" />
+            {CONTACT.label}
+          </span>
+          <h2
+            id="contact-heading"
+            className="display m-0 text-[clamp(28px,3vw,44px)] leading-[1.1] text-mute-light-2"
           >
-            <p className="text-base sm:text-lg text-[#0F172A] font-sans leading-relaxed mb-8">
-              Whether you are an architect in Manhasset requiring custom miter shop drawings or a homeowner in Brentwood planning a full bathroom marble slab remodel, we provide direct communication without intermediary agents.
+            {CONTACT.headline}
+          </h2>
+          <a
+            href={BUSINESS.phoneHref}
+            className="display flex flex-wrap text-[clamp(52px,10.4vw,160px)] leading-[0.86] tracking-[-0.05em] text-paper no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+          >
+            <span className="sr-only">{`Call ${BUSINESS.phone}`}</span>
+            {phoneParts.map((part, i) => (
+              <span
+                key={part}
+                aria-hidden="true"
+                className={`block overflow-hidden pb-[0.08em] ${i > 0 ? 'ml-[0.22em]' : ''}`}
+              >
+                <motion.span
+                  className="block"
+                  initial={{ y: reduced ? 0 : '110%' }}
+                  whileInView={{ y: '0%' }}
+                  viewport={{ once: true, amount: 0.4 }}
+                  transition={{ duration: 1.2, delay: i * 0.1, ease: EASE }}
+                >
+                  {part}
+                </motion.span>
+              </span>
+            ))}
+          </a>
+        </motion.div>
+
+        <div className="grid grid-cols-1 items-start gap-[clamp(34px,5vw,90px)] border-t border-ink-line pt-[clamp(34px,4vw,56px)] lg:grid-cols-2">
+          {/* Left — the details */}
+          <motion.div
+            className="flex min-w-0 flex-col gap-7"
+            {...rise}
+            transition={{ duration: 1, ease: EASE }}
+          >
+            <p className="m-0 max-w-[42ch] font-sans text-[19px] leading-[1.6] text-sand-3">
+              {CONTACT.body}
             </p>
 
-            <div className="space-y-4 mb-8">
-              {/* Phone Card */}
-              <a
-                href="tel:6315305883"
-                className="flex items-center gap-4 p-4 bg-white border-2 border-[#CBD5E1] hover:border-[#DC2626] transition-all group cursor-pointer shadow-xs hover:shadow-md"
-              >
-                <div className="w-12 h-12 bg-[#FEF2F2] border border-[#FECACA] text-[#DC2626] flex items-center justify-center flex-shrink-0 group-hover:bg-[#DC2626] group-hover:text-white transition-colors">
-                  <Phone className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-[10px] uppercase text-[#64748B]">Direct Master Line</div>
-                  <div className="text-lg font-black text-[#0F172A] font-mono">(631) 530-5883 / (347) 622-8386</div>
-                </div>
-                <span className="text-xs font-bold text-[#DC2626] group-hover:translate-x-1 transition-transform">
-                  [ CALL NOW ] &rarr;
+            <dl className="m-0 flex flex-col gap-[18px]">
+              <InfoRow term="JONATHAN">
+                <a
+                  href={BUSINESS.ownerPhoneHref}
+                  className="display text-[30px] text-paper no-underline hover:text-brand-soft focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  {BUSINESS.ownerPhone}
+                </a>
+              </InfoRow>
+              <InfoRow term="EMAIL">
+                <a
+                  href={`mailto:${BUSINESS.email}`}
+                  className="display [overflow-wrap:anywhere] text-[26px] text-paper no-underline hover:text-brand-soft focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  {BUSINESS.email}
+                </a>
+              </InfoRow>
+              <InfoRow term="HOURS">
+                <span className="font-sans text-[17px] leading-[1.45] text-sand-3">
+                  {BUSINESS.hours}
                 </span>
-              </a>
+              </InfoRow>
+              <InfoRow term="AREA">
+                <span className="font-sans text-[17px] leading-[1.45] text-sand-3">
+                  {BUSINESS.areas}
+                </span>
+              </InfoRow>
+              <InfoRow term="MAP">
+                <a
+                  href={BUSINESS.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="border-b border-brand font-sans text-[17px] leading-[1.45] text-sand-3 no-underline hover:text-paper focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                >
+                  Directions on Google Maps →
+                </a>
+              </InfoRow>
+            </dl>
 
-              {/* Instagram Card */}
-              <a
-                href="https://www.instagram.com/jafettile____com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-4 p-4 bg-white border-2 border-[#CBD5E1] hover:border-[#0F172A] transition-all group cursor-pointer shadow-xs hover:shadow-md"
-              >
-                <div className="w-12 h-12 bg-[#F8F9FA] border border-[#CBD5E1] text-[#DC2626] flex items-center justify-center flex-shrink-0 group-hover:bg-[#0F172A] group-hover:text-white transition-colors">
-                  <Instagram className="w-6 h-6" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-[10px] uppercase text-[#64748B]">Official Video Reels</div>
-                  <div className="text-sm font-bold text-[#0F172A]">@jafettile____com</div>
-                  <div className="text-[10px] text-[#64748B]">Before &amp; After Transformations</div>
-                </div>
-                <ExternalLink className="w-4 h-4 text-[#94A3B8] group-hover:text-[#0F172A]" />
-              </a>
-
-              {/* Service Territory Card */}
-              <div className="flex items-center gap-4 p-4 bg-white border border-[#CBD5E1] shadow-xs">
-                <div className="w-12 h-12 bg-[#F1F5F9] border border-[#CBD5E1] text-[#0F172A] flex items-center justify-center flex-shrink-0">
-                  <MapPin className="w-6 h-6 text-[#DC2626]" />
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase text-[#64748B]">Primary Territory</div>
-                  <div className="text-sm font-bold text-[#0F172A]">Brentwood, Nassau County &amp; Greater NY Area</div>
-                </div>
-              </div>
-
-              {/* Working Hours */}
-              <div className="flex items-center gap-4 p-4 bg-white border border-[#CBD5E1] shadow-xs">
-                <div className="w-12 h-12 bg-[#F1F5F9] border border-[#CBD5E1] text-[#0F172A] flex items-center justify-center flex-shrink-0">
-                  <Clock className="w-6 h-6 text-[#DC2626]" />
-                </div>
-                <div>
-                  <div className="text-[10px] uppercase text-[#64748B]">Field Survey Schedule</div>
-                  <div className="text-sm font-bold text-[#0F172A]">Monday – Saturday: 7:00 AM – 6:30 PM</div>
-                </div>
-              </div>
-            </div>
+            <p className="m-0 max-w-[42ch] border-l-2 border-brand py-4 pl-[18px] font-sans text-[16px] leading-[1.55] text-mute-light-2">
+              {CONTACT.pricingNote}
+            </p>
           </motion.div>
 
-          {/* Right Column: Dispatch Card */}
-          <motion.div 
-            initial={{ opacity: 0, x: 30 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.9, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-            className="lg:col-span-6"
+          {/* Right — estimate request form */}
+          <motion.form
+            noValidate
+            onSubmit={handleSubmit}
+            aria-labelledby="estimate-form-heading"
+            className="relative flex min-w-0 flex-col gap-4 bg-paper p-[clamp(24px,3vw,40px)] text-ink"
+            {...rise}
+            transition={{ duration: 1, delay: 0.12, ease: EASE }}
           >
-            <div className="p-6 sm:p-8 bg-white border-2 border-[#0F172A] shadow-md">
-              <div className="flex items-center justify-between border-b border-[#E2E8F0] pb-4 mb-6">
-                <div>
-                  <span className="text-[10px] uppercase tracking-wider text-[#DC2626] font-bold">
-                    FIELD SURVEY PROTOCOL
-                  </span>
-                  <h3 className="text-xl font-black text-[#0F172A] uppercase tracking-tight">
-                    DISPATCH YOUR PROJECT SPECS
-                  </h3>
-                </div>
-                <div className="p-2 bg-[#F1F5F9] border border-[#CBD5E1] text-[#DC2626]">
-                  <Building2 className="w-5 h-5" />
-                </div>
-              </div>
+            <span className="absolute left-0 top-0 h-3 w-3 bg-brand" aria-hidden="true" />
+            <span className="absolute right-0 top-0 h-3 w-3 bg-brand" aria-hidden="true" />
 
-              <p className="text-xs text-[#475569] font-sans leading-relaxed mb-6">
-                Fill out the estimate form or message our master installer directly. We offer on-site visits with stone sample boards across Long Island within 24–48 hours.
-              </p>
+            <h3 id="estimate-form-heading" className="label m-0 text-brand">
+              {CONTACT.form.label}
+            </h3>
+            <p className="m-0 font-sans text-[14px] text-mute-3">
+              <span aria-hidden="true" className="text-brand">
+                *
+              </span>{' '}
+              Required
+            </p>
 
-              <div className="p-4 bg-[#F8F9FA] border border-[#CBD5E1] mb-6 space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-[#64748B]">Entity Name:</span>
-                  <span className="text-[#0F172A] font-bold">ISAAC STONE AND TILE LLC</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#64748B]">Headquarters:</span>
-                  <span className="text-[#0F172A]">Brentwood, Suffolk County, NY</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#64748B]">Fabrication Alliance:</span>
-                  <span className="text-[#DC2626] font-bold">Formia Marble &amp; Stone</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-[#64748B]">Emergency Dispatch:</span>
-                  <span className="text-emerald-600 font-bold">ACTIVE (24/7 Field SMS)</span>
-                </div>
-              </div>
-
-              <a
-                href="#quote-form"
-                className="w-full py-4 bg-[#DC2626] hover:bg-[#B91C1C] text-white font-black text-xs uppercase tracking-widest transition-all text-center block shadow-sm"
-              >
-                REQUEST ON-SITE TEMPLATING &rarr;
-              </a>
+            <div className="flex flex-col gap-[7px]">
+              <label htmlFor="ct-name" className={LABEL_CLASS}>
+                Your name <span aria-hidden="true" className="text-brand">*</span>
+              </label>
+              <input
+                id="ct-name"
+                name="name"
+                type="text"
+                autoComplete="name"
+                required
+                ref={(el) => {
+                  fieldRefs.current.name = el;
+                }}
+                value={values.name}
+                onChange={(e) => set('name', e.target.value)}
+                aria-invalid={Boolean(errors.name)}
+                aria-describedby={errors.name ? 'ct-name-err' : undefined}
+                className={INPUT_CLASS}
+              />
+              {errors.name && (
+                <p id="ct-name-err" className="m-0 font-sans text-[14px] text-brand-deep">
+                  {errors.name}
+                </p>
+              )}
             </div>
-          </motion.div>
 
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-[7px]">
+                <label htmlFor="ct-phone" className={LABEL_CLASS}>
+                  Phone <span aria-hidden="true" className="text-brand">*</span>
+                </label>
+                <input
+                  id="ct-phone"
+                  name="phone"
+                  type="tel"
+                  autoComplete="tel"
+                  required
+                  ref={(el) => {
+                    fieldRefs.current.phone = el;
+                  }}
+                  value={values.phone}
+                  onChange={(e) => set('phone', e.target.value)}
+                  aria-invalid={Boolean(errors.phone)}
+                  aria-describedby={errors.phone ? 'ct-phone-err' : undefined}
+                  className={INPUT_CLASS}
+                />
+                {errors.phone && (
+                  <p id="ct-phone-err" className="m-0 font-sans text-[14px] text-brand-deep">
+                    {errors.phone}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex flex-col gap-[7px]">
+                <label htmlFor="ct-email" className={LABEL_CLASS}>
+                  Email <span aria-hidden="true" className="text-brand">*</span>
+                </label>
+                <input
+                  id="ct-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  ref={(el) => {
+                    fieldRefs.current.email = el;
+                  }}
+                  value={values.email}
+                  onChange={(e) => set('email', e.target.value)}
+                  aria-invalid={Boolean(errors.email)}
+                  aria-describedby={errors.email ? 'ct-email-err' : undefined}
+                  className={INPUT_CLASS}
+                />
+                {errors.email && (
+                  <p id="ct-email-err" className="m-0 font-sans text-[14px] text-brand-deep">
+                    {errors.email}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-[7px]">
+              <label htmlFor="ct-service" className={LABEL_CLASS}>
+                What do you need?
+              </label>
+              <select
+                id="ct-service"
+                name="service"
+                value={values.jobType}
+                onChange={(e) => set('jobType', e.target.value)}
+                className={INPUT_CLASS}
+              >
+                {CONTACT.jobTypes.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex flex-col gap-[7px]">
+              <label htmlFor="ct-photo" className={LABEL_CLASS}>
+                A photo of the space{' '}
+                <span className="font-normal text-mute-2">(optional)</span>
+              </label>
+              <input
+                id="ct-photo"
+                name="photo"
+                type="file"
+                accept="image/*"
+                onChange={(e) => setPhotoName(e.target.files?.[0]?.name ?? '')}
+                className="min-h-11 py-2.5 font-sans text-[15px] text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+              />
+              {photoName && (
+                <p className="m-0 font-sans text-[14px] text-mute-2">{photoName}</p>
+              )}
+            </div>
+
+            <div className="flex flex-col gap-[7px]">
+              <label htmlFor="ct-details" className={LABEL_CLASS}>
+                Tell us about the job{' '}
+                <span className="font-normal text-mute-2">(optional)</span>
+              </label>
+              <textarea
+                id="ct-details"
+                name="details"
+                rows={3}
+                value={values.message}
+                onChange={(e) => set('message', e.target.value)}
+                className={`${INPUT_CLASS} resize-y`}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={sending}
+              aria-busy={sending}
+              className="min-h-14 cursor-pointer border-none bg-brand p-[18px] font-sans text-[17px] font-bold text-paper transition-colors hover:bg-brand-deep focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand disabled:cursor-wait disabled:opacity-70"
+            >
+              {sending ? CONTACT.form.submitPending : CONTACT.form.submit}
+            </button>
+
+            <p
+              role="status"
+              aria-live="polite"
+              className="m-0 min-h-[1.5em] font-sans text-[14px] leading-[1.45] text-mute-3"
+            >
+              {status === 'idle' && Object.keys(errors).length > 0 && (
+                <span className="text-brand-deep">
+                  Check the highlighted fields and send again.
+                </span>
+              )}
+              {status === 'sent' && CONTACT.form.success}
+              {status === 'error' && (
+                <>
+                  {CONTACT.form.failure}{' '}
+                  <a
+                    href={BUSINESS.phoneHref}
+                    className="border-b border-brand text-ink no-underline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                  >
+                    {BUSINESS.phone}
+                  </a>
+                </>
+              )}
+            </p>
+          </motion.form>
         </div>
-
       </div>
     </section>
   );
-};
+}

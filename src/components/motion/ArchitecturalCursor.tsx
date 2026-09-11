@@ -65,7 +65,7 @@ export const ArchitecturalCursor: React.FC = () => {
           translateY: '-50%',
         }}
         className={`fixed w-2.5 h-2.5 rounded-full transition-transform duration-150 ${
-          isPointer ? 'bg-[#DC2626] scale-150 shadow-[0_0_8px_rgba(220,38,38,0.5)]' : 'bg-[#0F172A]/80'
+          isPointer ? 'bg-[#bf1d1a] scale-150 shadow-[0_0_8px_rgba(191,29,26,0.5)]' : 'bg-[#1a1815]/80'
         }`}
       />
 
@@ -79,11 +79,11 @@ export const ArchitecturalCursor: React.FC = () => {
         }}
         animate={{
           scale: isPointer ? 1.4 : 1,
-          borderColor: isPointer ? '#DC2626' : 'rgba(15, 23, 42, 0.25)',
+          borderColor: isPointer ? '#bf1d1a' : 'rgba(26, 24, 21, 0.25)',
           rotate: isPointer ? 45 : 0,
         }}
         transition={{ duration: 0.15 }}
-        className="fixed w-8 h-8 rounded-none border border-[#0F172A]/20"
+        className="fixed w-8 h-8 rounded-none border border-[#1a1815]/20"
       />
     </div>
   );
