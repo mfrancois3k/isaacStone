@@ -1,21 +1,25 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { GoogleGenAI } from '@google/genai';
-import { GEMINI_MODEL, SYSTEM_PROMPT, keywordFallback } from '../shared/consultant.js';
+import { XAI_MODEL, askWamy, keywordFallback, toChatTurns } from '../shared/consultant.js';
 
-interface HistoryItem {
-  sender?: string;
-  text?: string;
-}
+/**
+ * Best-effort per-IP limit so a bot cannot run up the xAI bill.
+ * ponytail: in-memory, so it only holds per warm function instance — a
+ * determined abuser spread across cold starts gets through. Move to Vercel KV
+ * or Upstash if usage ever shows it.
+ */
+const WINDOW_MS = 60_000;
+const MAX_PER_WINDOW = 20;
+const hits = new Map<string, number[]>();
 
-let aiClient: GoogleGenAI | null = null;
-
-function getGenAI(): GoogleGenAI | null {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) return null;
-  if (!aiClient) {
-    aiClient = new GoogleGenAI({ apiKey });
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const recent = (hits.get(ip) ?? []).filter((t) => now - t < WINDOW_MS);
+  if (recent.length >= MAX_PER_WINDOW) {
+    hits.set(ip, recent);
+    return true;
   }
-  return aiClient;
+  hits.set(ip, [...recent, now]);
+  return false;
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -24,71 +28,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(405).json({ error: 'Method not allowed.' });
   }
 
-  const { message, conversationHistory = [] } = (req.body ?? {}) as {
+  const forwarded = req.headers['x-forwarded-for'];
+  const ip = (Array.isArray(forwarded) ? forwarded[0] : forwarded)?.split(',')[0]?.trim() || 'unknown';
+  if (isRateLimited(ip)) {
+    return res.status(429).json({ error: 'Too many messages. Call us at (631) 530-5883.' });
+  }
+
+  const { message, conversationHistory } = (req.body ?? {}) as {
     message?: unknown;
-    conversationHistory?: HistoryItem[];
+    conversationHistory?: unknown;
   };
 
   if (!message || typeof message !== 'string') {
     return res.status(400).json({ error: 'A message string is required.' });
   }
 
-  const ai = getGenAI();
-
-  // No key configured: the keyword replies are held to the same standard as
-  // the system prompt, so this path is safe to serve to a real visitor.
-  if (!ai) {
-    const fallbackAnswer = keywordFallback(message);
-    return res.status(200).json({
-      reply: fallbackAnswer,
-      audioText: fallbackAnswer,
-      source: 'expert-knowledge-base',
-    });
-  }
-
-  const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
-  if (Array.isArray(conversationHistory)) {
-    for (const item of conversationHistory.slice(-6)) {
-      if (item?.sender === 'user' && item.text) {
-        contents.push({ role: 'user', parts: [{ text: item.text }] });
-      } else if (item?.sender === 'bot' && item.text) {
-        contents.push({ role: 'model', parts: [{ text: item.text }] });
-      }
-    }
-  }
-  contents.push({ role: 'user', parts: [{ text: message }] });
-
   try {
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
-      contents,
-      config: {
-        systemInstruction: SYSTEM_PROMPT,
-        temperature: 0.7,
-        maxOutputTokens: 250,
-      },
-    });
-
-    // Strip markdown so the reply reads cleanly through speech synthesis.
-    const cleaned = (response.text ?? '')
-      .replace(/[*_#`~[\]]/g, '')
-      .replace(/\n+/g, ' ')
-      .trim();
-
-    // An empty model reply is a failure, not an answer — fall back rather than
-    // inventing something reassuring to say on the company's behalf.
-    const reply = cleaned || keywordFallback(message);
-
-    return res.status(200).json({
-      reply,
-      audioText: reply,
-      source: cleaned ? GEMINI_MODEL : 'expert-knowledge-base',
-    });
+    const reply = await askWamy(toChatTurns(conversationHistory, message));
+    if (reply) {
+      return res.status(200).json({ reply, audioText: reply, source: XAI_MODEL });
+    }
   } catch (error) {
-    console.error('Gemini voice assistant error:', error);
-    return res.status(500).json({
-      error: 'Failed to generate consultant response.',
-      details: error instanceof Error ? error.message : 'Internal server error',
-    });
+    console.error('[WAMY] request failed:', error);
   }
+
+  // Unconfigured or failing model: the keyword replies make no promises and
+  // quote no prices, so they are safe to serve rather than an error.
+  const fallback = keywordFallback(message);
+  return res.status(200).json({ reply: fallback, audioText: fallback, source: 'expert-knowledge-base' });
 }

@@ -17,8 +17,10 @@ interface ChatMessage {
   text: string;
 }
 
+// Wamy introduces itself by name, matching the persona in shared/wamy-prompt.ts.
+// Kept free of any promise that details are sent: only the Send button does that.
 const GREETING =
-  "Hi — I can take your details and pass them to Jonathan. What room are you looking at?";
+  "Hi, I'm Wamy. Tell me about the project — the room and the material you have in mind — and I'll help you get a free on-site estimate.";
 
 /** Launcher teases. Rotated on a timer while the drawer is closed. */
 const HINTS = [
@@ -361,7 +363,7 @@ export function VoiceChatBot() {
             key="drawer"
             role="dialog"
             aria-modal="false"
-            aria-label="AI voice agent — estimate helper"
+            aria-label="Wamy, the estimate helper"
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 16 }}
@@ -372,7 +374,7 @@ export function VoiceChatBot() {
               <span className="absolute inset-x-0 top-0 h-0.5 bg-brand" />
               <span className="flex flex-col gap-0.5">
                 <span className={`${LABEL} text-brand`}>AI VOICE AGENT</span>
-                <span className="font-display text-[20px] leading-none">Estimate helper</span>
+                <span className="font-display text-[20px] leading-none">Wamy</span>
               </span>
               <span className="flex gap-1.5">
                 <button
@@ -390,7 +392,7 @@ export function VoiceChatBot() {
                   ref={closeRef}
                   type="button"
                   onClick={closeDrawer}
-                  aria-label="Close the estimate helper"
+                  aria-label="Close Wamy"
                   className={`flex h-[34px] w-[34px] items-center justify-center border border-ink-line-2 text-[17px] leading-none text-paper ${FOCUS}`}
                 >
                   ✕

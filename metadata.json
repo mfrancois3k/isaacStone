@@ -1,6 +1,7 @@
 {
   "name": "Isaac Stone and Tile LLC",
   "description": "Tile, granite and marble installation across Long Island, New York City and South Florida. Twenty-five years, one crew, free on-site estimates, and an AI estimate helper that hands off to the owner.",
-  "requestFramePermissions": ["microphone"],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "requestFramePermissions": [
+    "microphone"
+  ]
 }

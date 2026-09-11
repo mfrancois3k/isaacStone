@@ -2,9 +2,8 @@ import express from "express";
 import fs from "fs";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
-import { GEMINI_MODEL, SYSTEM_PROMPT, keywordFallback } from "./shared/consultant.js";
+import { XAI_MODEL, askWamy, keywordFallback, toChatTurns } from "./shared/consultant.js";
 import {
   LEAD_ACCEPTED_MESSAGE,
   LEAD_FAILED_MESSAGE,
@@ -20,26 +19,6 @@ const app = express();
 const PORT = 3000;
 
 app.use(express.json());
-
-// Initialize Gemini Client lazily with safety check
-let aiClient: GoogleGenAI | null = null;
-function getGenAI(): GoogleGenAI | null {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    return null;
-  }
-  if (!aiClient) {
-    aiClient = new GoogleGenAI({
-      apiKey,
-      httpOptions: {
-        headers: {
-          'User-Agent': 'aistudio-build',
-        },
-      },
-    });
-  }
-  return aiClient;
-}
 
 // Leads are also appended to disk. An in-memory array alone loses every request
 // made since the last restart, and a lost lead is a lost customer.
@@ -135,72 +114,23 @@ app.get("/api/leads", (req, res) => {
 
 // Voice / Chat API endpoint
 app.post("/api/voice-consultant", async (req, res) => {
-  try {
-    const { message, conversationHistory = [] } = req.body;
-
-    if (!message || typeof message !== 'string') {
-      return res.status(400).json({ error: "A message string is required." });
-    }
-
-    const ai = getGenAI();
-
-    // Fallback if no API key is set in environment yet
-    if (!ai) {
-      const fallbackAnswer = keywordFallback(message);
-
-      return res.json({
-        reply: fallbackAnswer,
-        audioText: fallbackAnswer,
-        source: "expert-knowledge-base"
-      });
-    }
-
-    // Convert conversation history into contents format
-    const contents: Array<{ role: 'user' | 'model'; parts: Array<{ text: string }> }> = [];
-
-    if (Array.isArray(conversationHistory)) {
-      for (const item of conversationHistory.slice(-6)) {
-        if (item.sender === 'user' && item.text) {
-          contents.push({ role: 'user', parts: [{ text: item.text }] });
-        } else if (item.sender === 'bot' && item.text) {
-          contents.push({ role: 'model', parts: [{ text: item.text }] });
-        }
-      }
-    }
-
-    // Add current user message
-    contents.push({ role: 'user', parts: [{ text: message }] });
-
-    const response = await ai.models.generateContent({
-      model: GEMINI_MODEL,
-      contents,
-      config: {
-        systemInstruction: SYSTEM_PROMPT,
-        temperature: 0.7,
-        maxOutputTokens: 250,
-      },
-    });
-
-    const reply = response.text || "Sorry — I did not catch that. Tell me the room and the material you have in mind, or call (631) 530-5883 and Jonathan will pick up.";
-
-    // Clean up any remaining asterisks or markdown to ensure smooth speech synthesis
-    const cleanedReply = reply
-      .replace(/[*_#`~[\]]/g, '')
-      .replace(/\n+/g, ' ')
-      .trim();
-
-    res.json({
-      reply: cleanedReply,
-      audioText: cleanedReply,
-      source: GEMINI_MODEL
-    });
-  } catch (error: any) {
-    console.error("Gemini voice assistant error:", error);
-    res.status(500).json({
-      error: "Failed to generate consultant response.",
-      details: error?.message || "Internal server error"
-    });
+  const { message, conversationHistory } = req.body ?? {};
+  if (!message || typeof message !== "string") {
+    return res.status(400).json({ error: "A message string is required." });
   }
+
+  try {
+    const reply = await askWamy(toChatTurns(conversationHistory, message));
+    if (reply) {
+      return res.json({ reply, audioText: reply, source: XAI_MODEL });
+    }
+  } catch (error) {
+    console.error("[WAMY] request failed:", error);
+  }
+
+  // Same fallback as the hosted function: no prices, no promises.
+  const fallback = keywordFallback(message);
+  return res.json({ reply: fallback, audioText: fallback, source: "expert-knowledge-base" });
 });
 
 async function startServer() {

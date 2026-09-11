@@ -4,44 +4,101 @@
  * into saying different things on a real business's behalf.
  */
 
-/**
- * FIXME(orchestrator): verify this model id against the current Google GenAI
- * model list before this ships. It was inherited from the scaffold and does not
- * match any Gemini model id we can confirm. Left as-is deliberately rather than
- * guessing a replacement.
- */
-export const GEMINI_MODEL = "gemini-3.8-flash";
+import { WAMY_SYSTEM_PROMPT } from './wamy-prompt.js';
+
+/** Verified against GET https://api.x.ai/v1/models on 2026-09-11. */
+export const XAI_MODEL = process.env.XAI_MODEL || 'grok-4.6';
 
 /**
- * System instructions for the website's estimate helper.
+ * Rules that depend on how this site is wired, appended to Wamy's authored
+ * prompt rather than edited into it.
  *
- * Every fact below comes from src/data/site.ts, which is the content source of
- * truth for this site. Do not add capabilities, partners, materials, tolerances,
- * prices, deposits or timelines here — this text is put in a real business's
- * mouth on a live page.
+ * Wamy's prompt tells the visitor "Jonathan will follow up the same business
+ * day" once it has their details. But the chat cannot deliver anything by
+ * itself: details only reach Jonathan when the visitor presses "Send this to
+ * Jonathan", and that endpoint refuses unless a lead webhook is configured.
+ * Promising a callback the system has no record of is the one failure a
+ * contractor's site cannot afford, so the chat hands off instead of promising.
  */
-export const SYSTEM_PROMPT = `You are the estimate helper on the website of Isaac Stone and Tile, a small family tile and stone company in Brentwood, New York. You are not a salesperson and not a concierge. You talk the way someone in the office would: plain, short and friendly, no jargon.
+const SITE_HANDOFF_RULES = `
 
-What is true about the company. This is the whole of what you know:
-- Isaac Stone and Tile (Isaac Stone and Tile LLC), Brentwood, New York. Established in 2000, so about twenty-five years of work.
-- What they do: tile installation, granite installation, marble installation, and superstructure and foundation work.
-- Where they work: Long Island, meaning Suffolk, Nassau and the Hamptons, plus New York City and South Florida.
-- Phone: (631) 530-5883. Jonathan is the owner and lead installer, and his direct line is (347) 622-8386. Email: jafet.tile@gmail.com.
-- Hours: Monday to Saturday, 7:00 in the morning to 6:30 in the evening.
-- How a job starts: a free on-site visit, then a written itemised estimate covering materials, labour and prep. The same crew starts and finishes the job.
+How this website works (these rules override step 4 above):
+- You cannot send, save or forward anything yourself. Nothing the visitor types here reaches Jonathan unless they press the "Send this to Jonathan" button below the chat, or call.
+- Once you have their details, confirm them back in one short summary, then tell them to press "Send this to Jonathan" below, or call (631) 530-5883 if they would rather talk now.
+- Never say that Jonathan will follow up, call them, or be in touch, and never say their details have been sent or received.
+- Reply in plain sentences with no markdown, bullet points or asterisks. Replies may be read aloud.`;
 
-Hard rules:
-1. Never quote or estimate a price, a rate per square foot, a total, a deposit, a percentage, a payment schedule, a start date, how long a job takes, or a tolerance. Not a range, not a rough figure, not even if the visitor pushes. Price depends on the material, the square footage, and the state of the floor or wall underneath, and the honest answer is that we give you the range on the phone before anyone drives out. Then offer to take their details.
-2. Do not invent anything. No partner companies, no suppliers, no fabricators, no brand or slab names, no certifications, no guarantees, no awards, no project counts, no customer names.
-3. If you are asked anything that is not in the list above, say you do not know and tell them to call Jonathan at (631) 530-5883. That is always a good answer here. Guessing is not.
-4. Do not call yourself a mason, an estimator, an architect or a consultant, and do not speak for the crew. You are the helper on the website.
+export const SYSTEM_PROMPT = WAMY_SYSTEM_PROMPT + SITE_HANDOFF_RULES;
 
-Your job is to collect four things, one question at a time and in your own words: their name, a phone number, the room and the material they have in mind, and roughly when they want it done. If they want their details passed through from this chat rather than calling, ask for an email address too, because the handoff needs one. Once you have what you need, stop asking and tell them Jonathan will call them back.
+/** Cost guards. A public chatbot is an open tab on the xAI bill. */
+const MAX_OUTPUT_TOKENS = 300;
+const MAX_TURNS = 12;
+const MAX_CHARS_PER_TURN = 2000;
 
-Style: two or three short sentences at most. This gets read aloud, so write it the way you would say it. No markdown, no bullet points, no asterisks, no headings.`;
+export interface ChatTurn {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
+/** The site's widget sends `{sender: 'user' | 'bot', text}`; xAI wants roles. */
+export function toChatTurns(history: unknown, message: string): ChatTurn[] {
+  const turns: ChatTurn[] = [];
+  if (Array.isArray(history)) {
+    for (const item of history) {
+      const text = typeof item?.text === 'string' ? item.text : '';
+      if (!text) continue;
+      if (item.sender === 'user') turns.push({ role: 'user', content: text });
+      else if (item.sender === 'bot') turns.push({ role: 'assistant', content: text });
+    }
+  }
+  turns.push({ role: 'user', content: message });
+  return turns
+    .slice(-MAX_TURNS)
+    .map((turn) => ({ role: turn.role, content: turn.content.slice(0, MAX_CHARS_PER_TURN) }));
+}
 
 /**
- * What a visitor gets when GEMINI_API_KEY is unset. Held to exactly the same
+ * Ask Wamy. Returns the reply text, or null when xAI is not configured, errors,
+ * or returns nothing usable — the caller then serves `keywordFallback`, which is
+ * held to the same no-prices, no-promises standard.
+ */
+export async function askWamy(turns: ChatTurn[]): Promise<string | null> {
+  const apiKey = process.env.XAI_API_KEY;
+  if (!apiKey) return null;
+
+  const response = await fetch('https://api.x.ai/v1/responses', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
+    body: JSON.stringify({
+      model: XAI_MODEL,
+      instructions: SYSTEM_PROMPT,
+      input: turns,
+      max_output_tokens: MAX_OUTPUT_TOKENS,
+      stream: false,
+    }),
+  });
+
+  const data = await response.json().catch(() => null);
+  if (!response.ok) {
+    console.error('[WAMY] xAI error', response.status, JSON.stringify(data)?.slice(0, 300));
+    return null;
+  }
+
+  const text: unknown =
+    data?.output_text ??
+    data?.output
+      ?.flatMap((item: { content?: Array<{ type?: string; text?: string }> }) => item.content ?? [])
+      .find((part: { type?: string }) => part.type === 'output_text')?.text;
+
+  if (typeof text !== 'string') return null;
+
+  // Strip markdown so the reply reads cleanly through speech synthesis.
+  const cleaned = text.replace(/[*_#`~[\]]/g, '').replace(/\n+/g, ' ').trim();
+  return cleaned || null;
+}
+
+/**
+ * What a visitor gets when XAI_API_KEY is unset or xAI fails. Held to exactly the same
  * standard as SYSTEM_PROMPT: no prices, no deposits, no timelines, no invented
  * partners or materials.
  */
