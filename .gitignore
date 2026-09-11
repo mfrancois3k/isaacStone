@@ -8,7 +8,8 @@ coverage/
 !.env.example
 
 # Customer lead submissions — real names and phone numbers. Never commit.
-data/leads.jsonl
-data/
+# Anchored to the repo root: an unanchored "data/" also matched src/data/,
+# which silently kept src/data/site.ts out of git.
+/data/
 
 .vercel
