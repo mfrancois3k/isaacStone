@@ -396,7 +396,7 @@ export function startSiteMotion(root, reduced) {
           const distance = (reelCenters[i] + tx - vw * 0.5) / vw;
           const edge = Math.min(1, Math.abs(distance));
           const entry = 1 - Math.pow(1 - clamp(enter * 1.6 - i * 0.12), 3);
-          put(card, "transform", `perspective(1400px) rotateY(${-distance * 18 - skew * 5}deg) rotateX(${(1 - entry) * 14}deg) translateY(${edge * 30 + (1 - entry) * 160}px) scale(${1 - edge * 0.16})`);
+          put(card, "transform", `perspective(1400px) rotateY(${-distance * 10 - skew * 2}deg) rotateX(${(1 - entry) * 8}deg) translateY(${edge * 18 + (1 - entry) * 90}px) scale(${1 - edge * 0.09})`);
           put(card, "opacity", String(entry * (1 - edge * 0.5)));
           put(card, "zIndex", String(10 - Math.round(edge * 9)));
           const play = playRings[i];

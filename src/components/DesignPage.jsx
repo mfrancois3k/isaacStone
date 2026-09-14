@@ -421,19 +421,18 @@ export default class DesignPage extends React.Component {
     });
     this.setState({ progress: 100, expanding: true, loaderIn: true }, () => {
       document.body.style.overflow = "";
-      this.startMotion();
-      // once the image fills the screen, lift it to reveal the hero
+      // Keep the hero dormant until the overlay is completely gone. This makes
+      // its entrance visible instead of spending the animation behind the loader.
       this._exit = setTimeout(() => {
         this.setState({ loaderExiting: true }, () => {
           document.body.style.overflow = "";
-          this.startMotion();
           const h1 = document.querySelector("h1");
           if (h1) {
             h1.setAttribute("tabindex", "-1");
             h1.focus({ preventScroll: true });
           }
           this._unmount = setTimeout(
-            () => this.setState({ loaderDone: true }),
+            () => this.setState({ loaderDone: true }, () => this.startMotion()),
             600,
           );
         });
@@ -10762,6 +10761,7 @@ export default class DesignPage extends React.Component {
         )}
         <div
           data-mobbar={""}
+          data-agent-open={v.voiceOpen ? "" : undefined}
           style={{
             position: "fixed",
             left: "0",
