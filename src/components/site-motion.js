@@ -2,6 +2,13 @@ const clamp = (n) => Math.max(0, Math.min(1, n));
 export function startSiteMotion(root, reduced) {
   const one = (s) => root.querySelector(s),
     all = (s) => [...root.querySelectorAll(s)];
+  let disposed = false, disposeHeadings;
+  const headings = all('[data-panel] h2, #work h2, #reels h2, #owner h2, #why h2, #beforeafter h2, #faq h2, #contact h2');
+  if (!reduced && headings.length) {
+    import('./heading-motion.js').then(({startHeadingMotion}) => {
+      if (!disposed) disposeHeadings = startHeadingMotion(headings);
+    }).catch(() => { /* Copy remains visible if the optional animation chunk cannot load. */ });
+  }
   const bar = one("#isv-progress"),
     header = one("#isv-header"),
     hero = one("[data-hero-text]"),
@@ -367,6 +374,8 @@ export function startSiteMotion(root, reduced) {
   document.addEventListener("visibilitychange", wake);
   wake();
   return () => {
+    disposed = true;
+    disposeHeadings?.();
     cancelAnimationFrame(raf);
     heroAnimations.forEach((a) => a.cancel());
     io.disconnect();

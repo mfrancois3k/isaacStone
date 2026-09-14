@@ -240,6 +240,9 @@ export function WamyDialog() {
               <MarbleSphere
                 state={sphereState}
                 getAudioLevel={voice.getAudioLevel}
+                onActivate={voice.active ? voice.toggleMute : start}
+                label={voice.active ? (voice.muted ? "Resume microphone with Wamy marble" : "Mute microphone with Wamy marble") : "Start conversation with Wamy marble"}
+                disabled={!voice.supported || voice.state === 'connecting'}
               />
             )}
             <p className="wamy-status" role="status">
@@ -368,7 +371,7 @@ export function WamyDialog() {
               <a href="tel:+16315305883">Call the team ↗</a>
             </div>
             <small>
-              Microphone starts only when you choose Start conversation.
+              Start conversation or tap the marble to speak. During a call, tap it to mute or resume your microphone.
             </small>
           </footer>
         </div>
