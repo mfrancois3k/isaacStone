@@ -179,6 +179,9 @@ export default class DesignPage extends React.Component {
     faq: 0,
     sent: false,
     formDetails: "",
+    formSubmitting: false,
+    formSuccess: "",
+    formError: "",
     voiceOpen: false,
     listening: false,
     micDenied: false,
@@ -791,11 +794,13 @@ export default class DesignPage extends React.Component {
 
       formDetails: s.formDetails,
       onDetails: (e) => this.setState({ formDetails: e.target.value }),
+      formSubmitting: s.formSubmitting,
       formNote:
         s.formError ||
-        (s.sent
-          ? "Your draft is ready below. Review it, then open your email app to send it."
-          : "Prepare and review your details before opening an email draft. Nothing is sent from this form."),
+        s.formSuccess ||
+        (s.formSubmitting
+          ? "Sending your request to the team…"
+          : "Send your details securely. You will receive a confirmation email, and the team will receive your project summary."),
       baPct: s.ba + "%",
       baClip: "inset(0 " + (100 - s.ba) + "% 0 0)",
       baDown: (e) => {
@@ -822,43 +827,51 @@ export default class DesignPage extends React.Component {
           photoName:
             e.target.files && e.target.files[0] ? e.target.files[0].name : "",
         }),
-      onSubmit: (e) => {
+      onSubmit: async (e) => {
         e.preventDefault();
+        if (this.state.formSubmitting) return;
         const fd = new FormData(e.currentTarget);
-        const clientName = (fd.get("name") || "").toString().trim();
+        const name = (fd.get("name") || "").toString().trim();
         const phone = (fd.get("phone") || "").toString().trim();
         const email = (fd.get("email") || "").toString().trim();
-        const service = (fd.get("service") || "stone work").toString();
+        const projectType = (fd.get("service") || "").toString().trim();
         const details = (fd.get("details") || "").toString().trim();
-        const body = [
-          "ISAAC STONE AND TILE",
-          "ESTIMATE REQUEST",
-          "",
-          "CLIENT CONTACT",
-          "Name: " + clientName,
-          "Phone: " + phone,
-          "Email: " + (email || "Not provided"),
-          "",
-          "PROJECT BRIEF",
-          "Requested service: " + service,
-          "Scope / notes: " + (details || "To discuss during the first call"),
-          "Photo: " + (s.photoName ? "Provided separately — " + s.photoName : "Not provided"),
-          "",
-          "NEXT STEP",
-          "Please contact the client to arrange a free on-site visit. After the visit, provide a written, itemized estimate covering preparation, materials, labor, and timeline.",
-        ]
-          .filter(Boolean)
-          .join("\n");
-        const mailto =
-          "mailto:jafet.tile@gmail.com?subject=" +
-          encodeURIComponent(
-            "Estimate request — " + service + " — " + clientName,
-          ) +
-          "&body=" +
-          encodeURIComponent(body);
-        this.setState({ sent: true, formDraft: { body, mailto }, draftCopied: false, formError: '' }, () => {
-          document.querySelector('.estimate-review')?.scrollIntoView({ behavior: 'instant', block: 'nearest' });
-        });
+        const notes = [
+          details || "No additional project notes provided.",
+          s.photoName ? "Photo selected in the website form: " + s.photoName : "",
+        ].filter(Boolean).join("\n\n");
+        this.setState({ formSubmitting: true, formError: "", formSuccess: "", formDraft: null, draftCopied: false });
+        try {
+          const response = await fetch("/api/leads/book-call", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name,
+              phone,
+              email,
+              projectType,
+              notes,
+              source: "form",
+              customerSmsConsent: false,
+            }),
+          });
+          const data = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(typeof data?.error === "string" ? data.error : "Could not send your request.");
+          this.setState({
+            sent: true,
+            formSubmitting: false,
+            formSuccess: typeof data?.message === "string"
+              ? data.message + (email ? " Check your email for a confirmation." : "")
+              : "Your request is with the team. Check your email for confirmation.",
+          });
+          e.currentTarget.reset();
+          this.setState({ formDetails: "", photoName: "" });
+        } catch (error) {
+          this.setState({
+            formSubmitting: false,
+            formError: error instanceof Error ? error.message : "Could not send your request. Please try again.",
+          });
+        }
       },
 
       menuOpen: !!s.menuOpen,
@@ -10454,7 +10467,11 @@ export default class DesignPage extends React.Component {
               <form
                 data-rv={""}
                 onSubmit={v.onSubmit}
-                onInput={() => { if (this.state.formDraft) this.setState({ formDraft: null, sent: false, draftCopied: false }); }}
+                onInput={() => {
+                  if (this.state.formSuccess || this.state.formError || this.state.sent) {
+                    this.setState({ formSuccess: "", formError: "", sent: false, draftCopied: false });
+                  }
+                }}
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -10659,6 +10676,7 @@ export default class DesignPage extends React.Component {
                 </label>
                 <button
                   type={"submit"}
+                  disabled={v.formSubmitting}
                   data-cur={"SEND"}
                   onMouseMove={v.magnet}
                   onMouseLeave={v.unmagnet}
@@ -10673,7 +10691,7 @@ export default class DesignPage extends React.Component {
                     transition: "transform .4s cubic-bezier(.16,1,.3,1)",
                   }}
                 ><span className="magnetic-face">
-                  {"Prepare estimate email"}
+                  {v.formSubmitting ? "Sending request…" : "Send estimate request"}
                 </span></button>
                 <p
                   aria-live={"polite"}
