@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { startSiteMotion } from "../src/components/site-motion.js";
 
-test("entrance counters use elapsed time once; gallery follows scroll pixels directly", () => {
+test("entrance counters use elapsed time once; gallery maps its full sticky travel to horizontal overflow", () => {
   const names = [
     "window",
     "document",
@@ -68,8 +68,17 @@ test("entrance counters use elapsed time once; gallery follows scroll pixels dir
     const start = performance.now();
     frame(start);
     assert.equal(stat.textContent, "0", "offscreen stat must wait for entry");
-    assert.equal(track.style.transform, "translateX(-250px)");
-    assert.equal(strip.style.height, "1720px");
+    assert.ok(
+      Math.abs(
+        parseFloat(track.style.transform.slice(11)) -
+          (-250 / (9999 - 720)) * 1000,
+      ) < 0.01,
+    );
+    assert.equal(
+      strip.style.height,
+      undefined,
+      "preserve the reference sticky-section height",
+    );
     observers[0].callback([{ target: stat, isIntersecting: true }]);
     frame(start + 800);
     assert.ok(

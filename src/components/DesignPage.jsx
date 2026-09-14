@@ -202,7 +202,7 @@ export default class DesignPage extends React.Component {
     ],
     progress: 0,
     loaderExiting: false,
-    loaderDone: loaderVisited(),
+    loaderDone: false,
     loaderIn: false,
     expanding: false,
     frame: 0,
@@ -310,7 +310,7 @@ export default class DesignPage extends React.Component {
     this._motionPreference.addEventListener("change", this._onMotionPreference);
     if (
       this.reduced ||
-      this.state.loaderDone ||
+      (this.props.loaderMode === "once per session" && loaderVisited()) ||
       this.props.loaderMode === "off"
     ) {
       markLoaderVisited();
@@ -322,7 +322,7 @@ export default class DesignPage extends React.Component {
       this._inT = setTimeout(() => this.setState({ loaderIn: true }), 20);
       this._t0 = performance.now();
       this._tick = setInterval(() => {
-        const t = clamp01((performance.now() - this._t0 - 300) / 1900);
+        const t = clamp01((performance.now() - this._t0 - 300) / 3900);
         const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         const progress = Math.min(
           this._loaded ? 100 : 99,

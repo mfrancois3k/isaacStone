@@ -14,6 +14,8 @@ export function startSiteMotion(root, reduced) {
     rule = one("[data-hbar]"),
     counter = one("[data-hcount]");
   const reelTrack = one("[data-reeltrack]"),
+    reelStrip = one("[data-reelstrip]"),
+    reelGhost = one("[data-reelghost]"),
     reelCards = all("[data-reelcard]"),
     reelRule = one("[data-reelbar]"),
     reelCount = one("[data-reelcount]");
@@ -158,6 +160,7 @@ export function startSiteMotion(root, reduced) {
     lastTime = 0,
     directionY = lastY,
     hidden = false;
+  let smoothY = lastY;
   const count = (el, index) => {
     const text = String(index + 1).padStart(2, "0") + " ";
     if (el?.firstChild && el.firstChild.nodeValue !== text)
@@ -183,6 +186,7 @@ export function startSiteMotion(root, reduced) {
       trackScroll = track?.scrollLeft || 0;
     const cardCenters = cards.map((c) => c.offsetLeft + c.offsetWidth / 2);
     const reelWidth = reelTrack?.scrollWidth || 0,
+      reelRect = rect(reelStrip),
       reelClient = reelTrack?.clientWidth || 1,
       reelScroll = reelTrack?.scrollLeft || 0,
       reelCenters = reelCards.map((c) => c.offsetLeft + c.offsetWidth / 2);
@@ -195,6 +199,8 @@ export function startSiteMotion(root, reduced) {
       tickerWidths = tickers.map((t) => t.el.scrollWidth / 2);
     const dt = Math.min(3, (time - (lastTime || time)) / 16.667 || 1);
     lastTime = time;
+    smoothY += (y - smoothY) * (reduced ? 1 : 1 - Math.pow(0.89, dt));
+    if (Math.abs(y - smoothY) < 0.3) smoothY = y;
     velocity += (y - lastY - velocity) * 0.12;
     lastY = y;
     // WRITE PHASE: one loop owns every continuously scrubbed effect, including the cursor.
@@ -212,14 +218,18 @@ export function startSiteMotion(root, reduced) {
       if (y > 140 && y - directionY > 6) hidden = true;
       else if (y - directionY < -6 || y < 140) hidden = false;
       if (Math.abs(y - directionY) > 6) directionY = y;
-      if (header)
+      if (header) {
         header.style.transform = hidden ? "translateY(-110%)" : "translateY(0)";
+        header.style.background =
+          y > vh * 0.9 ? "rgba(28,26,23,.92)" : "rgba(28,26,23,.55)";
+      }
       const hp = clamp(y / vh);
       if (hero) {
         hero.style.transform = `translateY(${hp * 90}px)`;
-        hero.style.opacity = String(1 - hp);
+        hero.style.opacity = String(Math.max(0, 1 - hp * 1.1));
       }
-      if (heroImage) heroImage.style.transform = `translateY(${-hp * 110}px)`;
+      if (heroImage)
+        heroImage.style.transform = `translateY(${-hp * 70}px) scale(${1 + hp * 0.06})`;
       parallax.forEach((el, i) => {
         const r = parallaxRects[i];
         if (r.bottom >= 0 && r.top <= vh)
@@ -243,21 +253,49 @@ export function startSiteMotion(root, reduced) {
             i === panels.length - 1
               ? 0
               : clamp((-stackRect.top - offset) / panelHeights[i]);
-          el.style.transform = `scale(${1 - p * 0.07})`;
-          el.style.filter = `brightness(${1 - p * 0.28})`;
+          el.style.transform = `scale(${1 - p * 0.07}) translateY(${-p * 24}px)`;
+          el.style.filter = "none";
+          const shade = el.querySelector("[data-shade]");
+          if (shade) shade.style.opacity = String(p * 0.5);
           offset += panelHeights[i];
         });
       }
       if (stripRect && track && vw > 768) {
         const max = Math.max(0, trackWidth - vw),
-          p = clamp(-stripRect.top / Math.max(1, max)),
+          p = clamp(
+            (smoothY - y - stripRect.top) / Math.max(1, stripRect.height - vh),
+          ),
           x = -max * p;
-        // Size the sticky travel to the actual horizontal overflow: one pixel per pixel.
-        const height = `${vh + max}px`;
-        if (strip.style.height !== height) strip.style.height = height;
         track.style.transform = `translateX(${x}px)`;
         if (rule) rule.style.transform = `scaleX(${p})`;
         count(counter, nearest(cardCenters, vw / 2 - x));
+      }
+      if (reelRect && reelTrack && vw > 768) {
+        const p = clamp(
+          (smoothY - y - reelRect.top) / Math.max(1, reelRect.height - vh),
+        );
+        const tx = -p * Math.max(0, reelWidth - vw);
+        reelTrack.style.transform = `translateX(${tx}px)`;
+        if (reelRule) reelRule.style.transform = `scaleX(${p})`;
+        if (reelGhost)
+          reelGhost.style.transform = `translate(${4 - p * 18}vw,-50%)`;
+        const enter = clamp((vh * 0.6 - reelRect.top) / (vh * 0.9));
+        const skew = Math.max(-1, Math.min(1, velocity / 40));
+        reelCards.forEach((card, i) => {
+          const distance = (reelCenters[i] + tx - vw * 0.5) / vw;
+          const edge = Math.min(1, Math.abs(distance));
+          const entry = 1 - Math.pow(1 - clamp(enter * 1.6 - i * 0.12), 3);
+          card.style.transform = `perspective(1400px) rotateY(${-distance * 18 - skew * 5}deg) rotateX(${(1 - entry) * 14}deg) translateY(${edge * 30 + (1 - entry) * 160}px) scale(${1 - edge * 0.16})`;
+          card.style.opacity = String(entry * (1 - edge * 0.5));
+          card.style.zIndex = String(10 - Math.round(edge * 9));
+          const play = card.querySelector("[data-playring]");
+          if (play) {
+            play.style.transform = `scale(${1 + (1 - edge) * 0.35})`;
+            play.style.background =
+              edge < 0.18 ? "rgba(191,29,26,.85)" : "rgba(15,14,13,.35)";
+          }
+        });
+        count(reelCount, nearest(reelCenters, vw * 0.5 - tx));
       }
       tickers.forEach((t, i) => {
         const half = tickerWidths[i];
@@ -315,7 +353,7 @@ export function startSiteMotion(root, reduced) {
       if (rule) rule.style.transform = `scaleX(${clamp(p)})`;
       count(counter, nearest(cardCenters, trackScroll + vw / 2));
     }
-    if (reelTrack) {
+    if (reelTrack && (vw <= 768 || reduced)) {
       if (reelRule)
         reelRule.style.transform = `scaleX(${clamp(reelScroll / Math.max(1, reelWidth - reelClient))})`;
       count(reelCount, nearest(reelCenters, reelScroll + reelClient / 2));
