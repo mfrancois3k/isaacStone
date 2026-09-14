@@ -323,7 +323,7 @@ export default class DesignPage extends React.Component {
     } else {
       this._inT = setTimeout(() => {
         this.setState({ loaderIn: true, loaderStage: 0 });
-        const steps = [60, 760, 1460, 2160, 2860, 3740];
+        const steps = [60, 910, 1760, 2610, 3460, 5260];
         this._stageTimers = steps.map((delay, index) =>
           setTimeout(() => this.setState({ loaderStage: index + 1 }), delay),
         );
@@ -333,11 +333,11 @@ export default class DesignPage extends React.Component {
         const elapsed = performance.now() - this._t0;
         // Let the craft-focused reveal breathe. The loader is part of the
         // first impression, so it should not flash past once the page is warm.
-        const t = clamp01((elapsed - 180) / 5100);
+        const t = clamp01((elapsed - 180) / 7100);
         const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         const progress = Math.min(
           this._loaded ? 100 : 99,
-          this._loaded && elapsed >= 4900 ? 100 : Math.round(eased * 100),
+          this._loaded && elapsed >= 6900 ? 100 : Math.round(eased * 100),
         );
         if (progress !== this.state.progress) this.setState({ progress });
         if (progress === 100) this.finishLoader();
@@ -697,7 +697,7 @@ export default class DesignPage extends React.Component {
           ? "translateY(0) scale(1)"
           : "translateY(200px)",
       shellClip: s.loaderExiting ? "inset(0 0 100% 0)" : "inset(0 0 0 0)",
-      centerDur: s.expanding ? "0.45s" : "0.7s",
+      centerDur: s.expanding ? "0.45s" : "1.6s",
       centerDelay: "0s",
       centerEase: s.expanding
         ? "cubic-bezier(.76,0,.24,1)"
@@ -982,7 +982,7 @@ export default class DesignPage extends React.Component {
                     opacity: v.imageOpacity(1),
                     transform: v.imageShift(1),
                     transition:
-                      "opacity .45s cubic-bezier(.6,.01,-.05,.95) 0s,transform .62s cubic-bezier(.6,.01,-.05,.95) 0s",
+                      "opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s,transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s",
                   }}
                 >
                   <img
@@ -1148,7 +1148,7 @@ export default class DesignPage extends React.Component {
                       transform: v.titleShift,
                       opacity: v.pieceOpacity,
                       transition:
-                        "transform .75s cubic-bezier(.16,1,.3,1) 3.1s,opacity .5s ease 3.1s",
+                        "transform .75s cubic-bezier(.16,1,.3,1) 5.26s,opacity .5s ease 5.26s",
                     }}
                   >
                     {"Tiles"}
@@ -1160,7 +1160,7 @@ export default class DesignPage extends React.Component {
                       transform: v.titleShift,
                       opacity: v.pieceOpacity,
                       transition:
-                        "transform .75s cubic-bezier(.16,1,.3,1) 3.22s,opacity .5s ease 3.22s",
+                        "transform .75s cubic-bezier(.16,1,.3,1) 5.38s,opacity .5s ease 5.38s",
                     }}
                   >
                     {"Tailored"}
@@ -1172,7 +1172,7 @@ export default class DesignPage extends React.Component {
                       transform: v.titleShift,
                       opacity: v.pieceOpacity,
                       transition:
-                        "transform .75s cubic-bezier(.16,1,.3,1) 3.34s,opacity .5s ease 3.34s",
+                        "transform .75s cubic-bezier(.16,1,.3,1) 5.5s,opacity .5s ease 5.5s",
                     }}
                   >
                     {"to"}
@@ -1184,7 +1184,7 @@ export default class DesignPage extends React.Component {
                       transform: v.titleShift,
                       opacity: v.pieceOpacity,
                       transition:
-                        "transform .75s cubic-bezier(.16,1,.3,1) 3.46s,opacity .5s ease 3.46s",
+                        "transform .75s cubic-bezier(.16,1,.3,1) 5.62s,opacity .5s ease 5.62s",
                     }}
                   >
                     {"Your"}
@@ -1196,7 +1196,7 @@ export default class DesignPage extends React.Component {
                       transform: v.titleShift,
                       opacity: v.pieceOpacity,
                       transition:
-                        "transform .75s cubic-bezier(.16,1,.3,1) 3.58s,opacity .5s ease 3.58s",
+                        "transform .75s cubic-bezier(.16,1,.3,1) 5.74s,opacity .5s ease 5.74s",
                     }}
                   >
                     {"Home"}
@@ -1215,7 +1215,7 @@ export default class DesignPage extends React.Component {
                     letterSpacing: "1.6px",
                     color: "#6b6459",
                     opacity: v.pieceOpacity,
-                    transition: "opacity .6s ease 3.75s",
+                    transition: "opacity .6s ease 5.95s",
                     pointerEvents: "none",
                   }}
                 >
