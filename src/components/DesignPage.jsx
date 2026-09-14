@@ -56,7 +56,7 @@ const QUESTIONS = [
   "Which town or ZIP code is the project in?",
   "What name should the team use?",
   "What phone number should the team call?",
-  "Would you prefer a call or a text?",
+  "What email should receive your confirmation?",
 ];
 const FIELDS = [
   "room",
