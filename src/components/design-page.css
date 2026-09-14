@@ -932,3 +932,84 @@ select {
 [data-mobbar][data-agent-open] {
   display: none !important;
 }
+
+/* Motion hierarchy: quick feedback for controls, measured motion for imagery. */
+:root {
+  --motion-fast: 180ms;
+  --motion-section: 700ms;
+  --motion-hero: 1600ms;
+  --motion-ease: cubic-bezier(.16, 1, .3, 1);
+}
+
+[data-topnav] a {
+  position: relative;
+  padding: 7px 0;
+}
+[data-topnav] a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1px;
+  height: 1px;
+  background: #d9a58f;
+  transform: scaleX(0);
+  transform-origin: right center;
+  transition: transform var(--motion-fast) var(--motion-ease);
+}
+#isv-header [data-menubtn],
+#isv-header a[href^="tel"],
+[data-mobbar] a {
+  transition: transform var(--motion-fast) var(--motion-ease),
+    box-shadow var(--motion-fast) var(--motion-ease),
+    background-color var(--motion-fast) ease;
+}
+input.design-effect-40,
+input.design-effect-41,
+input.design-effect-42,
+textarea.design-effect-43 {
+  transition: border-color var(--motion-fast) var(--motion-ease),
+    box-shadow var(--motion-fast) var(--motion-ease);
+}
+input.design-effect-40:focus-visible,
+input.design-effect-41:focus-visible,
+input.design-effect-42:focus-visible,
+textarea.design-effect-43:focus-visible {
+  box-shadow: 0 8px 0 -7px rgba(161, 86, 63, .55);
+}
+@media (hover: hover) and (pointer: fine) {
+  [data-topnav] a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+  #isv-header [data-menubtn]:hover,
+  #isv-header a[href^="tel"]:hover,
+  [data-mobbar] a:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 22px rgba(0, 0, 0, .18);
+  }
+  [data-htrack] figure > div img,
+  [data-reelcard] img {
+    transition: transform var(--motion-section) var(--motion-ease),
+      filter var(--motion-section) var(--motion-ease);
+  }
+  [data-htrack] figure:hover > div img,
+  [data-reelcard]:hover img {
+    transform: scale(1.035);
+    filter: saturate(1.08) contrast(1.03);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-topnav] a::after,
+  #isv-header [data-menubtn],
+  #isv-header a[href^="tel"],
+  [data-mobbar] a,
+  [data-htrack] figure > div img,
+  [data-reelcard] img,
+  input.design-effect-40,
+  input.design-effect-41,
+  input.design-effect-42,
+  textarea.design-effect-43 {
+    transition: none !important;
+  }
+}
