@@ -18,6 +18,11 @@ interface Call {
   inputMeter?: AnalyserNode;
   outputMeter?: AnalyserNode;
 }
+interface VoiceSession {
+  token: string;
+  expiresAt: number;
+  agentId: string;
+}
 
 export function useVoiceAgent(onTranscript: Transcript) {
   const [state, setState] = useState<VoiceState>('idle');
@@ -26,6 +31,8 @@ export function useVoiceAgent(onTranscript: Transcript) {
   const [muted, setMuted] = useState(false);
   const [supported, setSupported] = useState(true);
   const callRef = useRef<Call | null>(null);
+  const preparedSession = useRef<VoiceSession | null>(null);
+  const preparingSession = useRef<Promise<VoiceSession> | null>(null);
   const callback = useRef(onTranscript);
   callback.current = onTranscript;
   const mutedRef = useRef(false);
@@ -51,10 +58,44 @@ export function useVoiceAgent(onTranscript: Transcript) {
     return stop;
   }, [stop]);
 
+  const prepare = useCallback(async (): Promise<VoiceSession> => {
+    const cached = preparedSession.current;
+    // xAI secrets are intentionally short lived. Reuse one only when it still
+    // has enough life for a visitor to decide to start speaking.
+    if (cached && cached.expiresAt * 1000 - Date.now() > 15_000) return cached;
+    if (preparingSession.current) return preparingSession.current;
+
+    const request = fetch('/api/voice-session', {
+      method: 'POST',
+      signal: AbortSignal.timeout(10_000),
+    }).then(async (response) => {
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || typeof data.token !== 'string' || typeof data.agentId !== 'string') {
+        throw new Error(typeof data?.error === 'string' ? data.error : 'Voice could not connect. Please try again.');
+      }
+      const session: VoiceSession = {
+        token: data.token,
+        agentId: data.agentId,
+        expiresAt: Number(data.expiresAt) || Math.floor(Date.now() / 1000) + 30,
+      };
+      preparedSession.current = session;
+      return session;
+    });
+    preparingSession.current = request;
+    try {
+      return await request;
+    } finally {
+      if (preparingSession.current === request) preparingSession.current = null;
+    }
+  }, []);
+
   const start = useCallback(async () => {
     if (callRef.current) return;
     const call: Call = { cancelled: false, ready: false };
     callRef.current = call;
+    // Start token minting in parallel with microphone setup. If Wammy was
+    // opened moments ago this resolves from the warmed one instead.
+    const sessionPromise = prepare();
     setError(''); setNotice(''); setState('connecting');
     const fail = (message: string) => {
       if (callRef.current !== call) return;
@@ -79,10 +120,8 @@ export function useVoiceAgent(onTranscript: Transcript) {
       call.stream = stream;
       await context.audioWorklet.addModule('/audio/voice-capture.js');
       if (call.cancelled) return;
-      const response = await fetch('/api/voice-session', { method: 'POST', signal: AbortSignal.timeout(15_000) });
-      const data = await response.json();
+      const data = await sessionPromise;
       if (call.cancelled) return;
-      if (!response.ok) throw new Error(data.error || 'Voice could not connect. Please try again.');
       const socket = new WebSocket(`wss://api.x.ai/v1/realtime?agent_id=${encodeURIComponent(data.agentId)}`, [`xai-client-secret.${data.token}`]);
       call.socket = socket;
       clearTimeout(call.timeout);
@@ -102,7 +141,7 @@ export function useVoiceAgent(onTranscript: Transcript) {
             configured = true;
             send({ type: 'session.update', session: {
               // End a normal turn promptly; keep the louder activation threshold for speakers.
-              turn_detection: { type: 'server_vad', silence_duration_ms: 500, threshold: 0.85 },
+              turn_detection: { type: 'server_vad', silence_duration_ms: 350, threshold: 0.85 },
               audio: { input: { format: { type: 'audio/pcm', rate: context.sampleRate } }, output: { format: { type: 'audio/pcm', rate: 24000 } } },
             } });
           } else if (!call.ready && event.session?.audio?.input?.format) {
@@ -168,7 +207,7 @@ export function useVoiceAgent(onTranscript: Transcript) {
       const denied = cause instanceof DOMException && ['NotAllowedError', 'PermissionDeniedError'].includes(cause.name);
       fail(denied ? 'Microphone access was declined. Allow it to talk, or type below.' : cause instanceof Error ? cause.message : 'Voice could not start. Please type below.');
     }
-  }, [stop]);
+  }, [prepare, stop]);
 
   const toggleMute = useCallback(() => {
     mutedRef.current = !mutedRef.current;
@@ -191,5 +230,5 @@ export function useVoiceAgent(onTranscript: Transcript) {
     meter.getFloatTimeDomainData(meterSamples.current);
     return Math.min(1, Math.sqrt(meterSamples.current.reduce((sum, value) => sum + value * value, 0) / 256) * 5);
   }, []);
-  return { state, error, notice, muted, supported, start, stop, toggleMute, sendText, getAudioLevel, active: state !== 'idle' };
+  return { state, error, notice, muted, supported, prepare, start, stop, toggleMute, sendText, getAudioLevel, active: state !== 'idle' };
 }
