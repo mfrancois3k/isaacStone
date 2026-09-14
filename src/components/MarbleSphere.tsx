@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { followVoiceLevel } from "./marble-motion";
+import { followVoiceLevel, getMarbleVisual } from "./marble-motion";
 
 type State = "idle" | "connecting" | "listening" | "thinking" | "speaking" | "paused";
 const frames = ["idle", "listening", "thinking", "speaking", "paused"] as const;
@@ -14,6 +14,7 @@ export function MarbleSphere({state,getAudioLevel,onActivate,label,disabled}: {
   const sculpture=useRef<HTMLSpanElement>(null);
   const glow=useRef<HTMLSpanElement>(null);
   const halo=useRef<HTMLSpanElement>(null);
+  const signals=useRef<Array<HTMLSpanElement | null>>([]);
   const latest=useRef({state,getAudioLevel});
   latest.current={state,getAudioLevel};
   useEffect(()=>{
@@ -37,9 +38,17 @@ export function MarbleSphere({state,getAudioLevel,onActivate,label,disabled}: {
       const active=state==='speaking'||state==='listening';
       const sample=active ? (getAudioLevel?.(state==='speaking')||0) : 0;
       level=followVoiceLevel(level,sample,last?time-last:16);last=time;
-      orb.style.transform=`scale(${1+level*.115}) rotate(${level*2.5}deg)`;
-      if(glow.current){glow.current.style.opacity=String((active ? .35 : .13)+level*.65);glow.current.style.transform=`scale(${1+level*.3})`;}
-      if(halo.current){halo.current.style.opacity=String(active ? .12+level*.55 : 0);halo.current.style.transform=`scale(${.88+level*.28})`;}
+      const visual=getMarbleVisual(state,level);
+      orb.style.transform=`translate3d(0,${visual.lift}px,0) scale(${visual.scale}) rotateX(${visual.tiltX}deg) rotateY(${visual.tiltY}deg)`;
+      if(glow.current){glow.current.style.opacity=String(visual.glow);glow.current.style.transform=`translate3d(0,0,0) scale(${1+visual.energy*.34})`;}
+      if(halo.current){halo.current.style.opacity=String(visual.halo);halo.current.style.transform=`translate3d(0,0,0) scale(${.88+visual.energy*.34})`;}
+      signals.current.forEach((ring,index)=>{
+        if(!ring)return;
+        const depth=-12-index*6;
+        ring.style.opacity=String(visual.energy*(.28-index*.065));
+        ring.style.transform=`translate3d(0,0,${depth}px) rotate(${index===1?28:index===2?-24:0}deg) scale(${.78+visual.energy*(.34+index*.07)})`;
+      });
+      root.style.setProperty('--marble-energy',visual.energy.toFixed(3));
       root.dataset.audioLevel=level.toFixed(3);
       raf=requestAnimationFrame(tick);
     };
@@ -47,7 +56,7 @@ export function MarbleSphere({state,getAudioLevel,onActivate,label,disabled}: {
       cancelAnimationFrame(raf);last=0;
       if(reduced.matches||document.hidden){
         level=0;gsap.killTweensOf(attract);gsap.set(attract,{clearProps:'transform'});
-        orb.style.transform='none';if(glow.current)glow.current.style.opacity='0';if(halo.current)halo.current.style.opacity='0';
+        orb.style.transform='none';root.style.setProperty('--marble-energy','0');signals.current.forEach(ring=>{if(ring){ring.style.opacity='0';ring.style.transform='none';}});if(glow.current)glow.current.style.opacity='0';if(halo.current)halo.current.style.opacity='0';
       } else raf=requestAnimationFrame(tick);
     };
     root.addEventListener('pointermove',move);root.addEventListener('pointerleave',reset);
@@ -62,6 +71,7 @@ export function MarbleSphere({state,getAudioLevel,onActivate,label,disabled}: {
         <span className="marble-float">
           <span ref={glow} className="marble-audio-glow"/>
           <span ref={halo} className="marble-audio-halo"/>
+          <span className="marble-signal" aria-hidden="true">{[0,1,2].map(index=><i key={index} ref={element=>{signals.current[index]=element;}}/>)}</span>
           <span ref={sculpture} className="marble-sculpture">
             {frames.map(frame=><img key={frame} src={`/assets/wamy/${frame}.png`} alt="" width={1254} height={1254} style={{opacity:frame===active?1:0}}/>)}
           </span>

@@ -319,19 +319,24 @@ h1[tabindex="-1"]:focus {
 .marble-hit{position:absolute;inset:0;width:100%;height:100%;padding:0;background:none;border:0;border-radius:50%;cursor:pointer;touch-action:manipulation;}
 .marble-hit:disabled{cursor:wait;}
 .marble-hit:focus-visible{outline:2px solid #a1563f;outline-offset:2px;}
+.marble-interactive{--marble-energy:0;perspective:720px;isolation:isolate;}
 .marble-magnetic,.marble-float,.marble-sculpture{position:absolute;inset:0;display:block;pointer-events:none;}
 .marble-float{animation:marble-hover 4.8s ease-in-out infinite;}
-.marble-sculpture{will-change:transform;}
-.marble-sculpture>img{position:absolute;left:0;top:-6%;width:100%;height:auto;object-fit:contain;transition:opacity .25s ease;}
+.marble-sculpture{will-change:transform;transform-style:preserve-3d;}
+.marble-sculpture>img{position:absolute;left:0;top:-6%;width:100%;height:auto;object-fit:contain;backface-visibility:hidden;transition:opacity .25s ease;}
 .marble-audio-glow{position:absolute;inset:3%;border-radius:50%;background:radial-gradient(ellipse,#d8a77c80,transparent 68%);opacity:.13;pointer-events:none;}
 .marble-audio-halo{position:absolute;left:13%;top:8%;width:74%;aspect-ratio:1;border:1px solid #bc7b5655;border-radius:50%;opacity:0;pointer-events:none;}
+.marble-signal{position:absolute;inset:11%;display:grid;place-items:center;pointer-events:none;transform-style:preserve-3d;}
+.marble-signal i{position:absolute;width:42%;aspect-ratio:1;border:1px solid #bc7b5666;border-radius:50%;opacity:0;will-change:transform,opacity;}
+.marble-signal i:nth-child(2){width:66%;border-color:#f2dcc177;}
+.marble-signal i:nth-child(3){width:88%;border-color:#a1563f66;}
 .marble-shadow{position:absolute;left:28%;bottom:5%;width:44%;height:7%;border-radius:50%;background:#40342930;filter:blur(8px);animation:marble-shadow 4.8s ease-in-out infinite;pointer-events:none;}
 .marble-interactive[data-state="paused"] .marble-float,.marble-interactive[data-state="paused"] .marble-shadow{animation-play-state:paused;}
 @keyframes marble-hover{0%,100%{transform:translateY(3px) rotate(-1deg)}50%{transform:translateY(-7px) rotate(1deg)}}
 @keyframes marble-shadow{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(.84);opacity:.35}}
 .isaac-heading-line-mask{padding-bottom:.12em;margin-bottom:-.12em;}
 @media(hover:hover) and (pointer:fine){[data-htrack] figure img{transition:transform .6s cubic-bezier(.16,1,.3,1);}[data-htrack] figure:hover img{transform:scale(1.035);}}
-@media(prefers-reduced-motion:reduce){.marble-float,.marble-shadow{animation:none;transform:none;}.marble-audio-glow,.marble-audio-halo{opacity:0!important;}.marble-sculpture,.marble-magnetic{transform:none!important;}[data-htrack] figure:hover img{transform:none!important;}}
+@media(prefers-reduced-motion:reduce){.marble-float,.marble-shadow{animation:none;transform:none;}.marble-audio-glow,.marble-audio-halo,.marble-signal{opacity:0!important;}.marble-sculpture,.marble-magnetic{transform:none!important;}[data-htrack] figure:hover img{transform:none!important;}}
 
 /* Shared interaction finish: stable hit areas, explicit focus and honest draft feedback. */
 #contact, #reviews { position: relative !important; top: auto !important; }

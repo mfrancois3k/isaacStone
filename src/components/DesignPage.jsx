@@ -1,6 +1,3 @@
-Warning: truncated output (original token count: 97864)
-Total output lines: 10944
-
 import { startSiteMotion } from "./site-motion";
 import React from "react";
 import { StoneCraftSection, projects } from './ProjectExperience';
@@ -297,26 +294,6 @@ export default class DesignPage extends React.Component {
     };
     window.addEventListener("keydown", this._keys);
     document.body.style.overflow = "hidden";
-    // Derive each plate's delay from its on-screen distance to the composition
-    // centre. This gives the loader a deliberate centre-outward stagger rather
-    // than an arbitrary DOM-order sequence.
-    this._positionLoaderStagger = () => {
-      const collage = document.querySelector("[data-collage]");
-      if (!collage) return;
-      const base = collage.getBoundingClientRect();
-      const originX = base.left + base.width / 2;
-      const originY = base.top + base.height / 2;
-      const pieces = [...collage.querySelectorAll("[data-piece]")];
-      const distances = pieces.map((piece) => {
-        const r = piece.getBoundingClientRect();
-        return Math.hypot(r.left + r.width / 2 - originX, r.top + r.height / 2 - originY);
-      });
-      const furthest = Math.max(...distances, 1);
-      pieces.forEach((piece, index) => {
-        const delay = 90 + Math.round((distances[index] / furthest) * 300);
-        piece.style.setProperty("--loader-delay", `${delay}ms`);
-      });
-    };
 
     this._loaded = document.readyState === "complete";
     this._onLoad = () => {
@@ -343,10 +320,7 @@ export default class DesignPage extends React.Component {
         this.startMotion();
       });
     } else {
-      this._inT = setTimeout(() => {
-        this._positionLoaderStagger();
-        this.setState({ loaderIn: true });
-      }, 20);
+      this._inT = setTimeout(() => this.setState({ loaderIn: true }), 20);
       this._t0 = performance.now();
       this._tick = setInterval(() => {
         const elapsed = performance.now() - this._t0;
@@ -994,7 +968,7 @@ export default class DesignPage extends React.Component {
                     opacity: v.pieceOpacity,
                     transform: v.pieceShift,
                     transition:
-                      "opacity .8s cubic-bezier(.16,1,.3,1) var(--loader-delay, .1s),transform 1s cubic-bezier(.16,1,.3,1) var(--loader-delay, .1s)",
+                      "opacity .8s cubic-bezier(.16,1,.3,1) .1s,transform 1s cubic-bezier(.16,1,.3,1) .1s",
                   }}
                 >
                   <img
@@ -1024,7 +998,7 @@ export default class DesignPage extends React.Component {
                     opacity: v.pieceOpacity,
                     transform: v.pieceShift,
                     transition:
-                      "opacity .8s cubic-bezier(.16,1,.3,1) var(--loader-delay, .28s),transform 1s cubic-bezier(.16,1,.3,1) var(--loader-delay, .28s)",
+                      "opacity .8s cubic-bezier(.16,1,.3,1) .28s,transform 1s cubic-bezier(.16,1,.3,1) .28s",
                   }}
                 >
                   <img
@@ -1054,7 +1028,7 @@ export default class DesignPage extends React.Component {
                     opacity: v.pieceOpacity,
                     transform: v.pieceShift,
                     transition:
-                      "opacity .8s cubic-bezier(.16,1,.3,1) var(--loader-delay, .45s),transform 1s cubic-bezier(.16,1,.3,1) var(--loader-delay, .45s)",
+                      "opacity .8s cubic-bezier(.16,1,.3,1) .45s,transform 1s cubic-bezier(.16,1,.3,1) .45s",
                   }}
                 >
                   <img
@@ -1084,7 +1058,7 @@ export default class DesignPage extends React.Component {
                     opacity: v.pieceOpacity,
                     transform: v.pieceShift,
                     transition:
-                      "opacity .8s cubic-bezier(.16,1,.3,1) var(--loader-delay, .62s),transform 1s cubic-bezier(.16,1,.3,1) var(--loader-delay, .62s)",
+                      "opacity .8s cubic-bezier(.16,1,.3,1) .62s,transform 1s cubic-bezier(.16,1,.3,1) .62s",
                   }}
                 >
                   <img
@@ -1759,7 +1733,7510 @@ export default class DesignPage extends React.Component {
                 scrollSnapType: "x mandatory",
                 margin: "0 -8px",
                 padding: "0 8px 6px",
-                scrollbarWidth: …67864 tokens truncated…          <span
+                scrollbarWidth: "none",
+              }}
+            >
+              <a
+                href={"#work"}
+                style={{
+                  flex: "none",
+                  width: "150px",
+                  aspectRatio: "4/5",
+                  borderRadius: "10px",
+                  overflow: "hidden",
+                  background: "#2a2620",
+                  scrollSnapAlign: "start",
+                  position: "relative",
+                }}
+              >
+                <img
+                  id={"isv2-ms-0"}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  src={"/assets/design/img9.jpg"}
+                  alt={"Marble vessel sinks"}
+                  decoding={"async"}
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    left: "8px",
+                    bottom: "8px",
+                    maxWidth: "calc(100% - 16px)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "3px",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <span
+                    style={{
+                      alignSelf: "flex-start",
+                      padding: "4px 7px",
+                      borderRadius: "5px",
+                      background: "#a1563f",
+                      color: "#fff",
+                      font: "700 8px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.2px",
+                    }}
+                  >
+                    {"SELECTED WORK"}
+                  </span>
+                  <span
+                    style={{
+                      alignSelf: "flex-start",
+                      padding: "5px 8px",
+                      borderRadius: "6px",
+                      background: "rgba(15,14,13,.78)",
+                      color: "#f6efdd",
+                      font: "400 9px 'JetBrains Mono',monospace",
+                      letterSpacing: "1px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {"Marble vessel sinks"}
+                  </span>
+                </span>
+              </a>
+              <a
+                href={"#work"}
+                style={{
+                  flex: "none",
+                  width: "150px",
+                  aspectRatio: "4/5",
+                  borderRadius: "10px",
+                  overflow: "hidden",
+                  background: "#2a2620",
+                  scrollSnapAlign: "start",
+                  position: "relative",
+                }}
+              >
+                <img
+                  id={"isv2-ms-1"}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  src={"/assets/design/img7.jpg"}
+                  alt={"Marble alcove"}
+                  decoding={"async"}
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    left: "8px",
+                    bottom: "8px",
+                    maxWidth: "calc(100% - 16px)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "3px",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <span
+                    style={{
+                      alignSelf: "flex-start",
+                      padding: "4px 7px",
+                      borderRadius: "5px",
+                      background: "#a1563f",
+                      color: "#fff",
+                      font: "700 8px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.2px",
+                    }}
+                  >
+                    {"SELECTED WORK"}
+                  </span>
+                  <span
+                    style={{
+                      alignSelf: "flex-start",
+                      padding: "5px 8px",
+                      borderRadius: "6px",
+                      background: "rgba(15,14,13,.78)",
+                      color: "#f6efdd",
+                      font: "400 9px 'JetBrains Mono',monospace",
+                      letterSpacing: "1px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {"Marble alcove"}
+                  </span>
+                </span>
+              </a>
+              <a
+                href={"#work"}
+                style={{
+                  flex: "none",
+                  width: "150px",
+                  aspectRatio: "4/5",
+                  borderRadius: "10px",
+                  overflow: "hidden",
+                  background: "#2a2620",
+                  scrollSnapAlign: "start",
+                  position: "relative",
+                }}
+              >
+                <img
+                  id={"isv2-ms-2"}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  src={"/assets/design/img6.jpg"}
+                  alt={"Granite countertop"}
+                  decoding={"async"}
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    left: "8px",
+                    bottom: "8px",
+                    maxWidth: "calc(100% - 16px)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "3px",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <span
+                    style={{
+                      alignSelf: "flex-start",
+                      padding: "4px 7px",
+                      borderRadius: "5px",
+                      background: "#a1563f",
+                      color: "#fff",
+                      font: "700 8px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.2px",
+                    }}
+                  >
+                    {"SELECTED WORK"}
+                  </span>
+                  <span
+                    style={{
+                      alignSelf: "flex-start",
+                      padding: "5px 8px",
+                      borderRadius: "6px",
+                      background: "rgba(15,14,13,.78)",
+                      color: "#f6efdd",
+                      font: "400 9px 'JetBrains Mono',monospace",
+                      letterSpacing: "1px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {"Granite countertop"}
+                  </span>
+                </span>
+              </a>
+              <a
+                href={"#work"}
+                style={{
+                  flex: "none",
+                  width: "150px",
+                  aspectRatio: "4/5",
+                  borderRadius: "10px",
+                  overflow: "hidden",
+                  background: "#2a2620",
+                  scrollSnapAlign: "start",
+                  position: "relative",
+                }}
+              >
+                <img
+                  id={"isv2-ms-3"}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  src={"/assets/design/img15.jpg"}
+                  alt={"Black marble bath"}
+                  decoding={"async"}
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    left: "8px",
+                    bottom: "8px",
+                    maxWidth: "calc(100% - 16px)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "3px",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <span
+                    style={{
+                      alignSelf: "flex-start",
+                      padding: "4px 7px",
+                      borderRadius: "5px",
+                      background: "rgba(246,239,221,.9)",
+                      color: "#2a2825",
+                      font: "700 8px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.2px",
+                    }}
+                  >
+                    {"DESIGN INSPIRATION"}
+                  </span>
+                  <span
+                    style={{
+                      alignSelf: "flex-start",
+                      padding: "5px 8px",
+                      borderRadius: "6px",
+                      background: "rgba(15,14,13,.78)",
+                      color: "#f6efdd",
+                      font: "400 9px 'JetBrains Mono',monospace",
+                      letterSpacing: "1px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {"Black marble bath"}
+                  </span>
+                </span>
+              </a>
+              <a
+                href={"#work"}
+                style={{
+                  flex: "none",
+                  width: "150px",
+                  aspectRatio: "4/5",
+                  borderRadius: "10px",
+                  overflow: "hidden",
+                  background: "#2a2620",
+                  scrollSnapAlign: "start",
+                  position: "relative",
+                }}
+              >
+                <img
+                  id={"isv2-ms-4"}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  src={"/assets/design/img16.jpg"}
+                  alt={"Calacatta gold bath"}
+                  decoding={"async"}
+                />
+                <span
+                  style={{
+                    position: "absolute",
+                    left: "8px",
+                    bottom: "8px",
+                    maxWidth: "calc(100% - 16px)",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "3px",
+                    pointerEvents: "none",
+                  }}
+                >
+                  <span
+                    style={{
+                      alignSelf: "flex-start",
+                      padding: "4px 7px",
+                      borderRadius: "5px",
+                      background: "rgba(246,239,221,.9)",
+                      color: "#2a2825",
+                      font: "700 8px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.2px",
+                    }}
+                  >
+                    {"DESIGN INSPIRATION"}
+                  </span>
+                  <span
+                    style={{
+                      alignSelf: "flex-start",
+                      padding: "5px 8px",
+                      borderRadius: "6px",
+                      background: "rgba(15,14,13,.78)",
+                      color: "#f6efdd",
+                      font: "400 9px 'JetBrains Mono',monospace",
+                      letterSpacing: "1px",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {"Calacatta gold bath"}
+                  </span>
+                </span>
+              </a>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "12px",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "12px" }}>
+                <a
+                  href={"#contact"}
+                  data-cur={"GO"}
+                  onMouseMove={v.magnet}
+                  onMouseLeave={v.unmagnet}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "16px 26px",
+                    borderRadius: "999px",
+                    background: "#a1563f",
+                    color: "#fff",
+                    font: "700 16px 'Source Sans 3',sans-serif",
+                    minHeight: "52px",
+                    textDecoration: "none",
+                    transition: "transform .4s cubic-bezier(.16,1,.3,1)",
+                  }}
+                ><span className="magnetic-face">
+                  {"Request an on-site estimate"}
+                </span></a>
+                <a
+                  href={"tel:+16315305883"}
+                  data-cur={"CALL"}
+                  onMouseMove={v.magnet}
+                  onMouseLeave={v.unmagnet}
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "16px 26px",
+                    borderRadius: "999px",
+                    border: "1px solid #6b6459",
+                    color: "#f6efdd",
+                    font: "700 16px 'Source Sans 3',sans-serif",
+                    minHeight: "52px",
+                    textDecoration: "none",
+                    transition: "transform .4s cubic-bezier(.16,1,.3,1)",
+                  }}
+                ><span className="magnetic-face">
+                  {"Call (631) 530-5883"}
+                </span></a>
+              </div>
+              <a
+                href={"https://www.instagram.com/jafettile____com/"}
+                target={"_blank"}
+                rel={"noopener noreferrer"}
+                data-cur={"OPEN"}
+                style={{
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.6px",
+                  color: "#8d857a",
+                  textDecoration: "none",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                {"INSTAGRAM ↗"}
+              </a>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "8px 20px",
+                font: "400 10px 'JetBrains Mono',monospace",
+                letterSpacing: "1.6px",
+                color: "#8d857a",
+                borderTop: "1px solid #322e28",
+                paddingTop: "16px",
+                marginTop: "-16px",
+              }}
+            >
+              <span>{"DETAILED PLANNING"}</span>
+              <span>{"CAREFUL INSTALLATION"}</span>
+              <span>{"CLEAR WRITTEN ESTIMATES"}</span>
+            </div>
+            <p
+              style={{
+                margin: "-10px 0 0",
+                font: "400 15px/1.5 'Source Sans 3',sans-serif",
+                color: "#a89f92",
+              }}
+            >
+              {
+                "Estimates are written and itemized before work begins, and changes are discussed before additional work proceeds. "
+              }
+              <a href={"#work"} style={{ color: "#f6efdd" }}>
+                {"View selected work →"}
+              </a>
+            </p>
+          </div>
+          <div
+            data-rv={""}
+            data-hero-img={""}
+            data-cur={"VIEW"}
+            style={{
+              position: "relative",
+              borderRadius: "18px",
+              overflow: "hidden",
+              background: "#2a2825",
+              minHeight: "min(78vh,760px)",
+              isolation: "isolate",
+            }}
+          >
+            <div
+              style={{
+                position: "absolute",
+                inset: "0",
+                display: "flex",
+                gap: "10px",
+                padding: "0 10px",
+                alignItems: "flex-start",
+              }}
+            >
+              <div
+                data-vcol={""}
+                style={{
+                  flex: "1",
+                  minWidth: "0",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  marginTop: "0vh",
+                  animation: "vscroll3 70s linear infinite",
+                  willChange: "transform",
+                }}
+                className={"design-effect-1"}
+              >
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "4/5",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-2"}
+                >
+                  <img
+                    id={"isv2-vg-a0"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img9.jpg"}
+                    alt={"Marble vessel sinks · completed"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Marble vessel sinks · completed"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "1/1",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-3"}
+                >
+                  <img
+                    id={"isv2-vg-a1"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img15.jpg"}
+                    alt={"Black marble bath"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Black marble bath"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "3/4",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-4"}
+                >
+                  <img
+                    id={"isv2-vg-a2"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img7.jpg"}
+                    alt={"Marble alcove · completed"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Marble alcove · completed"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "4/5",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-5"}
+                >
+                  <img
+                    id={"isv2-vg-a3"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img14.jpg"}
+                    alt={"Setting large-format tile"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Setting large-format tile"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "4/5",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-6"}
+                >
+                  <img
+                    id={"isv2-vg-a4"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img9.jpg"}
+                    alt={"Marble vessel sinks · completed"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Marble vessel sinks · completed"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "1/1",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-7"}
+                >
+                  <img
+                    id={"isv2-vg-a5"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img15.jpg"}
+                    alt={"Black marble bath"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Black marble bath"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "3/4",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-8"}
+                >
+                  <img
+                    id={"isv2-vg-a6"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img7.jpg"}
+                    alt={"Marble alcove · completed"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Marble alcove · completed"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "4/5",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-9"}
+                >
+                  <img
+                    id={"isv2-vg-a7"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img14.jpg"}
+                    alt={"Setting large-format tile"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Setting large-format tile"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "4/5",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-10"}
+                >
+                  <img
+                    id={"isv2-vg-a8"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img9.jpg"}
+                    alt={"Marble vessel sinks · completed"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Marble vessel sinks · completed"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "1/1",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-11"}
+                >
+                  <img
+                    id={"isv2-vg-a9"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img15.jpg"}
+                    alt={"Black marble bath"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Black marble bath"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "3/4",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-12"}
+                >
+                  <img
+                    id={"isv2-vg-a10"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img7.jpg"}
+                    alt={"Marble alcove · completed"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Marble alcove · completed"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "4/5",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-13"}
+                >
+                  <img
+                    id={"isv2-vg-a11"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img14.jpg"}
+                    alt={"Setting large-format tile"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Setting large-format tile"}
+                    </span>
+                  </span>
+                </a>
+              </div>
+              <div
+                data-vcol={""}
+                style={{
+                  flex: "1",
+                  minWidth: "0",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  marginTop: "-18vh",
+                  animation: "vscroll3 52s linear infinite reverse",
+                  willChange: "transform",
+                }}
+                className={"design-effect-14"}
+              >
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "3/4",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-15"}
+                >
+                  <img
+                    id={"isv2-vg-b0"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img6.jpg"}
+                    alt={"Granite countertop · in progress"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Granite countertop · in progress"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "1/1",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-16"}
+                >
+                  <img
+                    id={"isv2-vg-b1"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img16.jpg"}
+                    alt={"Calacatta gold bath"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Calacatta gold bath"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "2/3",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-17"}
+                >
+                  <img
+                    id={"isv2-vg-b2"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img17.jpg"}
+                    alt={"Marble foyer inlay"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Marble foyer inlay"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "4/5",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-18"}
+                >
+                  <img
+                    id={"isv2-vg-b3"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img5.jpg"}
+                    alt={"The crew, mid-set"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"The crew, mid-set"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "3/4",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-19"}
+                >
+                  <img
+                    id={"isv2-vg-b4"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img6.jpg"}
+                    alt={"Granite countertop · in progress"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Granite countertop · in progress"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "1/1",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-20"}
+                >
+                  <img
+                    id={"isv2-vg-b5"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img16.jpg"}
+                    alt={"Calacatta gold bath"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Calacatta gold bath"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "2/3",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-21"}
+                >
+                  <img
+                    id={"isv2-vg-b6"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img17.jpg"}
+                    alt={"Marble foyer inlay"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Marble foyer inlay"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "4/5",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-22"}
+                >
+                  <img
+                    id={"isv2-vg-b7"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img5.jpg"}
+                    alt={"The crew, mid-set"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"The crew, mid-set"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "3/4",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-23"}
+                >
+                  <img
+                    id={"isv2-vg-b8"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img6.jpg"}
+                    alt={"Granite countertop · in progress"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Granite countertop · in progress"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "1/1",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-24"}
+                >
+                  <img
+                    id={"isv2-vg-b9"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img16.jpg"}
+                    alt={"Calacatta gold bath"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Calacatta gold bath"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "2/3",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-25"}
+                >
+                  <img
+                    id={"isv2-vg-b10"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img17.jpg"}
+                    alt={"Marble foyer inlay"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Marble foyer inlay"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "4/5",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-26"}
+                >
+                  <img
+                    id={"isv2-vg-b11"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img5.jpg"}
+                    alt={"The crew, mid-set"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"The crew, mid-set"}
+                    </span>
+                  </span>
+                </a>
+              </div>
+              <div
+                data-vcol={""}
+                style={{
+                  flex: "1",
+                  minWidth: "0",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "10px",
+                  marginTop: "-40vh",
+                  animation: "vscroll3 88s linear infinite",
+                  willChange: "transform",
+                }}
+                className={"design-effect-27"}
+              >
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "1/1",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-28"}
+                >
+                  <img
+                    id={"isv2-vg-c0"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img24.jpg"}
+                    alt={"Setting stone pavers"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Setting stone pavers"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "4/5",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-29"}
+                >
+                  <img
+                    id={"isv2-vg-c1"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img23.jpg"}
+                    alt={"Cutting tile on site"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Cutting tile on site"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "3/4",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-30"}
+                >
+                  <img
+                    id={"isv2-vg-c2"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img9.jpg"}
+                    alt={"Marble vessel sinks"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Marble vessel sinks"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "2/3",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-31"}
+                >
+                  <img
+                    id={"isv2-vg-c3"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img22.jpg"}
+                    alt={"Hand-set floor"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Hand-set floor"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "1/1",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-32"}
+                >
+                  <img
+                    id={"isv2-vg-c4"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img24.jpg"}
+                    alt={"Setting stone pavers"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Setting stone pavers"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "4/5",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-33"}
+                >
+                  <img
+                    id={"isv2-vg-c5"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img23.jpg"}
+                    alt={"Cutting tile on site"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Cutting tile on site"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "3/4",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-34"}
+                >
+                  <img
+                    id={"isv2-vg-c6"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img9.jpg"}
+                    alt={"Marble vessel sinks"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Marble vessel sinks"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "2/3",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-35"}
+                >
+                  <img
+                    id={"isv2-vg-c7"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img22.jpg"}
+                    alt={"Hand-set floor"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Hand-set floor"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "1/1",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-36"}
+                >
+                  <img
+                    id={"isv2-vg-c8"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img24.jpg"}
+                    alt={"Setting stone pavers"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Setting stone pavers"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "4/5",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-37"}
+                >
+                  <img
+                    id={"isv2-vg-c9"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img23.jpg"}
+                    alt={"Cutting tile on site"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Cutting tile on site"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "3/4",
+                    borderRadius: "10px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-38"}
+                >
+                  <img
+                    id={"isv2-vg-c10"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img9.jpg"}
+                    alt={"Marble vessel sinks"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "#a1563f",
+                        color: "#fff",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"SELECTED WORK"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Marble vessel sinks"}
+                    </span>
+                  </span>
+                </a>
+                <a
+                  href={"#work"}
+                  data-cur={"VIEW"}
+                  style={{
+                    position: "relative",
+                    display: "block",
+                    flex: "none",
+                    aspectRatio: "2/3",
+                    borderRadius: "14px",
+                    overflow: "hidden",
+                    background: "#2a2620",
+                    transition: "transform .7s cubic-bezier(.16,1,.3,1)",
+                  }}
+                  className={"design-effect-39"}
+                >
+                  <img
+                    id={"isv2-vg-c11"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img22.jpg"}
+                    alt={"Hand-set floor"}
+                    decoding={"async"}
+                  />
+                  <span
+                    style={{
+                      position: "absolute",
+                      left: "8px",
+                      bottom: "8px",
+                      maxWidth: "calc(100% - 16px)",
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "3px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "4px 7px",
+                        borderRadius: "5px",
+                        background: "rgba(246,239,221,.9)",
+                        color: "#2a2825",
+                        font: "700 8px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.2px",
+                      }}
+                    >
+                      {"DESIGN INSPIRATION"}
+                    </span>
+                    <span
+                      style={{
+                        alignSelf: "flex-start",
+                        padding: "5px 8px",
+                        borderRadius: "6px",
+                        background: "rgba(15,14,13,.78)",
+                        color: "#f6efdd",
+                        font: "400 9px 'JetBrains Mono',monospace",
+                        letterSpacing: "1px",
+                        textTransform: "uppercase",
+                      }}
+                    >
+                      {"Hand-set floor"}
+                    </span>
+                  </span>
+                </a>
+              </div>
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                inset: "0",
+                background:
+                  "linear-gradient(rgba(26,24,21,.95) 0%,transparent 22%,transparent 58%,rgba(26,24,21,.97) 100%)",
+                pointerEvents: "none",
+              }}
+            ></div>
+            <div
+              style={{
+                position: "absolute",
+                top: "0",
+                left: "0",
+                right: "0",
+                padding: "18px 20px",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "8px",
+                alignItems: "center",
+                justifyContent: "space-between",
+                pointerEvents: "none",
+                color: "#f6efdd",
+              }}
+            >
+              <span style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>
+                <span
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: "999px",
+                    border: "1px solid rgba(246,239,221,.28)",
+                    background: "rgba(26,24,21,.55)",
+                    backdropFilter: "blur(8px)",
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                  }}
+                >
+                  <span data-count={"25"}>{"0"}</span>
+                  {"+ YEARS"}
+                </span>
+                <span
+                  style={{
+                    padding: "8px 12px",
+                    borderRadius: "999px",
+                    border: "1px solid rgba(246,239,221,.28)",
+                    background: "rgba(26,24,21,.55)",
+                    backdropFilter: "blur(8px)",
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                  }}
+                >
+                  <a
+                    href={
+                      "https://www.angi.com/companylist/us/ny/highland-mills/jafet-home-improvement-reviews-1.htm"
+                    }
+                    target={"_blank"}
+                    rel={"noopener noreferrer"}
+                    style={{
+                      color: "#f6efdd",
+                      textDecoration: "none",
+                      pointerEvents: "auto",
+                    }}
+                  >
+                    {"BRENTWOOD, NY"}
+                  </a>
+                </span>
+              </span>
+              <span
+                style={{
+                  padding: "8px 12px",
+                  borderRadius: "999px",
+                  background: "#a1563f",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.6px",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                }}
+              >
+                <span
+                  style={{
+                    width: "7px",
+                    height: "7px",
+                    borderRadius: "50%",
+                    background: "#fff",
+                  }}
+                ></span>
+                {"LIVE FROM THE JOB SITE"}
+              </span>
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                left: "0",
+                right: "0",
+                bottom: "0",
+                padding: "20px",
+                display: "flex",
+                flexWrap: "wrap",
+                alignItems: "flex-end",
+                justifyContent: "space-between",
+                gap: "14px",
+                color: "#f6efdd",
+              }}
+            >
+              <a
+                href={"#work"}
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "5px",
+                  color: "#f6efdd",
+                  textDecoration: "none",
+                }}
+              >
+                <span
+                  style={{
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#d9a58f",
+                  }}
+                >
+                  {"OUR WORK"}
+                </span>
+                <span
+                  style={{
+                    font: "400 clamp(24px,2.2vw,32px)/1 'Instrument Serif',serif",
+                  }}
+                >
+                  {"Our jobs, and the finish we work to"}
+                </span>
+                <span
+                  style={{
+                    display: "flex",
+                    gap: "12px",
+                    font: "400 9px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.2px",
+                    color: "#a89f92",
+                    marginTop: "4px",
+                  }}
+                >
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "2px",
+                        background: "#a1563f",
+                      }}
+                    ></span>
+                    {"OUR WORK"}
+                  </span>
+                  <span
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "5px",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "8px",
+                        height: "8px",
+                        borderRadius: "2px",
+                        background: "#f6efdd",
+                      }}
+                    ></span>
+                    {"DESIGN INSPIRATION"}
+                  </span>
+                </span>
+              </a>
+              <a
+                href={"#work"}
+                data-cur={"VIEW"}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  padding: "12px 18px",
+                  borderRadius: "999px",
+                  border: "1px solid rgba(246,239,221,.45)",
+                  color: "#f6efdd",
+                  textDecoration: "none",
+                  font: "700 14px 'Source Sans 3',sans-serif",
+                }}
+              >
+                {"View selected work →"}
+              </a>
+            </div>
+          </div>
+        </section>
+        <div
+          style={{
+            position: "relative",
+            zIndex: "2",
+            background: "#f6efdd",
+            boxShadow: "0 -40px 80px rgba(0,0,0,.35)",
+          }}
+        >
+          <div
+            style={{
+              background: "#1c1a17",
+              color: "#8d857a",
+              borderTop: "2px solid #a1563f",
+              borderBottom: "1px solid #322e28",
+              overflow: "hidden",
+              padding: "12px 0",
+            }}
+          >
+            <div
+              data-ticker=""
+              style={{
+                display: "flex",
+                width: "max-content",
+                animation: "none",
+                font: "400 11px 'JetBrains Mono',monospace",
+                letterSpacing: "1.8px",
+              }}
+            >
+              <div
+                style={{ display: "flex", gap: "28px", paddingRight: "28px" }}
+              >
+                <span style={{ color: "#a1563f" }}>{"TILE INSTALLATION"}</span>
+                <span>{"//"}</span>
+                <span>{"GRANITE COUNTERTOPS"}</span>
+                <span>{"//"}</span>
+                <span style={{ color: "#f6efdd" }}>{"MARBLE BATHROOMS"}</span>
+                <span>{"//"}</span>
+                <span>{"BRENTWOOD"}</span>
+                <span>{"//"}</span>
+                <span>{"NASSAU COUNTY"}</span>
+                <span>{"//"}</span>
+                <span>{"SUFFOLK COUNTY"}</span>
+                <span>{"//"}</span>
+                <span style={{ color: "#a1563f" }}>{"THE HAMPTONS"}</span>
+                <span>{"//"}</span>
+                <span>{"NEW YORK CITY"}</span>
+                <span>{"//"}</span>
+                <span style={{ color: "#f6efdd" }}>{"LONG ISLAND"}</span>
+                <span>{"//"}</span>
+                <span>{"MON–SAT 7:00–18:30"}</span>
+                <span>{"//"}</span>
+              </div>
+              <div
+                style={{ display: "flex", gap: "28px", paddingRight: "28px" }}
+                aria-hidden={"true"}
+              >
+                <span style={{ color: "#a1563f" }}>{"TILE INSTALLATION"}</span>
+                <span>{"//"}</span>
+                <span>{"GRANITE COUNTERTOPS"}</span>
+                <span>{"//"}</span>
+                <span style={{ color: "#f6efdd" }}>{"MARBLE BATHROOMS"}</span>
+                <span>{"//"}</span>
+                <span>{"BRENTWOOD"}</span>
+                <span>{"//"}</span>
+                <span>{"NASSAU COUNTY"}</span>
+                <span>{"//"}</span>
+                <span>{"SUFFOLK COUNTY"}</span>
+                <span>{"//"}</span>
+                <span style={{ color: "#a1563f" }}>{"THE HAMPTONS"}</span>
+                <span>{"//"}</span>
+                <span>{"NEW YORK CITY"}</span>
+                <span>{"//"}</span>
+                <span>{"MON–SAT 7:00–18:30"}</span>
+                <span>{"//"}</span>
+              </div>
+            </div>
+          </div>
+          <section
+            data-agent={"firm"}
+            style={{
+              maxWidth: "1400px",
+              margin: "0 auto",
+              padding: "clamp(100px,14vw,200px) 28px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "56px",
+            }}
+          >
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                font: "400 10px 'JetBrains Mono',monospace",
+                letterSpacing: "1.8px",
+                color: "#a1563f",
+              }}
+            >
+              <span
+                style={{ width: "26px", height: "2px", background: "#a1563f" }}
+              ></span>
+              {"[ 00 // THE FIRM ]"}
+            </span>
+            <p
+              data-words={""}
+              style={{
+                margin: "0",
+                maxWidth: "26ch",
+                font: "400 clamp(40px,5.8vw,86px)/1.02 'Instrument Serif',serif",
+                letterSpacing: "-0.035em",
+                color: "#2a2825",
+              }}
+            >
+              {
+                "Tile, marble and stone for Long Island homes — planned carefully, installed precisely, finished to belong."
+              }
+            </p>
+            <div
+              data-rv={""}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit,minmax(240px,1fr))",
+                borderTop: "1px solid #2a2825",
+                opacity: "0",
+                transform: "translateY(40px)",
+                transition:
+                  "opacity 1s cubic-bezier(.16,1,.3,1) .15s,transform 1s cubic-bezier(.16,1,.3,1) .15s",
+              }}
+            >
+              <div
+                style={{
+                  padding: "22px 24px 0 0",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}
+              >
+                <span
+                  style={{
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#6b6459",
+                  }}
+                >
+                  {"EXPERIENCE"}
+                </span>
+                <span style={{ font: "400 30px 'Instrument Serif',serif" }}>
+                  <span data-count={"25"}>{"0"}</span>
+                  {"+ years"}
+                </span>
+              </div>
+              <div
+                style={{
+                  padding: "22px 24px 0",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}
+              >
+                <span
+                  style={{
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#6b6459",
+                  }}
+                >
+                  {"OUR FOCUS"}
+                </span>
+                <span style={{ font: "400 30px 'Instrument Serif',serif" }}>
+                  <span>Craft</span>
+                  {" in every detail"}
+                </span>
+              </div>
+              <div
+                style={{
+                  padding: "22px 24px 0",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}
+              >
+                <span
+                  style={{
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#6b6459",
+                  }}
+                >
+                  {"TERRITORY"}
+                </span>
+                <span style={{ font: "400 30px 'Instrument Serif',serif" }}>
+                  {"NY & Long Island"}
+                </span>
+              </div>
+              <div
+                style={{
+                  padding: "22px 0 0 24px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "6px",
+                }}
+              >
+                <span
+                  style={{
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#6b6459",
+                  }}
+                >
+                  {"BASED IN"}
+                </span>
+                <span style={{ font: "400 30px 'Instrument Serif',serif" }}>
+                  {"New York"}
+                </span>
+              </div>
+            </div>
+          </section>
+        </div>
+        <section
+          id={"services"}
+          data-stack={""}
+          data-agent={"services"}
+          style={{ position: "relative", zIndex: "3" }}
+        >
+          <div
+            data-panel={""}
+            style={{
+              position: "sticky",
+              top: "0",
+              minHeight: "100vh",
+              background: "#f6efdd",
+              color: "#2a2825",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))",
+              alignItems: "center",
+              gap: "clamp(30px,5vw,80px)",
+              padding:
+                "clamp(100px,12vh,140px) clamp(28px,5vw,80px) clamp(60px,8vh,100px)",
+              borderTop: "1px solid #ddd6ca",
+              transformOrigin: "50% 0",
+              willChange: "transform",
+            }}
+          >
+            <div
+              data-shade={""}
+              style={{
+                position: "absolute",
+                inset: "0",
+                background: "#1c1a17",
+                opacity: "0",
+                pointerEvents: "none",
+                willChange: "opacity",
+              }}
+            ></div>
+            <div
+              data-rv=""
+              data-block-reveal=""
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "22px",
+                minWidth: "0",
+              }}
+            >
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.8px",
+                  color: "#a1563f",
+                }}
+              >
+                <span
+                  style={{
+                    width: "26px",
+                    height: "2px",
+                    background: "#a1563f",
+                  }}
+                ></span>
+                {"[ 01 // SERVICES ]"}
+              </span>
+              <span
+                style={{
+                  font: "400 clamp(90px,14vw,200px)/0.8 'Instrument Serif',serif",
+                  letterSpacing: "-0.05em",
+                  color: "transparent",
+                  WebkitTextStroke: "1px #2a2825",
+                }}
+              >
+                {"01"}
+              </span>
+              <h2
+                style={{
+                  margin: "0",
+                  font: "400 clamp(44px,6vw,92px)/0.9 'Instrument Serif',serif",
+                  letterSpacing: "-0.04em",
+                }}
+              >
+                {"Tile Installation"}
+              </h2>
+              <p
+                style={{
+                  margin: "0",
+                  maxWidth: "44ch",
+                  font: "400 clamp(17px,1.4vw,20px)/1.55 'Source Sans 3',sans-serif",
+                  color: "#5a544b",
+                }}
+              >
+                {
+                  "Porcelain, ceramic and mosaic for bathrooms, kitchens and floors. Layout is planned before the first tile is set, and the substrate is checked before installation begins."
+                }
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "6px 14px",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.4px",
+                  textTransform: "uppercase",
+                  color: "#6b6459",
+                }}
+              >
+                <span>{"Careful layout"}</span>
+                <span>{"·"}</span>
+                <span>{"Aligned joints"}</span>
+                <span>{"·"}</span>
+                <span>{"Considered finishing"}</span>
+              </div>
+            </div>
+            <div
+              data-cur={"VIEW"}
+              style={{
+                aspectRatio: "4/5",
+                maxHeight: "70vh",
+                background: "#e6e1d9",
+                overflow: "hidden",
+                position: "relative",
+                justifySelf: "end",
+                width: "100%",
+                maxWidth: "520px",
+              }}
+            >
+              <div
+                data-plx={"0.06"}
+                style={{ position: "absolute", inset: "-8% 0" }}
+              >
+                <img
+                  id={"isv2-svc-tile"}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  src={"/assets/design/img14.jpg"}
+                  alt={"Tile installation — setting large-format tile"}
+                  decoding={"async"}
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            data-panel={""}
+            style={{
+              position: "sticky",
+              top: "0",
+              minHeight: "100vh",
+              background: "#2a2825",
+              color: "#f6efdd",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))",
+              alignItems: "center",
+              gap: "clamp(30px,5vw,80px)",
+              padding:
+                "clamp(100px,12vh,140px) clamp(28px,5vw,80px) clamp(60px,8vh,100px)",
+              transformOrigin: "50% 0",
+              willChange: "transform",
+              backgroundImage:
+                "linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px)",
+              backgroundSize: "34px 34px",
+            }}
+          >
+            <div
+              data-shade={""}
+              style={{
+                position: "absolute",
+                inset: "0",
+                background: "#1c1a17",
+                opacity: "0",
+                pointerEvents: "none",
+                willChange: "opacity",
+              }}
+            ></div>
+            <div
+              data-rv=""
+              data-block-reveal=""
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "22px",
+                minWidth: "0",
+              }}
+            >
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.8px",
+                  color: "#a1563f",
+                }}
+              >
+                <span
+                  style={{
+                    width: "26px",
+                    height: "2px",
+                    background: "#a1563f",
+                  }}
+                ></span>
+                {"[ 01 // SERVICES ]"}
+              </span>
+              <span
+                style={{
+                  font: "400 clamp(90px,14vw,200px)/0.8 'Instrument Serif',serif",
+                  letterSpacing: "-0.05em",
+                  color: "transparent",
+                  WebkitTextStroke: "1px #f6efdd",
+                }}
+              >
+                {"02"}
+              </span>
+              <h2
+                style={{
+                  margin: "0",
+                  font: "400 clamp(44px,6vw,92px)/0.9 'Instrument Serif',serif",
+                  letterSpacing: "-0.04em",
+                }}
+              >
+                {"Granite Installation"}
+              </h2>
+              <p
+                style={{
+                  margin: "0",
+                  maxWidth: "44ch",
+                  font: "400 clamp(17px,1.4vw,20px)/1.55 'Source Sans 3',sans-serif",
+                  color: "#d6cfc4",
+                }}
+              >
+                {
+                  "Countertops, islands and vanity tops templated to the room, with edges and seams finished to match."
+                }
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "6px 14px",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.4px",
+                  textTransform: "uppercase",
+                  color: "#a89f92",
+                }}
+              >
+                <span>{"Kitchens & baths"}</span>
+                <span>{"·"}</span>
+                <span>{"Templated to fit"}</span>
+                <span>{"·"}</span>
+                <span>{"Sealed and finished"}</span>
+              </div>
+            </div>
+            <div
+              data-cur={"VIEW"}
+              style={{
+                aspectRatio: "4/5",
+                maxHeight: "70vh",
+                background: "#1e1c19",
+                overflow: "hidden",
+                position: "relative",
+                justifySelf: "end",
+                width: "100%",
+                maxWidth: "520px",
+              }}
+            >
+              <div
+                data-plx={"0.06"}
+                style={{ position: "absolute", inset: "-8% 0" }}
+              >
+                <img
+                  id={"isv2-svc-granite"}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  src={"/assets/design/img6.jpg"}
+                  alt={"Granite countertop in progress"}
+                  decoding={"async"}
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            data-panel={""}
+            style={{
+              position: "sticky",
+              top: "0",
+              minHeight: "100vh",
+              background: "#efeae1",
+              color: "#2a2825",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))",
+              alignItems: "center",
+              gap: "clamp(30px,5vw,80px)",
+              padding:
+                "clamp(100px,12vh,140px) clamp(28px,5vw,80px) clamp(60px,8vh,100px)",
+              transformOrigin: "50% 0",
+              willChange: "transform",
+            }}
+          >
+            <div
+              data-shade={""}
+              style={{
+                position: "absolute",
+                inset: "0",
+                background: "#1c1a17",
+                opacity: "0",
+                pointerEvents: "none",
+                willChange: "opacity",
+              }}
+            ></div>
+            <div
+              data-rv=""
+              data-block-reveal=""
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "22px",
+                minWidth: "0",
+              }}
+            >
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.8px",
+                  color: "#a1563f",
+                }}
+              >
+                <span
+                  style={{
+                    width: "26px",
+                    height: "2px",
+                    background: "#a1563f",
+                  }}
+                ></span>
+                {"[ 01 // SERVICES ]"}
+              </span>
+              <span
+                style={{
+                  font: "400 clamp(90px,14vw,200px)/0.8 'Instrument Serif',serif",
+                  letterSpacing: "-0.05em",
+                  color: "transparent",
+                  WebkitTextStroke: "1px #2a2825",
+                }}
+              >
+                {"03"}
+              </span>
+              <h2
+                style={{
+                  margin: "0",
+                  font: "400 clamp(44px,6vw,92px)/0.9 'Instrument Serif',serif",
+                  letterSpacing: "-0.04em",
+                }}
+              >
+                {"Marble Installation"}
+              </h2>
+              <p
+                style={{
+                  margin: "0",
+                  maxWidth: "44ch",
+                  font: "400 clamp(17px,1.4vw,20px)/1.55 'Source Sans 3',sans-serif",
+                  color: "#5a544b",
+                }}
+              >
+                {
+                  "Slab showers, vanities and feature walls. Veining is matched where the stone allows, joints kept tight and level."
+                }
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "6px 14px",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.4px",
+                  textTransform: "uppercase",
+                  color: "#6b6459",
+                }}
+              >
+                <span>{"Bookmatched where possible"}</span>
+                <span>{"·"}</span>
+                <span>{"Level, tight joints"}</span>
+                <span>{"·"}</span>
+                <span>{"Finished edges"}</span>
+              </div>
+            </div>
+            <div
+              data-cur={"VIEW"}
+              style={{
+                aspectRatio: "4/5",
+                maxHeight: "70vh",
+                background: "#e6e1d9",
+                overflow: "hidden",
+                position: "relative",
+                justifySelf: "end",
+                width: "100%",
+                maxWidth: "520px",
+              }}
+            >
+              <div
+                data-plx={"0.06"}
+                style={{ position: "absolute", inset: "-8% 0" }}
+              >
+                <img
+                  id={"isv2-svc-marble"}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  src={"/assets/design/img7.jpg"}
+                  alt={"Installed marble alcove"}
+                  decoding={"async"}
+                />
+              </div>
+            </div>
+          </div>
+          <div
+            data-panel={""}
+            style={{
+              position: "sticky",
+              top: "0",
+              minHeight: "100vh",
+              background: "#1c1a17",
+              color: "#f6efdd",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit,minmax(320px,1fr))",
+              alignItems: "center",
+              gap: "clamp(30px,5vw,80px)",
+              padding:
+                "clamp(100px,12vh,140px) clamp(28px,5vw,80px) clamp(60px,8vh,100px)",
+              transformOrigin: "50% 0",
+              willChange: "transform",
+              backgroundImage:
+                "linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px)",
+              backgroundSize: "34px 34px",
+            }}
+          >
+            <div
+              data-shade={""}
+              style={{
+                position: "absolute",
+                inset: "0",
+                background: "#1c1a17",
+                opacity: "0",
+                pointerEvents: "none",
+                willChange: "opacity",
+              }}
+            ></div>
+            <div
+              data-rv=""
+              data-block-reveal=""
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "22px",
+                minWidth: "0",
+              }}
+            >
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.8px",
+                  color: "#a1563f",
+                }}
+              >
+                <span
+                  style={{
+                    width: "26px",
+                    height: "2px",
+                    background: "#a1563f",
+                  }}
+                ></span>
+                {"[ 01 // SERVICES ]"}
+              </span>
+              <span
+                style={{
+                  font: "400 clamp(90px,14vw,200px)/0.8 'Instrument Serif',serif",
+                  letterSpacing: "-0.05em",
+                  color: "transparent",
+                  WebkitTextStroke: "1px #f6efdd",
+                }}
+              >
+                {"04"}
+              </span>
+              <h2
+                style={{
+                  margin: "0",
+                  font: "400 clamp(44px,6vw,92px)/0.9 'Instrument Serif',serif",
+                  letterSpacing: "-0.04em",
+                }}
+              >
+                {"Floors & custom surfaces"}
+              </h2>
+              <p
+                style={{
+                  margin: "0",
+                  maxWidth: "44ch",
+                  font: "400 clamp(17px,1.4vw,20px)/1.55 'Source Sans 3',sans-serif",
+                  color: "#d6cfc4",
+                }}
+              >
+                {
+                  "Large-format floors, fireplace surrounds, feature walls and other interior stone applications, laid out before the first piece is set."
+                }
+              </p>
+              <p
+                style={{
+                  margin: "0",
+                  maxWidth: "44ch",
+                  font: "400 13px/1.5 'Source Sans 3',sans-serif",
+                  color: "#8d857a",
+                }}
+              >
+                {
+                  "Additional capability: structural and foundation work on request."
+                }
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "6px 14px",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.4px",
+                  textTransform: "uppercase",
+                  color: "#a89f92",
+                }}
+              >
+                <span>{"Layout planned first"}</span>
+                <span>{"·"}</span>
+                <span>{"Substrate checked"}</span>
+                <span>{"·"}</span>
+                <span>{"Clean transitions"}</span>
+              </div>
+              <a
+                href={"tel:+16315305883"}
+                data-cur={"CALL"}
+                onMouseMove={v.magnet}
+                onMouseLeave={v.unmagnet}
+                style={{
+                  alignSelf: "flex-start",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "14px 24px",
+                  border: "1px solid #6b6459",
+                  color: "#f6efdd",
+                  font: "700 15px 'Source Sans 3',sans-serif",
+                  minHeight: "48px",
+                  textDecoration: "none",
+                  transition: "transform .4s cubic-bezier(.16,1,.3,1)",
+                  marginTop: "8px",
+                }}
+              ><span className="magnetic-face">
+                {"Not sure which? Call and ask"}
+              </span></a>
+            </div>
+            <div
+              data-cur={"VIEW"}
+              style={{
+                aspectRatio: "4/5",
+                maxHeight: "70vh",
+                background: "#1e1c19",
+                overflow: "hidden",
+                position: "relative",
+                justifySelf: "end",
+                width: "100%",
+                maxWidth: "520px",
+              }}
+            >
+              <div
+                data-plx={"0.06"}
+                style={{ position: "absolute", inset: "-8% 0" }}
+              >
+                <img
+                  id={"isv2-svc-super"}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  src={"/assets/design/img8.jpg"}
+                  alt={"Structural work on site"}
+                  decoding={"async"}
+                />
+              </div>
+            </div>
+          </div>
+        </section>
+        <StoneCraftSection />
+        <section
+          id={"work"}
+          data-hstrip={""}
+          data-agent={"work"}
+          style={{
+            position: "relative",
+            height: "380vh",
+            background: "#1c1a17",
+            color: "#f6efdd",
+            zIndex: "4",
+            boxShadow: "0 -40px 80px rgba(0,0,0,.35)",
+          }}
+        >
+          <div
+            style={{
+              position: "sticky",
+              top: "0",
+              height: "100vh",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "flex-start",
+              paddingTop: "clamp(90px,12vh,120px)",
+              backgroundImage:
+                "linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px)",
+              backgroundSize: "34px 34px",
+            }}
+          >
+            <div
+              style={{
+                flex: "none",
+                padding: "0 28px",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "16px",
+                alignItems: "flex-end",
+                justifyContent: "space-between",
+                pointerEvents: "none",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                }}
+              >
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.8px",
+                    color: "#a1563f",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "26px",
+                      height: "2px",
+                      background: "#a1563f",
+                    }}
+                  ></span>
+                  {"[ 02 // WORK ]"}
+                </span>
+                <h2
+                  style={{
+                    margin: "0",
+                    font: "400 clamp(44px,6.4vw,96px)/0.88 'Instrument Serif',serif",
+                    letterSpacing: "-0.045em",
+                  }}
+                >
+                  {"Our work"}
+                </h2>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  gap: "6px",
+                }}
+              >
+                <span
+                  data-hcount={""}
+                  style={{
+                    font: "400 clamp(28px,3vw,44px)/1 'Instrument Serif',serif",
+                  }}
+                >
+                  {"01 "}
+                  <span style={{ color: "#6b6459" }}>{"/ 06"}</span>
+                </span>
+                <span
+                  style={{
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#8d857a",
+                  }}
+                >
+                  {"SCROLL TO MOVE →"}
+                </span>
+              </div>
+            </div>
+            <div
+              data-htrack={""}
+              style={{
+                display: "flex",
+                gap: "clamp(20px,3vw,48px)",
+                alignItems: "flex-start",
+                padding: "0 28px",
+                width: "max-content",
+                willChange: "transform",
+                flex: "1",
+                minHeight: "0",
+                margin: "clamp(20px,4vh,48px) 0 clamp(56px,9vh,80px)",
+              }}
+            >
+              <figure
+                data-cur={"VIEW"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  display: "inline-flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                  width: "max-content",
+                  maxWidth: "80vw",
+                }}
+              >
+                <div
+                  style={{
+                    height: "clamp(180px,calc(100vh - 360px),520px)",
+                    width: "auto",
+                    minWidth: "240px",
+                    aspectRatio: "3/2",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
+                  <img
+                    id={"isv2-w1"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img9.jpg"}
+                    alt={"marble-horizontal3-scaled.jpg"}
+                    decoding={"async"}
+                  />
+                </div>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "12px",
+                    width: "0",
+                    minWidth: "100%",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 15px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      minWidth: "0",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    <span
+                      style={{
+                        font: "400 10px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.4px",
+                        color: "#a1563f",
+                        marginRight: "10px",
+                      }}
+                    >
+                      {"01"}
+                    </span>
+                    {"Dual carved marble sinks with matching backsplash"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#8d857a",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {"MARBLE"}
+                  </span>
+                </figcaption>
+              <button type="button" className="work-project-trigger" aria-label={`View ${projects[0].title}`} onClick={event => window.dispatchEvent(new CustomEvent('open-project', { detail: { index: 0, source: event.currentTarget } }))}><span>Explore project</span><span aria-hidden="true">↗</span></button>
+              </figure>
+              <figure
+                data-cur={"VIEW"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  display: "inline-flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                  width: "max-content",
+                  maxWidth: "80vw",
+                }}
+              >
+                <div
+                  style={{
+                    height: "clamp(180px,calc(100vh - 360px),520px)",
+                    width: "auto",
+                    minWidth: "240px",
+                    aspectRatio: "4/5",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
+                  <img
+                    id={"isv2-w2"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img7.jpg"}
+                    alt={"IMG_3566-scaled.jpeg"}
+                    decoding={"async"}
+                  />
+                </div>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "12px",
+                    width: "0",
+                    minWidth: "100%",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 15px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      minWidth: "0",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    <span
+                      style={{
+                        font: "400 10px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.4px",
+                        color: "#a1563f",
+                        marginRight: "10px",
+                      }}
+                    >
+                      {"02"}
+                    </span>
+                    {"The marble alcove"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#8d857a",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {"MARBLE"}
+                  </span>
+                </figcaption>
+              <button type="button" className="work-project-trigger" aria-label={`View ${projects[1].title}`} onClick={event => window.dispatchEvent(new CustomEvent('open-project', { detail: { index: 1, source: event.currentTarget } }))}><span>Explore project</span><span aria-hidden="true">↗</span></button>
+              </figure>
+              <figure
+                data-cur={"VIEW"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  display: "inline-flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                  width: "max-content",
+                  maxWidth: "80vw",
+                }}
+              >
+                <div
+                  style={{
+                    height: "clamp(180px,calc(100vh - 360px),520px)",
+                    width: "auto",
+                    minWidth: "240px",
+                    aspectRatio: "4/3",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
+                  <img
+                    id={"isv2-w3"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img6.jpg"}
+                    alt={"granite-horizontal-2-scaled.jpg"}
+                    decoding={"async"}
+                  />
+                </div>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "12px",
+                    width: "0",
+                    minWidth: "100%",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 15px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      minWidth: "0",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    <span
+                      style={{
+                        font: "400 10px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.4px",
+                        color: "#a1563f",
+                        marginRight: "10px",
+                      }}
+                    >
+                      {"03"}
+                    </span>
+                    {"L-shaped granite countertop"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#8d857a",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {"GRANITE"}
+                  </span>
+                </figcaption>
+              <button type="button" className="work-project-trigger" aria-label={`View ${projects[2].title}`} onClick={event => window.dispatchEvent(new CustomEvent('open-project', { detail: { index: 2, source: event.currentTarget } }))}><span>Explore project</span><span aria-hidden="true">↗</span></button>
+              </figure>
+              <figure
+                data-cur={"VIEW"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  display: "inline-flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                  width: "max-content",
+                  maxWidth: "80vw",
+                }}
+              >
+                <div
+                  style={{
+                    height: "clamp(180px,calc(100vh - 360px),520px)",
+                    width: "auto",
+                    minWidth: "240px",
+                    aspectRatio: "4/5",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
+                  <img
+                    id={"isv2-w4"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img10.jpg"}
+                    alt={"jafet-foundation-1.jpg"}
+                    decoding={"async"}
+                  />
+                </div>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "12px",
+                    width: "0",
+                    minWidth: "100%",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 15px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      minWidth: "0",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    <span
+                      style={{
+                        font: "400 10px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.4px",
+                        color: "#a1563f",
+                        marginRight: "10px",
+                      }}
+                    >
+                      {"04"}
+                    </span>
+                    {"Underpinning between NYC row houses"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#8d857a",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {"ADDITIONAL WORK"}
+                  </span>
+                </figcaption>
+              <button type="button" className="work-project-trigger" aria-label={`View ${projects[3].title}`} onClick={event => window.dispatchEvent(new CustomEvent('open-project', { detail: { index: 3, source: event.currentTarget } }))}><span>Explore project</span><span aria-hidden="true">↗</span></button>
+              </figure>
+              <figure
+                data-cur={"VIEW"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  display: "inline-flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                  width: "max-content",
+                  maxWidth: "80vw",
+                }}
+              >
+                <div
+                  style={{
+                    height: "clamp(180px,calc(100vh - 360px),520px)",
+                    width: "auto",
+                    minWidth: "240px",
+                    aspectRatio: "3/2",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
+                  <img
+                    id={"isv2-w5"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img11.jpg"}
+                    alt={"jafet_superstructure-1.jpg"}
+                    decoding={"async"}
+                  />
+                </div>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "12px",
+                    width: "0",
+                    minWidth: "100%",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 15px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      minWidth: "0",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    <span
+                      style={{
+                        font: "400 10px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.4px",
+                        color: "#a1563f",
+                        marginRight: "10px",
+                      }}
+                    >
+                      {"05"}
+                    </span>
+                    {"Rooftop-level concrete formwork"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#8d857a",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {"ADDITIONAL WORK"}
+                  </span>
+                </figcaption>
+              <button type="button" className="work-project-trigger" aria-label={`View ${projects[4].title}`} onClick={event => window.dispatchEvent(new CustomEvent('open-project', { detail: { index: 4, source: event.currentTarget } }))}><span>Explore project</span><span aria-hidden="true">↗</span></button>
+              </figure>
+              <figure
+                data-cur={"VIEW"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  display: "inline-flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                  width: "max-content",
+                  maxWidth: "80vw",
+                }}
+              >
+                <div
+                  style={{
+                    height: "clamp(180px,calc(100vh - 360px),520px)",
+                    width: "auto",
+                    minWidth: "240px",
+                    aspectRatio: "4/5",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    position: "relative",
+                  }}
+                >
+                  <img
+                    id={"isv2-w6"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img12.jpg"}
+                    alt={"jafet-structure.jpg"}
+                    decoding={"async"}
+                  />
+                </div>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "12px",
+                    width: "0",
+                    minWidth: "100%",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 15px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      minWidth: "0",
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    }}
+                  >
+                    <span
+                      style={{
+                        font: "400 10px 'JetBrains Mono',monospace",
+                        letterSpacing: "1.4px",
+                        color: "#a1563f",
+                        marginRight: "10px",
+                      }}
+                    >
+                      {"06"}
+                    </span>
+                    {"Excavation, wider angle"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#8d857a",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {"ADDITIONAL WORK"}
+                  </span>
+                </figcaption>
+              <button type="button" className="work-project-trigger" aria-label={`View ${projects[5].title}`} onClick={event => window.dispatchEvent(new CustomEvent('open-project', { detail: { index: 5, source: event.currentTarget } }))}><span>Explore project</span><span aria-hidden="true">↗</span></button>
+              </figure>
+              <div
+                style={{
+                  flex: "none",
+                  width: "min(40vw,420px)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "18px",
+                  alignSelf: "center",
+                }}
+              >
+                <span
+                  style={{
+                    font: "400 clamp(30px,3.4vw,48px)/1 'Instrument Serif',serif",
+                  }}
+                >
+                  {"More on Instagram."}
+                </span>
+                <a
+                  href={"https://www.instagram.com/jafettile____com/"}
+                  target={"_blank"}
+                  rel={"noopener noreferrer"}
+                  data-cur={"OPEN"}
+                  style={{
+                    font: "400 11px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#f6efdd",
+                    textDecoration: "none",
+                    borderBottom: "1px solid #a1563f",
+                    paddingBottom: "3px",
+                    alignSelf: "flex-start",
+                  }}
+                >
+                  {"@JAFETTILE____COM →"}
+                </a>
+              </div>
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                left: "28px",
+                right: "28px",
+                bottom: "clamp(24px,4vh,40px)",
+                height: "1px",
+                background: "#322e28",
+              }}
+            >
+              <div
+                data-hbar={""}
+                style={{
+                  height: "1px",
+                  width: "0",
+                  background: "#a1563f",
+                  willChange: "width",
+                }}
+              ></div>
+            </div>
+          </div>
+        </section>
+        <div
+          style={{
+            position: "relative",
+            zIndex: "5",
+            background: "#f6efdd",
+            overflow: "hidden",
+            padding: "clamp(28px,4vw,56px) 0",
+            borderBottom: "1px solid #ddd6ca",
+            borderTop: "2px solid #a1563f",
+          }}
+        >
+          <div
+            data-vmarq={""}
+            style={{
+              display: "flex",
+              width: "max-content",
+              font: "400 clamp(64px,11vw,170px)/0.9 'Instrument Serif',serif",
+              letterSpacing: "-0.04em",
+              whiteSpace: "nowrap",
+              willChange: "transform",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                gap: ".35em",
+                paddingRight: ".35em",
+                alignItems: "baseline",
+              }}
+            >
+              <span>{"Tile"}</span>
+              <span style={{ color: "#a1563f" }}>{"—"}</span>
+              <span
+                style={{
+                  color: "transparent",
+                  WebkitTextStroke: "1px #2a2825",
+                }}
+              >
+                {"Granite"}
+              </span>
+              <span style={{ color: "#a1563f" }}>{"—"}</span>
+              <span>{"Marble"}</span>
+              <span style={{ color: "#a1563f" }}>{"—"}</span>
+              <span
+                style={{
+                  color: "transparent",
+                  WebkitTextStroke: "1px #2a2825",
+                  fontStyle: "italic",
+                }}
+              >
+                {"Brentwood"}
+              </span>
+              <span style={{ color: "#a1563f" }}>{"—"}</span>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                gap: ".35em",
+                paddingRight: ".35em",
+                alignItems: "baseline",
+              }}
+              aria-hidden={"true"}
+            >
+              <span>{"Tile"}</span>
+              <span style={{ color: "#a1563f" }}>{"—"}</span>
+              <span
+                style={{
+                  color: "transparent",
+                  WebkitTextStroke: "1px #2a2825",
+                }}
+              >
+                {"Granite"}
+              </span>
+              <span style={{ color: "#a1563f" }}>{"—"}</span>
+              <span>{"Marble"}</span>
+              <span style={{ color: "#a1563f" }}>{"—"}</span>
+              <span
+                style={{
+                  color: "transparent",
+                  WebkitTextStroke: "1px #2a2825",
+                  fontStyle: "italic",
+                }}
+              >
+                {"Brentwood"}
+              </span>
+              <span style={{ color: "#a1563f" }}>{"—"}</span>
+            </div>
+          </div>
+        </div>
+        <section
+          id={"reels"}
+          data-agent={"reels"}
+          data-reelstrip={""}
+          style={{
+            position: "relative",
+            zIndex: "5",
+            height: "420vh",
+            background: "#1c1a17",
+            color: "#f6efdd",
+            borderTop: "1px solid #322e28",
+          }}
+        >
+          <div
+            style={{
+              position: "sticky",
+              top: "0",
+              height: "100vh",
+              overflow: "hidden",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              backgroundImage:
+                "linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px)",
+              backgroundSize: "34px 34px",
+            }}
+          >
+            <div
+              data-reelghost={""}
+              aria-hidden={"true"}
+              style={{
+                position: "absolute",
+                left: "0",
+                top: "50%",
+                transform: "translateY(-50%)",
+                whiteSpace: "nowrap",
+                font: "400 clamp(160px,34vw,520px)/0.8 'Instrument Serif',serif",
+                letterSpacing: "-0.06em",
+                color: "transparent",
+                WebkitTextStroke: "1px rgba(246,239,221,.12)",
+                pointerEvents: "none",
+                willChange: "transform",
+              }}
+            >
+              {"JOB SITE — JOB SITE — JOB SITE"}
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                top: "clamp(90px,12vh,120px)",
+                left: "28px",
+                right: "28px",
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "16px",
+                alignItems: "flex-end",
+                justifyContent: "space-between",
+                pointerEvents: "none",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                }}
+              >
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.8px",
+                    color: "#a1563f",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "26px",
+                      height: "2px",
+                      background: "#a1563f",
+                    }}
+                  ></span>
+                  {"[ 02b // FROM THE JOB SITE ]"}
+                </span>
+                <h2
+                  style={{
+                    margin: "0",
+                    font: "400 clamp(40px,5.4vw,80px)/0.92 'Instrument Serif',serif",
+                    letterSpacing: "-0.04em",
+                  }}
+                >
+                  {"Reels from the job site"}
+                </h2>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-end",
+                  gap: "8px",
+                }}
+              >
+                <span
+                  data-reelcount={""}
+                  style={{
+                    font: "400 clamp(28px,3vw,44px)/1 'Instrument Serif',serif",
+                  }}
+                >
+                  {"01 "}
+                  <span style={{ color: "#6b6459" }}>{"/ 08"}</span>
+                </span>
+                <span
+                  style={{
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#8d857a",
+                  }}
+                >
+                  {"SCROLL TO MOVE →"}
+                </span>
+              </div>
+            </div>
+            <div
+              data-reeltrack={""}
+              style={{
+                display: "flex",
+                gap: "clamp(20px,3vw,44px)",
+                alignItems: "center",
+                padding: "0 28px",
+                width: "max-content",
+                willChange: "transform",
+                marginTop: "calc(clamp(90px,12vh,120px) + 60px)",
+              }}
+            >
+              <figure
+                data-reelcard={""}
+                data-cur={"PLAY"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  width: "min(78vw,320px,calc((100vh - 320px) * 9 / 16))",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  willChange: "transform,opacity",
+                }}
+              >
+                <button type="button" className="reel-trigger"
+                  onClick={v.openReel}
+                  onMouseEnter={v.previewOn}
+                  onMouseLeave={v.previewOff}
+                  data-video={"/uploads/reels/01-raising-the-bar.mp4"}
+                  data-title={"Raising the bar, one beam at a time"}
+                  aria-label={"Play: Raising the bar, one beam at a time"}
+                  style={{
+                    position: "relative",
+                    aspectRatio: "3/4",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    border: "1px solid #322e28",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    data-plx={"0.05"}
+                    style={{
+                      position: "absolute",
+                      inset: "-8% 0",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <img
+                      id={"isv2-reel-0"}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                      src={"/assets/design/vid0.jpg"}
+                      alt={"Raising the bar, one beam at a time"}
+                      decoding={"async"}
+                    />
+                  </div>
+                  <video
+                    data-preview={""}
+                    muted={true}
+                    loop={true}
+                    playsInline={true}
+                    preload={"none"}
+                    data-src={"/uploads/reels/01-raising-the-bar.mp4"}
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      opacity: "0",
+                      transition: "opacity .5s ease",
+                      pointerEvents: "none",
+                    }}
+                  ></video>
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      background:
+                        "linear-gradient(180deg,rgba(15,14,13,0) 40%,rgba(15,14,13,.78))",
+                      pointerEvents: "none",
+                    }}
+                  ></div>
+                  <div
+                    data-playring={""}
+                    style={{
+                      position: "absolute",
+                      left: "50%",
+                      top: "50%",
+                      width: "72px",
+                      height: "72px",
+                      margin: "-36px 0 0 -36px",
+                      borderRadius: "50%",
+                      border: "1px solid rgba(246,239,221,.55)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "rgba(15,14,13,.45)",
+                      pointerEvents: "none",
+                      willChange: "transform",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "0",
+                        height: "0",
+                        borderLeft: "16px solid #f6efdd",
+                        borderTop: "10px solid transparent",
+                        borderBottom: "10px solid transparent",
+                        marginLeft: "4px",
+                      }}
+                    ></span>
+                  </div>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      left: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "4px 8px",
+                      background: "#a1563f",
+                      color: "#fff",
+                      font: "700 9px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "5px",
+                        height: "5px",
+                        borderRadius: "50%",
+                        background: "#fff",
+                        animation: "pulseDot 1.2s infinite",
+                      }}
+                    ></span>
+                    {"STRUCTURE"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      right: "12px",
+                      padding: "4px 7px",
+                      background: "rgba(15,14,13,.7)",
+                      color: "#f6efdd",
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"0:07"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      right: "12px",
+                      bottom: "12px",
+                      font: "400 clamp(40px,5vw,72px)/0.8 'Instrument Serif',serif",
+                      color: "transparent",
+                      WebkitTextStroke: "1px rgba(246,239,221,.7)",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"01"}
+                  </span>
+                </button>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "10px",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#a1563f",
+                      flex: "none",
+                    }}
+                  >
+                    {"01"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 14px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      flex: "1",
+                      minWidth: "0",
+                    }}
+                  >
+                    {"Raising the bar, one beam at a time"}
+                  </span>
+                </figcaption>
+              </figure>
+              <figure
+                data-reelcard={""}
+                data-cur={"PLAY"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  width: "min(78vw,320px,calc((100vh - 320px) * 9 / 16))",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  willChange: "transform,opacity",
+                }}
+              >
+                <button type="button" className="reel-trigger"
+                  onClick={v.openReel}
+                  onMouseEnter={v.previewOn}
+                  onMouseLeave={v.previewOff}
+                  data-video={"/uploads/reels/02-crafted-with-precision.mp4"}
+                  data-title={"Crafted with precision — marble detailing"}
+                  aria-label={"Play: Crafted with precision — marble detailing"}
+                  style={{
+                    position: "relative",
+                    aspectRatio: "9/16",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    border: "1px solid #322e28",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    data-plx={"0.05"}
+                    style={{
+                      position: "absolute",
+                      inset: "-8% 0",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <img
+                      id={"isv2-reel-1"}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                      src={"/assets/design/vid1.jpg"}
+                      alt={"Crafted with precision — marble detailing"}
+                      decoding={"async"}
+                    />
+                  </div>
+                  <video
+                    data-preview={""}
+                    muted={true}
+                    loop={true}
+                    playsInline={true}
+                    preload={"none"}
+                    data-src={"/uploads/reels/02-crafted-with-precision.mp4"}
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      opacity: "0",
+                      transition: "opacity .5s ease",
+                      pointerEvents: "none",
+                    }}
+                  ></video>
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      background:
+                        "linear-gradient(180deg,rgba(15,14,13,0) 40%,rgba(15,14,13,.78))",
+                      pointerEvents: "none",
+                    }}
+                  ></div>
+                  <div
+                    data-playring={""}
+                    style={{
+                      position: "absolute",
+                      left: "50%",
+                      top: "50%",
+                      width: "72px",
+                      height: "72px",
+                      margin: "-36px 0 0 -36px",
+                      borderRadius: "50%",
+                      border: "1px solid rgba(246,239,221,.55)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "rgba(15,14,13,.45)",
+                      pointerEvents: "none",
+                      willChange: "transform",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "0",
+                        height: "0",
+                        borderLeft: "16px solid #f6efdd",
+                        borderTop: "10px solid transparent",
+                        borderBottom: "10px solid transparent",
+                        marginLeft: "4px",
+                      }}
+                    ></span>
+                  </div>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      left: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "4px 8px",
+                      background: "#a1563f",
+                      color: "#fff",
+                      font: "700 9px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "5px",
+                        height: "5px",
+                        borderRadius: "50%",
+                        background: "#fff",
+                        animation: "pulseDot 1.2s infinite",
+                      }}
+                    ></span>
+                    {"MARBLE"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      right: "12px",
+                      padding: "4px 7px",
+                      background: "rgba(15,14,13,.7)",
+                      color: "#f6efdd",
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"0:17"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      right: "12px",
+                      bottom: "12px",
+                      font: "400 clamp(40px,5vw,72px)/0.8 'Instrument Serif',serif",
+                      color: "transparent",
+                      WebkitTextStroke: "1px rgba(246,239,221,.7)",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"02"}
+                  </span>
+                </button>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "10px",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#a1563f",
+                      flex: "none",
+                    }}
+                  >
+                    {"02"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 14px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      flex: "1",
+                      minWidth: "0",
+                    }}
+                  >
+                    {"Crafted with precision — marble detailing"}
+                  </span>
+                </figcaption>
+              </figure>
+              <figure
+                data-reelcard={""}
+                data-cur={"PLAY"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  width: "min(78vw,320px,calc((100vh - 320px) * 9 / 16))",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  willChange: "transform,opacity",
+                }}
+              >
+                <button type="button" className="reel-trigger"
+                  onClick={v.openReel}
+                  onMouseEnter={v.previewOn}
+                  onMouseLeave={v.previewOff}
+                  data-video={"/uploads/reels/03-designing-tomorrow.mp4"}
+                  data-title={"Designing tomorrow, building today"}
+                  aria-label={"Play: Designing tomorrow, building today"}
+                  style={{
+                    position: "relative",
+                    aspectRatio: "9/16",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    border: "1px solid #322e28",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    data-plx={"0.05"}
+                    style={{
+                      position: "absolute",
+                      inset: "-8% 0",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <img
+                      id={"isv2-reel-2"}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                      src={"/assets/design/vid2.jpg"}
+                      alt={"Designing tomorrow, building today"}
+                      decoding={"async"}
+                    />
+                  </div>
+                  <video
+                    data-preview={""}
+                    muted={true}
+                    loop={true}
+                    playsInline={true}
+                    preload={"none"}
+                    data-src={"/uploads/reels/03-designing-tomorrow.mp4"}
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      opacity: "0",
+                      transition: "opacity .5s ease",
+                      pointerEvents: "none",
+                    }}
+                  ></video>
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      background:
+                        "linear-gradient(180deg,rgba(15,14,13,0) 40%,rgba(15,14,13,.78))",
+                      pointerEvents: "none",
+                    }}
+                  ></div>
+                  <div
+                    data-playring={""}
+                    style={{
+                      position: "absolute",
+                      left: "50%",
+                      top: "50%",
+                      width: "72px",
+                      height: "72px",
+                      margin: "-36px 0 0 -36px",
+                      borderRadius: "50%",
+                      border: "1px solid rgba(246,239,221,.55)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "rgba(15,14,13,.45)",
+                      pointerEvents: "none",
+                      willChange: "transform",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "0",
+                        height: "0",
+                        borderLeft: "16px solid #f6efdd",
+                        borderTop: "10px solid transparent",
+                        borderBottom: "10px solid transparent",
+                        marginLeft: "4px",
+                      }}
+                    ></span>
+                  </div>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      left: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "4px 8px",
+                      background: "#a1563f",
+                      color: "#fff",
+                      font: "700 9px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "5px",
+                        height: "5px",
+                        borderRadius: "50%",
+                        background: "#fff",
+                        animation: "pulseDot 1.2s infinite",
+                      }}
+                    ></span>
+                    {"DEMOLITION"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      right: "12px",
+                      padding: "4px 7px",
+                      background: "rgba(15,14,13,.7)",
+                      color: "#f6efdd",
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"0:06"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      right: "12px",
+                      bottom: "12px",
+                      font: "400 clamp(40px,5vw,72px)/0.8 'Instrument Serif',serif",
+                      color: "transparent",
+                      WebkitTextStroke: "1px rgba(246,239,221,.7)",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"03"}
+                  </span>
+                </button>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "10px",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#a1563f",
+                      flex: "none",
+                    }}
+                  >
+                    {"03"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 14px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      flex: "1",
+                      minWidth: "0",
+                    }}
+                  >
+                    {"Designing tomorrow, building today"}
+                  </span>
+                </figcaption>
+              </figure>
+              <figure
+                data-reelcard={""}
+                data-cur={"PLAY"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  width: "min(78vw,320px,calc((100vh - 320px) * 9 / 16))",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  willChange: "transform,opacity",
+                }}
+              >
+                <button type="button" className="reel-trigger"
+                  onClick={v.openReel}
+                  onMouseEnter={v.previewOn}
+                  onMouseLeave={v.previewOff}
+                  data-video={"/uploads/reels/04-floors-into-masterpieces.mp4"}
+                  data-title={"Turning floors into masterpieces"}
+                  aria-label={"Play: Turning floors into masterpieces"}
+                  style={{
+                    position: "relative",
+                    aspectRatio: "9/16",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    border: "1px solid #322e28",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    data-plx={"0.05"}
+                    style={{
+                      position: "absolute",
+                      inset: "-8% 0",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <img
+                      id={"isv2-reel-3"}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                      src={"/assets/design/vid3.jpg"}
+                      alt={"Turning floors into masterpieces"}
+                      decoding={"async"}
+                    />
+                  </div>
+                  <video
+                    data-preview={""}
+                    muted={true}
+                    loop={true}
+                    playsInline={true}
+                    preload={"none"}
+                    data-src={"/uploads/reels/04-floors-into-masterpieces.mp4"}
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      opacity: "0",
+                      transition: "opacity .5s ease",
+                      pointerEvents: "none",
+                    }}
+                  ></video>
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      background:
+                        "linear-gradient(180deg,rgba(15,14,13,0) 40%,rgba(15,14,13,.78))",
+                      pointerEvents: "none",
+                    }}
+                  ></div>
+                  <div
+                    data-playring={""}
+                    style={{
+                      position: "absolute",
+                      left: "50%",
+                      top: "50%",
+                      width: "72px",
+                      height: "72px",
+                      margin: "-36px 0 0 -36px",
+                      borderRadius: "50%",
+                      border: "1px solid rgba(246,239,221,.55)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "rgba(15,14,13,.45)",
+                      pointerEvents: "none",
+                      willChange: "transform",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "0",
+                        height: "0",
+                        borderLeft: "16px solid #f6efdd",
+                        borderTop: "10px solid transparent",
+                        borderBottom: "10px solid transparent",
+                        marginLeft: "4px",
+                      }}
+                    ></span>
+                  </div>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      left: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "4px 8px",
+                      background: "#a1563f",
+                      color: "#fff",
+                      font: "700 9px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "5px",
+                        height: "5px",
+                        borderRadius: "50%",
+                        background: "#fff",
+                        animation: "pulseDot 1.2s infinite",
+                      }}
+                    ></span>
+                    {"TILE FLOOR"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      right: "12px",
+                      padding: "4px 7px",
+                      background: "rgba(15,14,13,.7)",
+                      color: "#f6efdd",
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"0:11"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      right: "12px",
+                      bottom: "12px",
+                      font: "400 clamp(40px,5vw,72px)/0.8 'Instrument Serif',serif",
+                      color: "transparent",
+                      WebkitTextStroke: "1px rgba(246,239,221,.7)",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"04"}
+                  </span>
+                </button>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "10px",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#a1563f",
+                      flex: "none",
+                    }}
+                  >
+                    {"04"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 14px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      flex: "1",
+                      minWidth: "0",
+                    }}
+                  >
+                    {"Turning floors into masterpieces"}
+                  </span>
+                </figcaption>
+              </figure>
+              <figure
+                data-reelcard={""}
+                data-cur={"PLAY"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  width: "min(78vw,320px,calc((100vh - 320px) * 9 / 16))",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  willChange: "transform,opacity",
+                }}
+              >
+                <button type="button" className="reel-trigger"
+                  onClick={v.openReel}
+                  onMouseEnter={v.previewOn}
+                  onMouseLeave={v.previewOff}
+                  data-video={"/uploads/reels/05-crafting-elegance.mp4"}
+                  data-title={"Crafting elegance, tile by tile — New York"}
+                  aria-label={
+                    "Play: Crafting elegance, tile by tile — New York"
+                  }
+                  style={{
+                    position: "relative",
+                    aspectRatio: "9/16",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    border: "1px solid #322e28",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    data-plx={"0.05"}
+                    style={{
+                      position: "absolute",
+                      inset: "-8% 0",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <img
+                      id={"isv2-reel-4"}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                      src={"/assets/design/vid4.jpg"}
+                      alt={"Crafting elegance, tile by tile — New York"}
+                      decoding={"async"}
+                    />
+                  </div>
+                  <video
+                    data-preview={""}
+                    muted={true}
+                    loop={true}
+                    playsInline={true}
+                    preload={"none"}
+                    data-src={"/uploads/reels/05-crafting-elegance.mp4"}
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      opacity: "0",
+                      transition: "opacity .5s ease",
+                      pointerEvents: "none",
+                    }}
+                  ></video>
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      background:
+                        "linear-gradient(180deg,rgba(15,14,13,0) 40%,rgba(15,14,13,.78))",
+                      pointerEvents: "none",
+                    }}
+                  ></div>
+                  <div
+                    data-playring={""}
+                    style={{
+                      position: "absolute",
+                      left: "50%",
+                      top: "50%",
+                      width: "72px",
+                      height: "72px",
+                      margin: "-36px 0 0 -36px",
+                      borderRadius: "50%",
+                      border: "1px solid rgba(246,239,221,.55)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "rgba(15,14,13,.45)",
+                      pointerEvents: "none",
+                      willChange: "transform",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "0",
+                        height: "0",
+                        borderLeft: "16px solid #f6efdd",
+                        borderTop: "10px solid transparent",
+                        borderBottom: "10px solid transparent",
+                        marginLeft: "4px",
+                      }}
+                    ></span>
+                  </div>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      left: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "4px 8px",
+                      background: "#a1563f",
+                      color: "#fff",
+                      font: "700 9px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "5px",
+                        height: "5px",
+                        borderRadius: "50%",
+                        background: "#fff",
+                        animation: "pulseDot 1.2s infinite",
+                      }}
+                    ></span>
+                    {"BATHROOM"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      right: "12px",
+                      padding: "4px 7px",
+                      background: "rgba(15,14,13,.7)",
+                      color: "#f6efdd",
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"0:29"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      right: "12px",
+                      bottom: "12px",
+                      font: "400 clamp(40px,5vw,72px)/0.8 'Instrument Serif',serif",
+                      color: "transparent",
+                      WebkitTextStroke: "1px rgba(246,239,221,.7)",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"05"}
+                  </span>
+                </button>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "10px",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#a1563f",
+                      flex: "none",
+                    }}
+                  >
+                    {"05"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 14px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      flex: "1",
+                      minWidth: "0",
+                    }}
+                  >
+                    {"Crafting elegance, tile by tile — New York"}
+                  </span>
+                </figcaption>
+              </figure>
+              <figure
+                data-reelcard={""}
+                data-cur={"PLAY"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  width: "min(78vw,320px,calc((100vh - 320px) * 9 / 16))",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  willChange: "transform,opacity",
+                }}
+              >
+                <button type="button" className="reel-trigger"
+                  onClick={v.openReel}
+                  onMouseEnter={v.previewOn}
+                  onMouseLeave={v.previewOff}
+                  data-video={"/uploads/reels/06-blueprints-into-bubbles.mp4"}
+                  data-title={"Blueprints into bubbles — dream bathroom"}
+                  aria-label={"Play: Blueprints into bubbles — dream bathroom"}
+                  style={{
+                    position: "relative",
+                    aspectRatio: "9/16",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    border: "1px solid #322e28",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    data-plx={"0.05"}
+                    style={{
+                      position: "absolute",
+                      inset: "-8% 0",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <img
+                      id={"isv2-reel-5"}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                      src={"/assets/design/vid5.jpg"}
+                      alt={"Blueprints into bubbles — dream bathroom"}
+                      decoding={"async"}
+                    />
+                  </div>
+                  <video
+                    data-preview={""}
+                    muted={true}
+                    loop={true}
+                    playsInline={true}
+                    preload={"none"}
+                    data-src={"/uploads/reels/06-blueprints-into-bubbles.mp4"}
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      opacity: "0",
+                      transition: "opacity .5s ease",
+                      pointerEvents: "none",
+                    }}
+                  ></video>
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      background:
+                        "linear-gradient(180deg,rgba(15,14,13,0) 40%,rgba(15,14,13,.78))",
+                      pointerEvents: "none",
+                    }}
+                  ></div>
+                  <div
+                    data-playring={""}
+                    style={{
+                      position: "absolute",
+                      left: "50%",
+                      top: "50%",
+                      width: "72px",
+                      height: "72px",
+                      margin: "-36px 0 0 -36px",
+                      borderRadius: "50%",
+                      border: "1px solid rgba(246,239,221,.55)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "rgba(15,14,13,.45)",
+                      pointerEvents: "none",
+                      willChange: "transform",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "0",
+                        height: "0",
+                        borderLeft: "16px solid #f6efdd",
+                        borderTop: "10px solid transparent",
+                        borderBottom: "10px solid transparent",
+                        marginLeft: "4px",
+                      }}
+                    ></span>
+                  </div>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      left: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "4px 8px",
+                      background: "#a1563f",
+                      color: "#fff",
+                      font: "700 9px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "5px",
+                        height: "5px",
+                        borderRadius: "50%",
+                        background: "#fff",
+                        animation: "pulseDot 1.2s infinite",
+                      }}
+                    ></span>
+                    {"BATHROOM"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      right: "12px",
+                      padding: "4px 7px",
+                      background: "rgba(15,14,13,.7)",
+                      color: "#f6efdd",
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"0:57"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      right: "12px",
+                      bottom: "12px",
+                      font: "400 clamp(40px,5vw,72px)/0.8 'Instrument Serif',serif",
+                      color: "transparent",
+                      WebkitTextStroke: "1px rgba(246,239,221,.7)",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"06"}
+                  </span>
+                </button>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "10px",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#a1563f",
+                      flex: "none",
+                    }}
+                  >
+                    {"06"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 14px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      flex: "1",
+                      minWidth: "0",
+                    }}
+                  >
+                    {"Blueprints into bubbles — dream bathroom"}
+                  </span>
+                </figcaption>
+              </figure>
+              <figure
+                data-reelcard={""}
+                data-cur={"PLAY"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  width: "min(78vw,320px,calc((100vh - 320px) * 9 / 16))",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  willChange: "transform,opacity",
+                }}
+              >
+                <button type="button" className="reel-trigger"
+                  onClick={v.openReel}
+                  onMouseEnter={v.previewOn}
+                  onMouseLeave={v.previewOff}
+                  data-video={"/uploads/reels/07-job-site.mp4"}
+                  data-title={"On the job site"}
+                  aria-label={"Play: On the job site"}
+                  style={{
+                    position: "relative",
+                    aspectRatio: "9/16",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    border: "1px solid #322e28",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    data-plx={"0.05"}
+                    style={{
+                      position: "absolute",
+                      inset: "-8% 0",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <img
+                      id={"isv2-reel-6"}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                      src={"/assets/design/vid6.jpg"}
+                      alt={"On the job site"}
+                      decoding={"async"}
+                    />
+                  </div>
+                  <video
+                    data-preview={""}
+                    muted={true}
+                    loop={true}
+                    playsInline={true}
+                    preload={"none"}
+                    data-src={"/uploads/reels/07-job-site.mp4"}
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      opacity: "0",
+                      transition: "opacity .5s ease",
+                      pointerEvents: "none",
+                    }}
+                  ></video>
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      background:
+                        "linear-gradient(180deg,rgba(15,14,13,0) 40%,rgba(15,14,13,.78))",
+                      pointerEvents: "none",
+                    }}
+                  ></div>
+                  <div
+                    data-playring={""}
+                    style={{
+                      position: "absolute",
+                      left: "50%",
+                      top: "50%",
+                      width: "72px",
+                      height: "72px",
+                      margin: "-36px 0 0 -36px",
+                      borderRadius: "50%",
+                      border: "1px solid rgba(246,239,221,.55)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "rgba(15,14,13,.45)",
+                      pointerEvents: "none",
+                      willChange: "transform",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "0",
+                        height: "0",
+                        borderLeft: "16px solid #f6efdd",
+                        borderTop: "10px solid transparent",
+                        borderBottom: "10px solid transparent",
+                        marginLeft: "4px",
+                      }}
+                    ></span>
+                  </div>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      left: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "4px 8px",
+                      background: "#a1563f",
+                      color: "#fff",
+                      font: "700 9px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "5px",
+                        height: "5px",
+                        borderRadius: "50%",
+                        background: "#fff",
+                        animation: "pulseDot 1.2s infinite",
+                      }}
+                    ></span>
+                    {"JOB SITE"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      right: "12px",
+                      padding: "4px 7px",
+                      background: "rgba(15,14,13,.7)",
+                      color: "#f6efdd",
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"0:30"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      right: "12px",
+                      bottom: "12px",
+                      font: "400 clamp(40px,5vw,72px)/0.8 'Instrument Serif',serif",
+                      color: "transparent",
+                      WebkitTextStroke: "1px rgba(246,239,221,.7)",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"07"}
+                  </span>
+                </button>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "10px",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#a1563f",
+                      flex: "none",
+                    }}
+                  >
+                    {"07"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 14px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      flex: "1",
+                      minWidth: "0",
+                    }}
+                  >
+                    {"On the job site"}
+                  </span>
+                </figcaption>
+              </figure>
+              <figure
+                data-reelcard={""}
+                data-cur={"PLAY"}
+                style={{
+                  margin: "0",
+                  flex: "none",
+                  width: "min(78vw,320px,calc((100vh - 320px) * 9 / 16))",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "12px",
+                  willChange: "transform,opacity",
+                }}
+              >
+                <button type="button" className="reel-trigger"
+                  onClick={v.openReel}
+                  onMouseEnter={v.previewOn}
+                  onMouseLeave={v.previewOff}
+                  data-video={"/uploads/reels/08-bland-to-grand.mp4"}
+                  data-title={"From bland to grand — before & after"}
+                  aria-label={"Play: From bland to grand — before & after"}
+                  style={{
+                    position: "relative",
+                    aspectRatio: "9/16",
+                    background: "#1e1c19",
+                    overflow: "hidden",
+                    border: "1px solid #322e28",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div
+                    data-plx={"0.05"}
+                    style={{
+                      position: "absolute",
+                      inset: "-8% 0",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <img
+                      id={"isv2-reel-7"}
+                      style={{
+                        display: "block",
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
+                      src={"/assets/design/vid7.jpg"}
+                      alt={"From bland to grand — before & after"}
+                      decoding={"async"}
+                    />
+                  </div>
+                  <video
+                    data-preview={""}
+                    muted={true}
+                    loop={true}
+                    playsInline={true}
+                    preload={"none"}
+                    data-src={"/uploads/reels/08-bland-to-grand.mp4"}
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      opacity: "0",
+                      transition: "opacity .5s ease",
+                      pointerEvents: "none",
+                    }}
+                  ></video>
+                  <div
+                    style={{
+                      position: "absolute",
+                      inset: "0",
+                      background:
+                        "linear-gradient(180deg,rgba(15,14,13,0) 40%,rgba(15,14,13,.78))",
+                      pointerEvents: "none",
+                    }}
+                  ></div>
+                  <div
+                    data-playring={""}
+                    style={{
+                      position: "absolute",
+                      left: "50%",
+                      top: "50%",
+                      width: "72px",
+                      height: "72px",
+                      margin: "-36px 0 0 -36px",
+                      borderRadius: "50%",
+                      border: "1px solid rgba(246,239,221,.55)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      background: "rgba(15,14,13,.45)",
+                      pointerEvents: "none",
+                      willChange: "transform",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "0",
+                        height: "0",
+                        borderLeft: "16px solid #f6efdd",
+                        borderTop: "10px solid transparent",
+                        borderBottom: "10px solid transparent",
+                        marginLeft: "4px",
+                      }}
+                    ></span>
+                  </div>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      left: "12px",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      padding: "4px 8px",
+                      background: "#a1563f",
+                      color: "#fff",
+                      font: "700 9px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    <span
+                      style={{
+                        width: "5px",
+                        height: "5px",
+                        borderRadius: "50%",
+                        background: "#fff",
+                        animation: "pulseDot 1.2s infinite",
+                      }}
+                    ></span>
+                    {"BEFORE / AFTER"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      top: "12px",
+                      right: "12px",
+                      padding: "4px 7px",
+                      background: "rgba(15,14,13,.7)",
+                      color: "#f6efdd",
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"0:29"}
+                  </span>
+                  <span
+                    style={{
+                      position: "absolute",
+                      right: "12px",
+                      bottom: "12px",
+                      font: "400 clamp(40px,5vw,72px)/0.8 'Instrument Serif',serif",
+                      color: "transparent",
+                      WebkitTextStroke: "1px rgba(246,239,221,.7)",
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {"08"}
+                  </span>
+                </button>
+                <figcaption
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: "12px",
+                    alignItems: "baseline",
+                    borderTop: "1px solid #322e28",
+                    paddingTop: "10px",
+                  }}
+                >
+                  <span
+                    style={{
+                      font: "400 10px 'JetBrains Mono',monospace",
+                      letterSpacing: "1.4px",
+                      color: "#a1563f",
+                      flex: "none",
+                    }}
+                  >
+                    {"08"}
+                  </span>
+                  <span
+                    style={{
+                      font: "400 14px/1.35 'Source Sans 3',sans-serif",
+                      color: "#d6cfc4",
+                      flex: "1",
+                      minWidth: "0",
+                    }}
+                  >
+                    {"From bland to grand — before & after"}
+                  </span>
+                </figcaption>
+              </figure>
+              <div
+                style={{
+                  flex: "none",
+                  width: "min(40vw,420px)",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "18px",
+                  alignSelf: "center",
+                  paddingBottom: "40px",
+                }}
+              >
+                <span
+                  style={{
+                    font: "400 clamp(30px,3.4vw,48px)/1 'Instrument Serif',serif",
+                  }}
+                >
+                  {"Eight clips from real jobs. More on Instagram."}
+                </span>
+                <a
+                  href={"https://www.instagram.com/jafettile____com/"}
+                  target={"_blank"}
+                  rel={"noopener noreferrer"}
+                  data-cur={"OPEN"}
+                  style={{
+                    font: "400 11px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#f6efdd",
+                    textDecoration: "none",
+                    borderBottom: "1px solid #a1563f",
+                    paddingBottom: "3px",
+                    alignSelf: "flex-start",
+                  }}
+                >
+                  {"@JAFETTILE____COM →"}
+                </a>
+              </div>
+            </div>
+            <div
+              style={{
+                position: "absolute",
+                left: "28px",
+                right: "28px",
+                bottom: "clamp(24px,4vh,40px)",
+                height: "1px",
+                background: "#322e28",
+              }}
+            >
+              <div
+                data-reelbar={""}
+                style={{
+                  height: "1px",
+                  width: "0",
+                  background: "#a1563f",
+                  willChange: "width",
+                }}
+              ></div>
+            </div>
+          </div>
+        </section>
+        <section
+          id={"reviews"}
+          data-agent={"reviews"}
+          style={{
+            isolation: "isolate",
+            position: "sticky",
+            top: "0",
+            zIndex: "6",
+            minHeight: "100vh",
+            background: "#f6efdd",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+          }}
+        >
+          <div
+            aria-hidden={"true"}
+            style={{
+              position: "absolute",
+              inset: "0",
+              zIndex: "-1",
+              opacity: ".35",
+              pointerEvents: "none",
+            }}
+          >
+            <img
+              id={"isv2-tex-reviews"}
+              style={{
+                display: "block",
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+              src={"/assets/design/img19.jpg"}
+              alt={"Carrara veining"}
+              decoding={"async"}
+            />
+            <div
+              style={{
+                position: "absolute",
+                inset: "0",
+                background:
+                  "linear-gradient(180deg,#f6efdd 0%,rgba(246,239,221,.4) 50%,#f6efdd 100%)",
+              }}
+            ></div>
+          </div>
+          <div
+            data-rv=""
+            data-block-reveal=""
+            style={{
+              maxWidth: "1400px",
+              margin: "0 auto",
+              padding: "clamp(100px,14vw,180px) 28px",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              textAlign: "center",
+              gap: "40px",
+              width: "100%",
+            }}
+          >
+            <span
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "10px",
+                font: "400 10px 'JetBrains Mono',monospace",
+                letterSpacing: "1.8px",
+                color: "#a1563f",
+              }}
+            >
+              <span
+                style={{ width: "26px", height: "2px", background: "#a1563f" }}
+              ></span>
+              {"[ 03 // REVIEWS ]"}
+            </span>
+            <h2
+              data-words={""}
+              style={{
+                margin: "0",
+                maxWidth: "20ch",
+                font: "400 clamp(40px,6.6vw,100px)/0.98 'Instrument Serif',serif",
+                letterSpacing: "-0.04em",
+              }}
+            >
+              {"Know the work. Meet the team."}
+            </h2>
+            <p
+              style={{
+                margin: "0",
+                maxWidth: "52ch",
+                font: "400 18px/1.55 'Source Sans 3',sans-serif",
+                color: "#5a544b",
+              }}
+            >
+              {
+                "Explore the installations and job-site videos, then ask the team about work relevant to your project. Public reviews for the related Jafet business are available on "
+              }
+              <a
+                href={
+                  "https://www.angi.com/companylist/us/ny/highland-mills/jafet-home-improvement-reviews-1.htm"
+                }
+                target={"_blank"}
+                rel={"noopener noreferrer"}
+              >
+                {"Angi"}
+              </a>
+              {". These are Jafet reviews, not verified Isaac Stone and Tile testimonials."}
+            </p>
+          </div>
+        </section>
+        <section
+          id={"owner"}
+          data-agent={"owner"}
+          style={{
+            position: "relative",
+            zIndex: "7",
+            background: "#efeae1",
+            color: "#2a2825",
+            borderTop: "1px solid #ddd6ca",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "1400px",
+              margin: "0 auto",
+              padding: "clamp(80px,10vw,150px) 28px",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))",
+              gap: "clamp(34px,5vw,80px)",
+              alignItems: "center",
+            }}
+          >
+            <div
+              data-rv={""}
+              style={{
+                position: "relative",
+                aspectRatio: "4/5",
+                maxWidth: "480px",
+                width: "100%",
+                background: "#2a2825",
+                overflow: "hidden",
+                opacity: "0",
+                transform: "translateY(40px)",
+                transition:
+                  "opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1)",
+              }}
+            >
+              <div
+                data-plx={"0.06"}
+                style={{ position: "absolute", inset: "-8% 0" }}
+              >
+                <img
+                  id={"isv2-owner-site"}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  src={"/assets/design/img5.jpg"}
+                  alt={"Crew on site"}
+                  decoding={"async"}
+                />
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  left: "0",
+                  right: "0",
+                  bottom: "0",
+                  padding: "18px 18px 16px",
+                  background: "linear-gradient(transparent,rgba(15,14,13,.9))",
+                  color: "#f6efdd",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "4px",
+                  pointerEvents: "none",
+                }}
+              >
+                <span
+                  style={{
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#a1563f",
+                  }}
+                >
+                  {"ON SITE"}
+                </span>
+                <span
+                  style={{ font: "400 22px/1.05 'Instrument Serif',serif" }}
+                >
+                  {"The crew, mid-set"}
+                </span>
+                <span
+                  style={{
+                    font: "400 13px/1.35 'Source Sans 3',sans-serif",
+                    color: "#a89f92",
+                  }}
+                >
+                  {"Large-format floor, levelled and cut by hand"}
+                </span>
+              </div>
+              <span
+                style={{
+                  position: "absolute",
+                  top: "14px",
+                  left: "14px",
+                  width: "20px",
+                  height: "20px",
+                  borderTop: "2px solid #a1563f",
+                  borderLeft: "2px solid #a1563f",
+                }}
+              ></span>
+              <span
+                style={{
+                  position: "absolute",
+                  top: "14px",
+                  right: "14px",
+                  width: "20px",
+                  height: "20px",
+                  borderTop: "2px solid #a1563f",
+                  borderRight: "2px solid #a1563f",
+                }}
+              ></span>
+            </div>
+            <div
+              data-rv={""}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: "22px",
+                minWidth: "0",
+                opacity: "0",
+                transform: "translateY(40px)",
+                transition:
+                  "opacity 1s cubic-bezier(.16,1,.3,1) .1s,transform 1s cubic-bezier(.16,1,.3,1) .1s",
+              }}
+            >
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.8px",
+                  color: "#a1563f",
+                }}
+              >
+                <span
+                  style={{
+                    width: "26px",
+                    height: "2px",
+                    background: "#a1563f",
+                  }}
+                ></span>
+                {"[ 03b // THE CREW ]"}
+              </span>
+              <h2
+                style={{
+                  margin: "0",
+                  font: "400 clamp(40px,5.4vw,80px)/0.92 'Instrument Serif',serif",
+                  letterSpacing: "-0.04em",
+                }}
+              >
+                {"Owner-led, "}
+                <em style={{ color: "#a1563f" }}>{"start"}</em>
+                {" to finish."}
+              </h2>
+              <p
+                style={{
+                  margin: "0",
+                  maxWidth: "44ch",
+                  font: "400 clamp(17px,1.3vw,20px)/1.55 'Source Sans 3',sans-serif",
+                  color: "#3e392f",
+                }}
+              >
+                {
+                  "One experienced team plans, measures and installs your project, and you speak directly with the people doing the work. Questions go to a single point of contact throughout, and changes are discussed before additional work proceeds."
+                }
+              </p>
+              <div
+                style={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: "8px 22px",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.4px",
+                  color: "#6b6459",
+                  borderTop: "1px solid #ddd6ca",
+                  paddingTop: "16px",
+                }}
+              >
+                <span>{"OWNER-LED CRAFTSMANSHIP"}</span>
+                <span>{"·"}</span>
+                <span>{"ONE POINT OF CONTACT"}</span>
+                <span>{"·"}</span>
+                <span>{"BRENTWOOD, NY"}</span>
+              </div>
+              <a
+                href={"tel:+16315305883"}
+                data-cur={"CALL"}
+                onMouseMove={v.magnet}
+                onMouseLeave={v.unmagnet}
+                style={{
+                  alignSelf: "flex-start",
+                  display: "flex",
+                  alignItems: "center",
+                  padding: "16px 26px",
+                  background: "#2a2825",
+                  color: "#f6efdd",
+                  font: "700 16px 'Source Sans 3',sans-serif",
+                  minHeight: "52px",
+                  textDecoration: "none",
+                  transition: "transform .4s cubic-bezier(.16,1,.3,1)",
+                }}
+              ><span className="magnetic-face">
+                {"Call (631) 530-5883"}
+              </span></a>
+            </div>
+          </div>
+        </section>
+        <section
+          id={"why"}
+          data-agent={"why"}
+          style={{
+            position: "relative",
+            zIndex: "7",
+            background: "#efeae1",
+            color: "#2a2825",
+            borderTop: "1px solid #ddd6ca",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "1400px",
+              margin: "0 auto",
+              padding: "clamp(80px,10vw,150px) 28px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "40px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "16px",
+                alignItems: "flex-end",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                }}
+              >
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.8px",
+                    color: "#a1563f",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "26px",
+                      height: "2px",
+                      background: "#a1563f",
+                    }}
+                  ></span>
+                  {"[ 03c // WHY US ]"}
+                </span>
+                <h2
+                  style={{
+                    margin: "0",
+                    font: "400 clamp(40px,5.4vw,80px)/0.92 'Instrument Serif',serif",
+                    letterSpacing: "-0.04em",
+                  }}
+                >
+                  {"Why work with us?"}
+                </h2>
+              </div>
+              <p
+                style={{
+                  margin: "0",
+                  maxWidth: "40ch",
+                  font: "400 17px/1.55 'Source Sans 3',sans-serif",
+                  color: "#5a544b",
+                }}
+              >
+                {
+                  "Trusted for the finish, the schedule, and the phone getting answered."
+                }
+              </p>
+            </div>
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit,minmax(220px,1fr))",
+                gridAutoRows: "minmax(220px,auto)",
+                gridAutoFlow: "dense",
+                gap: "1px",
+                background: "#ddd6ca",
+                border: "1px solid #ddd6ca",
+              }}
+            >
+              <div
+                data-rv={""}
+                style={{
+                  background: "#2a2825",
+                  color: "#f6efdd",
+                  padding: "clamp(22px,2.6vw,36px)",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  gap: "20px",
+                  minHeight: "220px",
+                  opacity: "0",
+                  transform: "translateY(30px)",
+                  transition:
+                    "opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)",
+                }}
+              >
+                <span
+                  style={{
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#8d857a",
+                  }}
+                >
+                  {"IN THE TRADE"}
+                </span>
+                <span
+                  style={{
+                    font: "400 clamp(40px,4.6vw,68px)/0.9 'Instrument Serif',serif",
+                    letterSpacing: "-0.04em",
+                  }}
+                >
+                  {"25+ years"}
+                </span>
+              </div>
+              <div
+                data-rv={""}
+                data-cur={"VIEW"}
+                style={{
+                  position: "relative",
+                  background: "#1e1c19",
+                  overflow: "hidden",
+                  minHeight: "220px",
+                  gridColumn: "span 2",
+                  opacity: "0",
+                  transform: "translateY(30px)",
+                  transition:
+                    "opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)",
+                }}
+              >
+                <div
+                  data-plx={"0.05"}
+                  style={{ position: "absolute", inset: "-8% 0" }}
+                >
+                  <img
+                    id={"isv2-why-kitchen"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img0.jpg"}
+                    alt={"Calacatta kitchen"}
+                    decoding={"async"}
+                  />
+                </div>
+                <span
+                  style={{
+                    position: "absolute",
+                    left: "14px",
+                    bottom: "12px",
+                    padding: "5px 9px",
+                    background: "rgba(15,14,13,.85)",
+                    color: "#f6efdd",
+                    font: "400 9px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.4px",
+                    pointerEvents: "none",
+                  }}
+                >
+                  {"CALACATTA KITCHEN"}
+                </span>
+              </div>
+              <div
+                data-rv={""}
+                style={{
+                  background: "#f6efdd",
+                  color: "#2a2825",
+                  padding: "clamp(22px,2.6vw,36px)",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  gap: "20px",
+                  minHeight: "220px",
+                  opacity: "0",
+                  transform: "translateY(30px)",
+                  transition:
+                    "opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)",
+                }}
+              >
+                <span
+                  style={{
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#6b6459",
+                  }}
+                >
+                  {"CONTACT"}
+                </span>
+                <span
+                  style={{
+                    font: "400 clamp(40px,4.6vw,68px)/0.9 'Instrument Serif',serif",
+                    letterSpacing: "-0.04em",
+                  }}
+                >
+                  {"Direct"}
+                </span>
+              </div>
+              <div
+                data-rv={""}
+                data-cur={"VIEW"}
+                style={{
+                  position: "relative",
+                  background: "#1e1c19",
+                  overflow: "hidden",
+                  minHeight: "220px",
+                  gridColumn: "span 2",
+                  opacity: "0",
+                  transform: "translateY(30px)",
+                  transition:
+                    "opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)",
+                }}
+              >
+                <div
+                  data-plx={"0.05"}
+                  style={{ position: "absolute", inset: "-8% 0" }}
+                >
+                  <img
+                    id={"isv2-why-bath"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img1.jpg"}
+                    alt={"Bookmatched bath"}
+                    decoding={"async"}
+                  />
+                </div>
+                <span
+                  style={{
+                    position: "absolute",
+                    left: "14px",
+                    bottom: "12px",
+                    padding: "5px 9px",
+                    background: "rgba(15,14,13,.85)",
+                    color: "#f6efdd",
+                    font: "400 9px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.4px",
+                    pointerEvents: "none",
+                  }}
+                >
+                  {"BOOKMATCHED BATH"}
+                </span>
+              </div>
+              <div
+                data-rv={""}
+                style={{
+                  background: "#f6efdd",
+                  color: "#2a2825",
+                  padding: "clamp(22px,2.6vw,36px)",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  gap: "20px",
+                  minHeight: "220px",
+                  opacity: "0",
+                  transform: "translateY(30px)",
+                  transition:
+                    "opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)",
+                }}
+              >
+                <span
+                  style={{
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#6b6459",
+                  }}
+                >
+                  {"APPROACH"}
+                </span>
+                <span
+                  style={{
+                    font: "400 clamp(40px,4.6vw,68px)/0.9 'Instrument Serif',serif",
+                    letterSpacing: "-0.04em",
+                  }}
+                >
+                  {"Owner-led"}
+                </span>
+              </div>
+              <div
+                data-rv={""}
+                style={{
+                  background: "#2a2825",
+                  color: "#f6efdd",
+                  padding: "clamp(22px,2.6vw,36px)",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  gap: "20px",
+                  minHeight: "220px",
+                  opacity: "0",
+                  transform: "translateY(30px)",
+                  transition:
+                    "opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)",
+                }}
+              >
+                <span
+                  style={{
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.6px",
+                    color: "#8d857a",
+                  }}
+                >
+                  {"LOCAL SERVICE"}
+                </span>
+                <span
+                  style={{
+                    font: "400 clamp(40px,4.6vw,68px)/0.9 'Instrument Serif',serif",
+                    letterSpacing: "-0.04em",
+                  }}
+                >
+                  {"NY & LI"}
+                </span>
+              </div>
+              <div
+                data-rv={""}
+                data-cur={"VIEW"}
+                style={{
+                  position: "relative",
+                  background: "#1e1c19",
+                  overflow: "hidden",
+                  minHeight: "220px",
+                  gridColumn: "span 2",
+                  opacity: "0",
+                  transform: "translateY(30px)",
+                  transition:
+                    "opacity .9s cubic-bezier(.16,1,.3,1),transform .9s cubic-bezier(.16,1,.3,1)",
+                }}
+              >
+                <div
+                  data-plx={"0.05"}
+                  style={{ position: "absolute", inset: "-8% 0" }}
+                >
+                  <img
+                    id={"isv2-why-patio"}
+                    style={{
+                      display: "block",
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                    }}
+                    src={"/assets/design/img3.jpg"}
+                    alt={"Stone patio"}
+                    decoding={"async"}
+                  />
+                </div>
+                <span
+                  style={{
+                    position: "absolute",
+                    left: "14px",
+                    bottom: "12px",
+                    padding: "5px 9px",
+                    background: "rgba(15,14,13,.85)",
+                    color: "#f6efdd",
+                    font: "400 9px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.4px",
+                    pointerEvents: "none",
+                  }}
+                >
+                  {"STONE PATIO"}
+                </span>
+              </div>
+            </div>
+          </div>
+        </section>
+        <section
+          id={"beforeafter"}
+          data-agent={"beforeafter"}
+          style={{
+            position: "relative",
+            zIndex: "7",
+            background: "#1c1a17",
+            color: "#f6efdd",
+            backgroundImage:
+              "linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px)",
+            backgroundSize: "34px 34px",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "1400px",
+              margin: "0 auto",
+              padding: "clamp(80px,10vw,150px) 28px",
+              display: "flex",
+              flexDirection: "column",
+              gap: "34px",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                flexWrap: "wrap",
+                gap: "16px",
+                alignItems: "flex-end",
+                justifyContent: "space-between",
+              }}
+            >
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "14px",
+                }}
+              >
+                <span
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "10px",
+                    font: "400 10px 'JetBrains Mono',monospace",
+                    letterSpacing: "1.8px",
+                    color: "#a1563f",
+                  }}
+                >
+                  <span
+                    style={{
+                      width: "26px",
+                      height: "2px",
+                      background: "#a1563f",
+                    }}
+                  ></span>
+                  {"[ 03c // PREPARATION & FINISH ]"}
+                </span>
+                <h2
+                  style={{
+                    margin: "0",
+                    font: "400 clamp(44px,6.4vw,96px)/0.88 'Instrument Serif',serif",
+                    letterSpacing: "-0.045em",
+                  }}
+                >
+                  {"From structure to finish."}
+                </h2>
+              </div>
+              <span
+                style={{
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.6px",
+                  color: "#8d857a",
+                }}
+              >
+                {"DRAG THE HANDLE ↔"}
+              </span>
+            </div>
+            <div
+              data-rv={""}
+              data-cur={"DRAG"}
+              onPointerDown={v.baDown}
+              role="slider"
+              tabIndex={0}
+              aria-label="Explore project preparation and finished stone"
+              aria-valuemin={2}
+              aria-valuemax={98}
+              aria-valuenow={this.state.ba}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+                  e.preventDefault();
+                  this.setState({
+                    ba: Math.max(
+                      2,
+                      Math.min(
+                        98,
+                        this.state.ba + (e.key === "ArrowRight" ? 5 : -5),
+                      ),
+                    ),
+                  });
+                }
+              }}
+              onPointerMove={v.baMove}
+              onPointerUp={v.baUp}
+              onPointerCancel={v.baUp}
+              style={{
+                position: "relative",
+                width: "100%",
+                aspectRatio: "16/9",
+                maxHeight: "78vh",
+                background: "#1e1c19",
+                overflow: "hidden",
+                touchAction: "pan-y",
+                userSelect: "none",
+                opacity: "0",
+                transform: "translateY(40px)",
+                transition:
+                  "opacity 1s cubic-bezier(.16,1,.3,1),transform 1s cubic-bezier(.16,1,.3,1)",
+              }}
+            >
+              <div style={{ position: "absolute", inset: "0" }}>
+                <img
+                  id={"isv2-ba-after"}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  src={"/assets/design/img7.jpg"}
+                  alt={"Finished stone surface"}
+                  decoding={"async"}
+                />
+              </div>
+              <div
+                style={{ position: "absolute", inset: "0", clipPath: v.baClip }}
+              >
+                <img
+                  id={"isv2-ba-before"}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  src={"/assets/design/img5.jpg"}
+                  alt={"Structural preparation"}
+                  decoding={"async"}
+                />
+              </div>
+              <div
+                style={{
+                  position: "absolute",
+                  top: "0",
+                  bottom: "0",
+                  left: v.baPct,
+                  width: "2px",
+                  background: "#f6efdd",
+                  transform: "translateX(-1px)",
+                  pointerEvents: "none",
+                }}
+              >
+                <span
+                  style={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%,-50%)",
+                    width: "52px",
+                    height: "52px",
+                    borderRadius: "50%",
+                    background: "#a1563f",
+                    border: "2px solid #f6efdd",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    font: "700 13px 'JetBrains Mono',monospace",
+                    color: "#fff",
+                    letterSpacing: "-1px",
+                  }}
+                >
+                  {"↔"}
+                </span>
+              </div>
+              <span
+                style={{
+                  position: "absolute",
+                  top: "16px",
+                  left: "16px",
+                  padding: "5px 9px",
+                  background: "rgba(15,14,13,.85)",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.6px",
+                  color: "#f6efdd",
+                  pointerEvents: "none",
+                }}
+              >
+                {"PREPARATION"}
+              </span>
+              <span
+                style={{
+                  position: "absolute",
+                  top: "16px",
+                  right: "16px",
+                  padding: "5px 9px",
+                  background: "#a1563f",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.6px",
+                  color: "#fff",
+                  pointerEvents: "none",
+                }}
+              >
+                {"FINISHED SURFACE"}
+              </span>
+            </div>
+            <p
+              style={{
+                margin: "0",
+                maxWidth: "60ch",
+                font: "400 14px/1.5 'Source Sans 3',sans-serif",
+                color: "#8d857a",
+              }}
+            >
+              {
+                "Two project examples: structural preparation and a finished stone surface. Drag to explore each."
+              }
+            </p>
+          </div>
+        </section>
+        <section
+          data-process={""}
+          data-agent={"process"}
+          style={{
+            position: "relative",
+            zIndex: "7",
+            background: "#efeae1",
+            borderTop: "2px solid #a1563f",
+            boxShadow: "0 -40px 80px rgba(0,0,0,.25)",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "1400px",
+              margin: "0 auto",
+              padding: "clamp(100px,14vw,200px) 28px",
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))",
+              gap: "clamp(40px,5vw,90px)",
+              alignItems: "start",
+            }}
+          >
+            <div
+              data-rv={""}
+              style={{
+                position: "sticky",
+                top: "110px",
+                display: "flex",
+                flexDirection: "column",
+                gap: "24px",
+                minWidth: "0",
+              }}
+            >
+              <span
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                  font: "400 10px 'JetBrains Mono',monospace",
+                  letterSpacing: "1.8px",
+                  color: "#a1563f",
+                }}
+              >
+                <span
+                  style={{
+                    width: "26px",
+                    height: "2px",
+                    background: "#a1563f",
+                  }}
+                ></span>
+                {"[ 04 // PROCESS ]"}
+              </span>
+              <h2
+                style={{
+                  margin: "0",
+                  font: "400 clamp(52px,7.4vw,112px)/0.88 'Instrument Serif',serif",
+                  letterSpacing: "-0.045em",
+                }}
+              >
+                <span
+                  style={{
+                    display: "block",
+                    overflow: "hidden",
+                    paddingBottom: ".08em",
+                  }}
+                >
+                  <span
+                    data-rv-line={""}
+                    style={{
+                      display: "block",
+                      transform: "translateY(110%)",
+                      transition: "transform 1.1s cubic-bezier(.16,1,.3,1)",
+                    }}
+                  >
+                    {"How a"}
+                  </span>
+                </span>
+                <span
+                  style={{
+                    display: "block",
+                    overflow: "hidden",
+                    paddingBottom: ".08em",
+                  }}
+                >
+                  <span
                     data-rv-line={""}
                     style={{
                       display: "block",
