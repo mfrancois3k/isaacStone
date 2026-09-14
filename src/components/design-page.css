@@ -603,6 +603,30 @@ a:hover {
     transform: translateX(-50%);
   }
 }
+
+/* Independent marquees: these should never rely on the scroll animation loop. */
+[data-vmarq] {
+  animation: tick 28s linear infinite !important;
+  will-change: transform;
+}
+[data-ticker] {
+  animation: tick 36s linear infinite !important;
+  will-change: transform;
+}
+@media (hover: hover) and (pointer: fine) {
+  [data-vmarq]:hover,
+  [data-ticker]:hover {
+    animation-play-state: paused !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-vmarq],
+  [data-ticker] {
+    animation: none !important;
+    transform: none !important;
+  }
+}
+
 @keyframes lbFade {
   from {
     opacity: 0;
