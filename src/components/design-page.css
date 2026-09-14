@@ -927,3 +927,8 @@ select {
 .design-effect-43:focus-visible {
   border-bottom-color: #a1563f;
 }
+
+/* The voice sheet owns the mobile safe area while open; never leave a second fixed CTA underneath it. */
+[data-mobbar][data-agent-open] {
+  display: none !important;
+}
