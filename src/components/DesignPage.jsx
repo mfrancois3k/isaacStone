@@ -1603,10 +1603,14 @@ export default class DesignPage extends React.Component {
               }}
             >
               <div
+                data-rv-item={""}
                 style={{
                   display: "flex",
                   flexWrap: "wrap",
                   gap: "8px 18px",
+                  opacity: "0",
+                  transform: "translateY(18px)",
+                  transition: "transform .8s cubic-bezier(.16,1,.3,1) 0s,opacity .8s cubic-bezier(.16,1,.3,1) 0s",
                   alignItems: "center",
                   font: "400 10px 'JetBrains Mono',monospace",
                   letterSpacing: "1.6px",
@@ -1644,7 +1648,8 @@ export default class DesignPage extends React.Component {
                     style={{
                       display: "block",
                       transform: "translateY(110%)",
-                      transition: "transform .9s cubic-bezier(.16,1,.3,1)",
+                      opacity: "0",
+                      transition: "transform 1.6s cubic-bezier(.6,.01,-.05,.95) .35s,opacity 1.6s cubic-bezier(.6,.01,-.05,.95) .35s",
                     }}
                   >
                     {"Precision"}
@@ -1662,7 +1667,8 @@ export default class DesignPage extends React.Component {
                     style={{
                       display: "block",
                       transform: "translateY(110%)",
-                      transition: "transform .9s cubic-bezier(.16,1,.3,1) .08s",
+                      opacity: "0",
+                      transition: "transform 1.6s cubic-bezier(.6,.01,-.05,.95) .70s,opacity 1.6s cubic-bezier(.6,.01,-.05,.95) .70s",
                     }}
                   >
                     {"installation, "}
@@ -1683,7 +1689,8 @@ export default class DesignPage extends React.Component {
                     style={{
                       display: "block",
                       transform: "translateY(110%)",
-                      transition: "transform .9s cubic-bezier(.16,1,.3,1) .16s",
+                      opacity: "0",
+                      transition: "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 1.05s,opacity 1.6s cubic-bezier(.6,.01,-.05,.95) 1.05s",
                     }}
                   >
                     <em style={{ fontStyle: "italic", color: "#d9a58f" }}>
@@ -1693,9 +1700,13 @@ export default class DesignPage extends React.Component {
                 </span>
               </h1>
               <p
+                data-rv-item={""}
                 style={{
                   margin: "0",
                   maxWidth: "44ch",
+                  opacity: "0",
+                  transform: "translateY(18px)",
+                  transition: "transform .9s cubic-bezier(.16,1,.3,1) 1.40s,opacity .9s cubic-bezier(.16,1,.3,1) 1.40s",
                   font: "400 clamp(17px,1.3vw,20px)/1.55 'Source Sans 3',sans-serif",
                   color: "#d6cfc4",
                 }}
@@ -1705,10 +1716,14 @@ export default class DesignPage extends React.Component {
                 }
               </p>
               <span
+                data-rv-item={""}
                 style={{
                   display: "flex",
                   alignItems: "center",
                   gap: "9px",
+                  opacity: "0",
+                  transform: "translateY(14px)",
+                  transition: "transform .7s cubic-bezier(.16,1,.3,1) 1.72s,opacity .7s cubic-bezier(.16,1,.3,1) 1.72s",
                   font: "400 10px 'JetBrains Mono',monospace",
                   letterSpacing: "1.6px",
                   color: "#a89f92",
