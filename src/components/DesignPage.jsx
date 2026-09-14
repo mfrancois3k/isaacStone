@@ -323,7 +323,7 @@ export default class DesignPage extends React.Component {
     } else {
       this._inT = setTimeout(() => {
         this.setState({ loaderIn: true, loaderStage: 0 });
-        const steps = [60, 410, 760, 1110, 1460, 3160];
+        const steps = [60, 410, 760, 1110, 1460, 3160, 3510, 3860, 4210, 4560];
         this._stageTimers = steps.map((delay, index) =>
           setTimeout(() => this.setState({ loaderStage: index + 1 }), delay),
         );
@@ -689,7 +689,9 @@ export default class DesignPage extends React.Component {
           : s.loaderStage >= stage
             ? "translateY(0)"
             : "translateY(200px)",
-      titleShift: s.loaderStage >= 6 ? "translateY(0)" : "translateY(110%)",
+      titleOpacity: (stage) => (s.expanding ? 0 : s.loaderStage >= stage ? 1 : 0),
+      titleShift: (stage) =>
+        s.loaderStage >= stage ? "translateY(0)" : "translateY(110%)",
       collageOverflow: s.expanding ? "visible" : "hidden",
       centerShift: s.expanding
         ? this._centerFill || "scale(1)"
@@ -1136,6 +1138,7 @@ export default class DesignPage extends React.Component {
                     font: "700 clamp(42px,9vw,150px)/.8 Arial,sans-serif",
                     letterSpacing: "-0.075em",
                     color: "#2a2825",
+                    zIndex: "4",
                     pointerEvents: "none",
                   }}
                 >
@@ -1143,8 +1146,8 @@ export default class DesignPage extends React.Component {
                     data-stag={""}
                     style={{
                       display: "block",
-                      transform: v.titleShift,
-                      opacity: v.pieceOpacity,
+                      transform: v.titleShift(6),
+                      opacity: v.titleOpacity(6),
                       transition:
                         "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s",
                     }}
@@ -1156,10 +1159,10 @@ export default class DesignPage extends React.Component {
                     style={{
                       display: "block",
                       marginLeft: "12%",
-                      transform: v.titleShift,
-                      opacity: v.pieceOpacity,
+                      transform: v.titleShift(7),
+                      opacity: v.titleOpacity(7),
                       transition:
-                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) .35s,opacity .9s cubic-bezier(.6,.01,-.05,.95) .35s",
+                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s",
                     }}
                   >
                     {"Tailored"}
@@ -1169,10 +1172,10 @@ export default class DesignPage extends React.Component {
                     style={{
                       display: "inline-block",
                       marginLeft: "25%",
-                      transform: v.titleShift,
-                      opacity: v.pieceOpacity,
+                      transform: v.titleShift(8),
+                      opacity: v.titleOpacity(8),
                       transition:
-                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) .7s,opacity .9s cubic-bezier(.6,.01,-.05,.95) .7s",
+                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s",
                     }}
                   >
                     {"to"}
@@ -1181,10 +1184,10 @@ export default class DesignPage extends React.Component {
                     data-stag={""}
                     style={{
                       display: "inline-block",
-                      transform: v.titleShift,
-                      opacity: v.pieceOpacity,
+                      transform: v.titleShift(9),
+                      opacity: v.titleOpacity(9),
                       transition:
-                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 1.05s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 1.05s",
+                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s",
                     }}
                   >
                     {"Your"}
@@ -1193,10 +1196,10 @@ export default class DesignPage extends React.Component {
                     data-stag={""}
                     style={{
                       display: "inline-block",
-                      transform: v.titleShift,
-                      opacity: v.pieceOpacity,
+                      transform: v.titleShift(10),
+                      opacity: v.titleOpacity(10),
                       transition:
-                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 1.4s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 1.4s",
+                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s",
                     }}
                   >
                     {"Home"}
