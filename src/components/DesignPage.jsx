@@ -205,6 +205,7 @@ export default class DesignPage extends React.Component {
     loaderExiting: false,
     loaderDone: false,
     loaderIn: false,
+    loaderStage: 0,
     expanding: false,
     frame: 0,
     ba: 50,
@@ -320,17 +321,23 @@ export default class DesignPage extends React.Component {
         this.startMotion();
       });
     } else {
-      this._inT = setTimeout(() => this.setState({ loaderIn: true }), 20);
+      this._inT = setTimeout(() => {
+        this.setState({ loaderIn: true, loaderStage: 0 });
+        const steps = [60, 760, 1460, 2160, 2860, 3740];
+        this._stageTimers = steps.map((delay, index) =>
+          setTimeout(() => this.setState({ loaderStage: index + 1 }), delay),
+        );
+      }, 20);
       this._t0 = performance.now();
       this._tick = setInterval(() => {
         const elapsed = performance.now() - this._t0;
         // Let the craft-focused reveal breathe. The loader is part of the
         // first impression, so it should not flash past once the page is warm.
-        const t = clamp01((elapsed - 180) / 4400);
+        const t = clamp01((elapsed - 180) / 5100);
         const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         const progress = Math.min(
           this._loaded ? 100 : 99,
-          this._loaded && elapsed >= 4200 ? 100 : Math.round(eased * 100),
+          this._loaded && elapsed >= 4900 ? 100 : Math.round(eased * 100),
         );
         if (progress !== this.state.progress) this.setState({ progress });
         if (progress === 100) this.finishLoader();
@@ -355,6 +362,7 @@ export default class DesignPage extends React.Component {
     clearTimeout(this._exit);
     clearTimeout(this._unmount);
     clearTimeout(this._inT);
+    this._stageTimers?.forEach(clearTimeout);
     clearTimeout(this._hintT);
     if (this._io) this._io.disconnect();
     if (this._ro) this._ro.disconnect();
@@ -382,6 +390,7 @@ export default class DesignPage extends React.Component {
       return;
     }
     if (this.state.expanding || this.state.loaderDone) return;
+    this._stageTimers?.forEach(clearTimeout);
     clearInterval(this._tick);
     clearTimeout(this._exit);
     // FLIP: measure the centre piece and compute the transform that fills the viewport
@@ -672,26 +681,28 @@ export default class DesignPage extends React.Component {
       stop: (e) => e.stopPropagation(),
       loaderActive: !s.loaderDone,
       loaderPointer: s.expanding ? "none" : "auto",
-      pieceOpacity: s.expanding ? 0 : s.loaderIn ? 1 : 0,
-      pieceShift: s.expanding
-        ? "translateY(-40px) scale(.96)"
-        : s.loaderIn
-          ? "translateY(0)"
-          : "translateY(200px)",
-      titleShift: s.loaderIn ? "translateY(0)" : "translateY(110%)",
+      pieceOpacity: s.expanding ? 0 : s.loaderStage >= 6 ? 1 : 0,
+      imageOpacity: (stage) => (s.expanding ? 0 : s.loaderStage >= stage ? 1 : 0),
+      imageShift: (stage) =>
+        s.expanding
+          ? "translateY(-40px) scale(.96)"
+          : s.loaderStage >= stage
+            ? "translateY(0)"
+            : "translateY(200px)",
+      titleShift: s.loaderStage >= 6 ? "translateY(0)" : "translateY(110%)",
       collageOverflow: s.expanding ? "visible" : "hidden",
       centerShift: s.expanding
         ? this._centerFill || "scale(1)"
-        : s.loaderIn
+        : s.loaderStage >= 5
           ? "translateY(0) scale(1)"
-          : "translateY(46px) scale(.96)",
+          : "translateY(200px)",
       shellClip: s.loaderExiting ? "inset(0 0 100% 0)" : "inset(0 0 0 0)",
-      centerDur: s.expanding ? "0.45s" : "1.6s",
-      centerDelay: s.expanding ? "0s" : "1.4s",
+      centerDur: s.expanding ? "0.45s" : "0.7s",
+      centerDelay: "0s",
       centerEase: s.expanding
         ? "cubic-bezier(.76,0,.24,1)"
         : "cubic-bezier(.16,1,.3,1)",
-      centerOpacity: s.loaderIn ? 1 : 0,
+      centerOpacity: s.expanding ? 0 : s.loaderStage >= 5 ? 1 : 0,
       progress: Math.round(s.progress),
       progressPct: s.progress + "%",
       loaderMessage: LOADER_LINES[li],
@@ -968,10 +979,10 @@ export default class DesignPage extends React.Component {
                     height: "37%",
                     overflow: "hidden",
                     background: "#e9e7e2",
-                    opacity: v.pieceOpacity,
-                    transform: v.pieceShift,
+                    opacity: v.imageOpacity(1),
+                    transform: v.imageShift(1),
                     transition:
-                      "opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s,transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s",
+                      "opacity .45s cubic-bezier(.6,.01,-.05,.95) 0s,transform .62s cubic-bezier(.6,.01,-.05,.95) 0s",
                   }}
                 >
                   <img
@@ -998,10 +1009,10 @@ export default class DesignPage extends React.Component {
                     height: "38%",
                     overflow: "hidden",
                     background: "#e9e7e2",
-                    opacity: v.pieceOpacity,
-                    transform: v.pieceShift,
+                    opacity: v.imageOpacity(2),
+                    transform: v.imageShift(2),
                     transition:
-                      "opacity .9s cubic-bezier(.6,.01,-.05,.95) .35s,transform 1.6s cubic-bezier(.6,.01,-.05,.95) .35s",
+                      "opacity .45s cubic-bezier(.6,.01,-.05,.95) 0s,transform .62s cubic-bezier(.6,.01,-.05,.95) 0s",
                   }}
                 >
                   <img
@@ -1028,10 +1039,10 @@ export default class DesignPage extends React.Component {
                     height: "22%",
                     overflow: "hidden",
                     background: "#e9e7e2",
-                    opacity: v.pieceOpacity,
-                    transform: v.pieceShift,
+                    opacity: v.imageOpacity(3),
+                    transform: v.imageShift(3),
                     transition:
-                      "opacity .9s cubic-bezier(.6,.01,-.05,.95) .7s,transform 1.6s cubic-bezier(.6,.01,-.05,.95) .7s",
+                      "opacity .45s cubic-bezier(.6,.01,-.05,.95) 0s,transform .62s cubic-bezier(.6,.01,-.05,.95) 0s",
                   }}
                 >
                   <img
@@ -1058,10 +1069,10 @@ export default class DesignPage extends React.Component {
                     height: "20%",
                     overflow: "hidden",
                     background: "#e9e7e2",
-                    opacity: v.pieceOpacity,
-                    transform: v.pieceShift,
+                    opacity: v.imageOpacity(4),
+                    transform: v.imageShift(4),
                     transition:
-                      "opacity .9s cubic-bezier(.6,.01,-.05,.95) 1.05s,transform 1.6s cubic-bezier(.6,.01,-.05,.95) 1.05s",
+                      "opacity .45s cubic-bezier(.6,.01,-.05,.95) 0s,transform .62s cubic-bezier(.6,.01,-.05,.95) 0s",
                   }}
                 >
                   <img
