@@ -254,6 +254,9 @@ export function WamyDialog() {
         aria-label="Talk with Wamy"
       >
         <img src="/assets/wamy/idle.png" alt="" width="58" height="58" />
+        <span className="wamy-launcher-particles" aria-hidden="true">
+          {Array.from({ length: 9 }, (_, index) => <i key={index} />)}
+        </span>
         <span>
           Talk with Wamy<small>LET’S TALK ABOUT YOUR SPACE</small>
         </span>

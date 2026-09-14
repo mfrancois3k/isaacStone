@@ -341,12 +341,16 @@ h1[tabindex="-1"]:focus {
 /* Shared interaction finish: stable hit areas, explicit focus and honest draft feedback. */
 #contact, #reviews { position: relative !important; top: auto !important; }
 :root{--isaac-ease-out:cubic-bezier(.23,1,.32,1);--isaac-press-duration:160ms;}
-.reel-trigger{display:block;width:100%;padding:0;text-align:inherit;color:inherit;font:inherit;}
+.reel-trigger{display:block;position:relative;width:100%;padding:0;text-align:inherit;color:inherit;font:inherit;overflow:hidden;}
 .reel-trigger:focus-visible,.work-project-trigger:focus-visible{outline:3px solid #e5b299;outline-offset:5px;}
+[data-htrack]>figure,#isv-header a,.reel-trigger{isolation:isolate;}
+#isv-header a{position:relative;}
+#isv-header a::after{content:"";position:absolute;left:0;right:0;bottom:-7px;height:1px;background:#dca58d;transform:scaleX(0);transform-origin:left;transition:transform .2s var(--isaac-ease-out);}
 [data-htrack]>figure{position:relative;}
-.work-project-trigger{position:absolute;inset:0;width:100%;border:0;padding:0;background:transparent;color:#f6efdd;cursor:pointer;text-align:left;}
-.work-project-trigger>span:first-child{position:absolute;left:16px;bottom:76px;background:#1c1a17;padding:9px 13px;font:600 13px 'Source Sans 3',sans-serif;opacity:0;transform:translateY(6px);transition:opacity .2s var(--isaac-ease-out),transform .2s var(--isaac-ease-out);}
-.work-project-trigger>span:last-child{position:absolute;right:14px;top:14px;display:grid;place-items:center;width:36px;height:36px;border:1px solid #ffffff80;border-radius:50%;background:#1c1a1780;font-size:20px;}
+.work-project-trigger{position:absolute;inset:0;width:100%;border:0;padding:0;background:transparent;color:#f6efdd;cursor:pointer;text-align:left;overflow:hidden;}
+.work-project-trigger::after,.reel-trigger::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(108deg,transparent 35%,#fff3 50%,transparent 65%);opacity:0;transform:translateX(-112%);transition:transform .32s var(--isaac-ease-out),opacity .18s var(--isaac-ease-out);}
+.work-project-trigger>span:first-child{position:absolute;z-index:2;left:16px;bottom:76px;background:#1c1a17;padding:9px 13px;font:600 13px 'Source Sans 3',sans-serif;opacity:0;transform:translateY(6px);transition:opacity .2s var(--isaac-ease-out),transform .2s var(--isaac-ease-out);}
+.work-project-trigger>span:last-child{position:absolute;z-index:2;right:14px;top:14px;display:grid;place-items:center;width:36px;height:36px;border:1px solid #ffffff80;border-radius:50%;background:#1c1a1780;font-size:20px;}
 .work-project-trigger:focus-visible>span:first-child{opacity:1;transform:none;}
 .magnetic-face{display:inline-flex;align-items:center;justify-content:inherit;gap:inherit;transition:transform .25s var(--isaac-ease-out);pointer-events:none;}
 #isv-header button,[data-process] a,#contact button,#contact a,.reel-trigger{transition:scale var(--isaac-press-duration) var(--isaac-ease-out);}
@@ -360,5 +364,5 @@ h1[tabindex="-1"]:focus {
 .estimate-review-actions a,.estimate-review-actions button{padding:13px 16px;border:1px solid #a1563f;background:#a1563f;color:#fff6e6;font:600 15px 'Source Sans 3',sans-serif;text-decoration:none;cursor:pointer;}
 .estimate-review-actions button{background:none;color:#6d392c;}.estimate-review>p{font:400 14px/1.5 'Source Sans 3',sans-serif;}
 @keyframes estimate-appear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-@media(hover:hover) and (pointer:fine){.work-project-trigger:hover>span:first-child{opacity:1;transform:none;}}
-@media(prefers-reduced-motion:reduce){.magnetic-face{transform:none!important;}#isv-header button:active,#contact button:active,#contact a:active,.reel-trigger:active{scale:1;}.estimate-review{animation:none;}}
+@media(hover:hover) and (pointer:fine){#isv-header a:hover::after{transform:scaleX(1);}.work-project-trigger:hover>span:first-child{opacity:1;transform:none;}.work-project-trigger:hover::after,.reel-trigger:hover::after{opacity:1;transform:translateX(112%);}}
+@media(prefers-reduced-motion:reduce){.magnetic-face{transform:none!important;}#isv-header button:active,#contact button:active,#contact a:active,.reel-trigger:active{scale:1;}.estimate-review{animation:none;}#isv-header a::after,.work-project-trigger::after,.reel-trigger::after{transition:none;transform:none;opacity:0;}}
