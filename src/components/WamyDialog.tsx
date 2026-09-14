@@ -300,15 +300,22 @@ export function WamyDialog() {
             <p className="wamy-status" role="status">
               {status}
             </p>
-            {voice.error && (
-              <p className="wamy-note" role="alert">
-                {voice.error}
+            {(voice.error || voice.notice) && (
+              <p className="wamy-note" role={voice.error ? "alert" : "status"}>
+                {voice.error || voice.notice}
               </p>
             )}
-            <div className="wamy-current" aria-live="off">
+            <div key={lastBot?.id ?? "welcome"} className="wamy-current wamy-message-in" aria-live="off">
               {lastBot?.text ||
                 "A beautiful space begins with a conversation. Share your ideas, ask a question, or plan an estimate."}
             </div>
+            {messages.some((m) => m.sender === "user") && !review && (
+              <button className="wamy-request-cta" onClick={() => { voice.stop(); openReview(); }}>
+                <span>Request an estimate</span>
+                <small>Review the details, then send them to the team</small>
+                <ArrowUpRight size={18} aria-hidden="true" />
+              </button>
+            )}
             <div className="wamy-reveal" hidden={messages.length === 0} inert={messages.length === 0}>
               <details className="wamy-history">
                 <summary>
@@ -328,7 +335,7 @@ export function WamyDialog() {
               <form className="wamy-review" onSubmit={submitRequest}>
                 <h3>Review your request</h3>
                 <p>
-                  Wamy included your conversation. Confirm the details below and the team receives a new lead right away.
+                  Wamy included your conversation. Confirm the details below, then send the estimate request to the team. A team member confirms any appointment time.
                 </p>
                 <label>Name <input required value={request.name} onChange={(e) => setRequest((v) => ({ ...v, name: e.target.value }))} /></label>
                 <label>Phone <input required type="tel" value={request.phone} onChange={(e) => setRequest((v) => ({ ...v, phone: e.target.value }))} /></label>
@@ -371,9 +378,9 @@ export function WamyDialog() {
           <footer className="wamy-controls">
             <div className="wamy-actions">
               {voice.active ? (
-                <button className="wamy-primary" onClick={voice.stop}>
+                <button className="wamy-primary" onClick={() => { voice.stop(); if (messages.some((m) => m.sender === "user")) openReview(); }}>
                   <PhoneOff size={17} />
-                  End conversation
+                  Review request
                 </button>
               ) : (
                 <button
@@ -401,16 +408,6 @@ export function WamyDialog() {
                 <button onClick={voice.toggleMute} aria-pressed={voice.muted}>
                   {voice.muted ? <MicOff size={15} /> : <Mic size={15} />}{" "}
                   {voice.muted ? "Resume microphone" : "Mute microphone"}
-                </button>
-              )}
-              {messages.some((m) => m.sender === "user") && (
-                <button
-                  onClick={() => {
-                    voice.stop();
-                    review ? setReview(false) : openReview();
-                  }}
-                >
-                  Review project request
                 </button>
               )}
               <a href="tel:+16315305883">Call the team ↗</a>

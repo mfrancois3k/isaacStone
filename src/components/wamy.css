@@ -123,6 +123,23 @@
   margin: -4px auto -6px;
   flex: none;
 }
+.marble-stage::before,
+.marble-stage::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  inset: 29px 37px 16px;
+  border: 1px solid #b16a4f55;
+  border-radius: 48% 52% 53% 47%;
+  pointer-events: none;
+  opacity: .3;
+}
+.marble-stage::after { inset: 41px 50px 28px; border-color: #eee4d388; }
+.marble-stage[data-state="listening"]::before { animation: wamy-listen 2.2s ease-in-out infinite; }
+.marble-stage[data-state="thinking"]::before { animation: wamy-orbit 1.5s linear infinite; border-style: dashed; }
+.marble-stage[data-state="speaking"]::before { animation: wamy-speak .7s ease-in-out infinite alternate; border-color: #a1563f99; }
+.marble-stage[data-state="speaking"]::after { animation: wamy-orbit 2.3s linear infinite reverse; }
+.marble-stage[data-state="paused"] { filter: saturate(.72); }
 .marble-stage canvas,
 .marble-stage > img {
   position: absolute;
@@ -171,6 +188,26 @@
   overflow-y: auto;
   text-wrap: pretty;
 }
+.wamy-message-in { animation: wamy-message-in .32s cubic-bezier(.23,1,.32,1); }
+.wamy-request-cta {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  width: 100%;
+  margin-top: 14px;
+  padding: 13px 16px;
+  text-align: left;
+  color: #fff;
+  background: linear-gradient(110deg, #9e523b, #b96849);
+  border: 1px solid #8b432e;
+  border-radius: 13px;
+  box-shadow: 0 9px 22px #8b432e2e;
+  cursor: pointer;
+  animation: wamy-cta-in .4s cubic-bezier(.23,1,.32,1);
+}
+.wamy-request-cta span { font: 600 16px "Source Sans 3", sans-serif; }
+.wamy-request-cta small { grid-column: 1; margin-top: 2px; font: 12px/1.3 "Source Sans 3", sans-serif; opacity: .88; }
+.wamy-request-cta svg { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
 .wamy-history {
   font-size: 14px;
   text-align: left;
@@ -366,6 +403,11 @@
     transform: none;
   }
 }
+@keyframes wamy-listen { 50% { transform: scale(1.09); opacity: .78; border-color: #a1563f99; } }
+@keyframes wamy-speak { to { transform: scale(1.16); opacity: .82; box-shadow: 0 0 0 12px #a1563f10; } }
+@keyframes wamy-orbit { to { rotate: 360deg; } }
+@keyframes wamy-message-in { from { opacity: 0; transform: translateY(7px); } }
+@keyframes wamy-cta-in { from { opacity: 0; transform: translateY(9px) scale(.98); } }
 @media (hover: hover) {
   .wamy-launcher:hover {
     transform: translateY(-3px);
@@ -498,4 +540,5 @@
   .wamy-reveal, .wamy-history::details-content { transition: none; transform: none; }
   .wamy-dialog button:not(.marble-hit):active, .wamy-launcher:active { scale: 1; }
   .wamy-dialog button:not(.marble-hit), .wamy-launcher { transition: none; }
+  .marble-stage::before, .marble-stage::after, .wamy-message-in, .wamy-request-cta { animation: none; }
 }
