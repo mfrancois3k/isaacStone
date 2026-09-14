@@ -60,7 +60,8 @@ export function startSiteMotion(root, reduced) {
     if (number) number.style.transition = "color .45s ease,transform .7s cubic-bezier(.16,1,.3,1),-webkit-text-stroke .45s ease";
     if (content) content.style.transition = "transform .7s cubic-bezier(.16,1,.3,1),opacity .55s ease";
   });
-  const tickers = all("[data-vmarq],[data-ticker]").map((el) => ({ el, x: 0 }));
+  // Marquees use CSS animation so they keep moving even if scroll motion is unavailable.
+  const tickers = [];
   const dot = one("#isv-cur-dot"),
     ring = one("#isv-cur-ring"),
     label = one("#isv-cur-label");
