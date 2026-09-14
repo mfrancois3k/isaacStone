@@ -48,6 +48,18 @@ export function startSiteMotion(root, reduced) {
   const craft = one('[data-craft-section]'), craftImage = one('[data-craft-image]'),
     craftDetail = one('[data-craft-detail]'), craftRule = one('[data-craft-rule]');
   if (reduced) { put(craftImage, 'transform', 'scale(1)'); put(craftDetail, 'opacity', '0'); put(craftRule, 'transform', 'scaleX(1)'); }
+  // Process timeline: each stage owns a concise focus state while its portion
+  // of the line is being drawn. These transitions are deliberately separate
+  // from the page loader and hero choreography.
+  steps.forEach((step) => {
+    step.style.transition = "opacity .55s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1),background-color .55s ease";
+    const marker = step.firstElementChild;
+    const number = marker?.nextElementSibling;
+    const content = step.lastElementChild;
+    if (marker) marker.style.transition = "background-color .35s ease,transform .55s cubic-bezier(.16,1,.3,1),box-shadow .55s ease";
+    if (number) number.style.transition = "color .45s ease,transform .7s cubic-bezier(.16,1,.3,1),-webkit-text-stroke .45s ease";
+    if (content) content.style.transition = "transform .7s cubic-bezier(.16,1,.3,1),opacity .55s ease";
+  });
   const tickers = all("[data-vmarq],[data-ticker]").map((el) => ({ el, x: 0 }));
   const dot = one("#isv-cur-dot"),
     ring = one("#isv-cur-ring"),
@@ -421,23 +433,41 @@ export function startSiteMotion(root, reduced) {
         }
       });
       if (scrollChanged) {
-        if (processRect && line)
-          put(line, "transform", `scaleY(${clamp((vh * 0.7 - processRect.top) / processRect.height)})`);
-        steps.forEach((el, i) => {
-          const on = stepRects[i].top < vh * 0.7;
-          put(el, "opacity", on ? "1" : ".35");
-          const dot = el.firstElementChild;
-          const number = dot?.nextElementSibling;
-          if (number) {
-            put(number, "color", on ? "#a1563f" : "#857e72");
-            put(number, "transform", on ? "scale(1.04)" : "scale(1)");
-          }
-          if (dot) {
-            put(dot, "transform", on ? "scale(1.4)" : "scale(1)");
-            put(dot, "background", on ? "#a1563f" : "#d8d1c4");
-            put(dot, "color", on ? "#a1563f" : "");
-          }
-        });
+        if (processRect && line) {
+          const lineProgress = clamp((vh * 0.72 - processRect.top) / Math.max(1, processRect.height * .86));
+          put(line, "transform", `scaleY(${lineProgress})`);
+          const currentStep = Math.max(0, steps.reduce((active, step, index) =>
+            stepRects[index].top < vh * .62 ? index : active, -1));
+          steps.forEach((el, i) => {
+            const rect = stepRects[i];
+            const enter = clamp((vh * .88 - rect.top) / Math.max(1, vh * .45));
+            const isActive = i === currentStep && rect.bottom > vh * .18;
+            const isPast = i < currentStep;
+            el.toggleAttribute("data-active", isActive);
+            if (isActive) el.setAttribute("aria-current", "step");
+            else el.removeAttribute("aria-current");
+            put(el, "opacity", isActive ? "1" : isPast ? ".62" : String(.25 + enter * .28));
+            put(el, "transform", `translateY(${(1 - enter) * 24}px)`);
+            put(el, "background", isActive ? "linear-gradient(90deg,rgba(161,86,63,.11),rgba(161,86,63,0) 72%)" : "transparent");
+            const marker = el.firstElementChild;
+            const number = marker?.nextElementSibling;
+            const content = el.lastElementChild;
+            if (number) {
+              put(number, "color", isActive ? "#a1563f" : isPast ? "#857e72" : "transparent");
+              put(number, "WebkitTextStroke", isActive ? "0" : "1px #2a2825");
+              put(number, "transform", `translateY(${(1 - enter) * 12}px) scale(${isActive ? 1.06 : 1})`);
+            }
+            if (content) {
+              put(content, "opacity", isActive ? "1" : isPast ? ".72" : String(.34 + enter * .36));
+              put(content, "transform", `translateY(${(1 - enter) * 18}px)`);
+            }
+            if (marker) {
+              put(marker, "transform", `scale(${isActive ? 1.7 : isPast ? 1.12 : 1})`);
+              put(marker, "background", isActive ? "#a1563f" : isPast ? "#b77c69" : "#d8d1c4");
+              put(marker, "boxShadow", isActive ? "0 0 0 7px rgba(161,86,63,.12)" : "none");
+            }
+          });
+        }
         if (craftRect) {
           const p = clamp(-craftRect.top / Math.max(1, craftRect.height - vh));
           put(craftImage, 'transform', `scale(${1.65 - p * .65})`);
