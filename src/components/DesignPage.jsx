@@ -586,7 +586,14 @@ export default class DesignPage extends React.Component {
   startMotion() {
     if (this._motionStarted) return;
     this._motionStarted = true;
-    this._disposeMotion = startSiteMotion(document.body, this.reduced);
+    try {
+      this._disposeMotion = startSiteMotion(document.body, this.reduced);
+    } catch (error) {
+      // Motion is progressive enhancement. Never let a browser-specific
+      // animation error keep the loader from handing visitors to the site.
+      this._motionStarted = false;
+      console.error("Site motion failed to start", error);
+    }
   }
 
   renderVals() {
