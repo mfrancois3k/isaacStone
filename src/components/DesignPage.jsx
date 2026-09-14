@@ -1128,23 +1128,21 @@ export default class DesignPage extends React.Component {
                 <h2
                   style={{
                     position: "absolute",
-                    left: "0",
-                    right: "0",
-                    top: "14.5%",
+                    left: "5%",
+                    right: "5%",
+                    top: "7%",
                     margin: "0",
-                    textAlign: "center",
-                    font: "400 clamp(20px,4.2vw,58px)/1 'Instrument Serif',serif",
-                    letterSpacing: "-0.02em",
+                    textAlign: "left",
+                    font: "700 clamp(42px,9vw,150px)/.8 Arial,sans-serif",
+                    letterSpacing: "-0.075em",
                     color: "#2a2825",
-                    overflow: "hidden",
-                    paddingBottom: ".1em",
                     pointerEvents: "none",
                   }}
                 >
                   <span
                     data-stag={""}
                     style={{
-                      display: "inline-block",
+                      display: "block",
                       transform: v.titleShift,
                       opacity: v.pieceOpacity,
                       transition:
@@ -1156,7 +1154,8 @@ export default class DesignPage extends React.Component {
                   <span
                     data-stag={""}
                     style={{
-                      display: "inline-block",
+                      display: "block",
+                      marginLeft: "12%",
                       transform: v.titleShift,
                       opacity: v.pieceOpacity,
                       transition:
@@ -1169,6 +1168,7 @@ export default class DesignPage extends React.Component {
                     data-stag={""}
                     style={{
                       display: "inline-block",
+                      marginLeft: "25%",
                       transform: v.titleShift,
                       opacity: v.pieceOpacity,
                       transition:

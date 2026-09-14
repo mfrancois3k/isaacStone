@@ -46,14 +46,14 @@
   }
 
   [data-collage] h2 {
-    top: 6% !important;
-    padding: 0 7% !important;
-    font-size: clamp(28px, 8vw, 36px) !important;
-    line-height: .94 !important;
+    top: 7% !important;
+    padding: 0 3% !important;
+    font-size: clamp(48px, 14vw, 68px) !important;
+    line-height: .8 !important;
   }
 
   [data-collage] h2 span {
-    margin-right: .16em;
+    margin-right: .08em;
   }
 }
 
