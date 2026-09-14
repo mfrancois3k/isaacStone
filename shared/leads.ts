@@ -17,6 +17,10 @@ export interface LeadRecord {
   projectType?: string;
   preferredCallTime?: string;
   notes?: string;
+  /** The visitor explicitly asked for a transactional SMS confirmation. */
+  customerSmsConsent: boolean;
+  /** Kept intentionally simple for the MVP; the team works the new-lead inbox. */
+  status: 'new';
 }
 
 const str = (value: unknown): string =>
@@ -53,12 +57,14 @@ export function buildLead(body: unknown): LeadRecord {
     id: `lead-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     createdAt: new Date().toISOString(),
     source: raw.source === 'chat' ? 'chat' : 'form',
+    status: 'new',
     name: str(raw.name),
     phone: str(raw.phone),
     ...(email ? { email } : {}),
     ...(projectType ? { projectType } : {}),
     ...(preferredCallTime ? { preferredCallTime } : {}),
     ...(notes ? { notes } : {}),
+    customerSmsConsent: raw.customerSmsConsent === true,
   };
 }
 

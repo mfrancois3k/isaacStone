@@ -18,6 +18,15 @@ interface Message {
   sender: "user" | "bot";
   text: string;
 }
+interface RequestDraft {
+  name: string;
+  phone: string;
+  email: string;
+  projectType: string;
+  preferredCallTime: string;
+  notes: string;
+  customerSmsConsent: boolean;
+}
 export function WamyDialog() {
   const dialog = useRef<HTMLDialogElement>(null);
   const opener = useRef<HTMLElement | null>(null);
@@ -27,6 +36,10 @@ export function WamyDialog() {
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [review, setReview] = useState(false);
+  const [sendingRequest, setSendingRequest] = useState(false);
+  const [request, setRequest] = useState<RequestDraft>({
+    name: '', phone: '', email: '', projectType: '', preferredCallTime: '', notes: '', customerSmsConsent: false,
+  });
   const [note, setNote] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const abort = useRef<AbortController | null>(null);
@@ -182,14 +195,45 @@ export function WamyDialog() {
     setTyping(false);
     void voice.start();
   };
-  const prepareEmail = () => {
-    const body = messages
+  const openReview = () => {
+    const transcript = messages
       .map((m) => `${m.sender === "bot" ? "Wamy" : "You"}: ${m.text}`)
       .join("\n\n");
-    window.location.href = `mailto:jafet.tile@gmail.com?subject=${encodeURIComponent("Estimate request — Isaac Stone and Tile")}&body=${encodeURIComponent(body)}`;
-    setNote(
-      "Your email app has opened with the conversation. Review and send the email there.",
-    );
+    setRequest({
+      name: details.name ?? '',
+      phone: details.phone ?? '',
+      email: details.email ?? '',
+      projectType: details.project ?? '',
+      preferredCallTime: details.timing ?? '',
+      notes: transcript,
+      customerSmsConsent: false,
+    });
+    setNote('');
+    setReview(true);
+  };
+  const submitRequest = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!request.name.trim() || !request.phone.trim() || sendingRequest) {
+      setNote('Please add your name and a number the team can call.');
+      return;
+    }
+    setSendingRequest(true);
+    setNote('');
+    try {
+      const response = await fetch('/api/leads/book-call', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...request, source: 'chat' }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(typeof data?.error === 'string' ? data.error : 'Could not send your request.');
+      setNote(typeof data?.message === 'string' ? data.message : 'Your request is with the team.');
+      setReview(false);
+    } catch (error) {
+      setNote(error instanceof Error ? error.message : 'Could not send your request. Please call (631) 530-5883.');
+    } finally {
+      setSendingRequest(false);
+    }
   };
   return (
     <>
@@ -273,28 +317,21 @@ export function WamyDialog() {
               </details>
             )}
             {review && (
-              <section className="wamy-review">
+              <form className="wamy-review" onSubmit={submitRequest}>
                 <h3>Review your request</h3>
                 <p>
-                  {[
-                    details.name,
-                    details.phone,
-                    details.email,
-                    details.project,
-                    details.timing,
-                  ]
-                    .filter(Boolean)
-                    .join(" · ") ||
-                    "Your conversation will be included in an email draft for the team."}
+                  Wamy included your conversation. Confirm the details below and the team receives a new lead right away.
                 </p>
-                <p>
-                  You can review and edit the full conversation in your email
-                  app before sending.
-                </p>
-                <button className="wamy-secondary" onClick={prepareEmail}>
-                  Prepare estimate email <ArrowUpRight size={16} />
+                <label>Name <input required value={request.name} onChange={(e) => setRequest((v) => ({ ...v, name: e.target.value }))} /></label>
+                <label>Phone <input required type="tel" value={request.phone} onChange={(e) => setRequest((v) => ({ ...v, phone: e.target.value }))} /></label>
+                <label>Email <input type="email" value={request.email} onChange={(e) => setRequest((v) => ({ ...v, email: e.target.value }))} /></label>
+                <label>Project <input value={request.projectType} onChange={(e) => setRequest((v) => ({ ...v, projectType: e.target.value }))} /></label>
+                <label>Best time to call <input value={request.preferredCallTime} onChange={(e) => setRequest((v) => ({ ...v, preferredCallTime: e.target.value }))} /></label>
+                <label className="wamy-consent"><input type="checkbox" checked={request.customerSmsConsent} onChange={(e) => setRequest((v) => ({ ...v, customerSmsConsent: e.target.checked }))} /> Text me a confirmation about this request.</label>
+                <button className="wamy-secondary" disabled={sendingRequest}>
+                  {sendingRequest ? 'Sending…' : 'Send request to the team'} <ArrowUpRight size={16} />
                 </button>
-              </section>
+              </form>
             )}
             {note && (
               <p className="wamy-note" role="status">
@@ -362,7 +399,7 @@ export function WamyDialog() {
                 <button
                   onClick={() => {
                     voice.stop();
-                    setReview(!review);
+                    review ? setReview(false) : openReview();
                   }}
                 >
                   Review project request

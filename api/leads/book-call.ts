@@ -6,6 +6,7 @@ import {
   missingFieldsMessage,
   missingLeadFields,
 } from '../../shared/leads.js';
+import { hasHostedLeadSink, notifyLead } from '../../shared/lead-notifications.js';
 
 /**
  * Estimate requests, on the hosted deployment.
@@ -13,9 +14,8 @@ import {
  * The local server appends leads to data/leads.jsonl. That cannot work here:
  * a serverless filesystem is ephemeral, so a lead written to disk is gone the
  * moment the function is recycled. Rather than accept a request and quietly
- * drop it, this handler forwards to LEAD_WEBHOOK_URL, and refuses honestly
- * when no sink is configured — a visitor who is told to call gets their job
- * quoted; a visitor who is told "thanks, we have it" does not.
+ * drop it, this handler requires either a webhook lead list or a successfully
+ * delivered owner email, and refuses honestly when neither is configured.
  */
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -30,8 +30,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const lead = buildLead(req.body);
 
   const sink = process.env.LEAD_WEBHOOK_URL;
-  if (!sink) {
-    console.error('[LEAD] LEAD_WEBHOOK_URL is not configured — request refused, nothing stored.');
+  if (!hasHostedLeadSink()) {
+    console.error('[LEAD] no durable delivery destination is configured — request refused.');
     return res.status(503).json({
       error:
         'Our online form is not taking requests right now. Please call (631) 530-5883 — we answer the phone ourselves, Monday to Saturday.',
@@ -39,17 +39,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const response = await fetch(sink, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(lead),
-    });
-
-    if (!response.ok) {
-      throw new Error(`lead sink responded ${response.status}`);
+    // A webhook is the durable source of truth when configured. If the owner
+    // email inbox is the chosen MVP inbox, Resend delivery below is the sink.
+    if (sink) {
+      const response = await fetch(sink, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lead),
+      });
+      if (!response.ok) throw new Error(`lead sink responded ${response.status}`);
     }
 
-    console.log(`[LEAD] ${lead.source} request from ${lead.name} forwarded as ${lead.id}`);
+    const notifications = await notifyLead(lead);
+    if (!sink && notifications.ownerEmail !== 'sent') {
+      throw new Error('owner email could not be delivered');
+    }
+
+    console.log(`[LEAD] ${lead.source} request from ${lead.name} accepted as ${lead.id}`, notifications);
     return res.status(200).json({
       success: true,
       id: lead.id,
