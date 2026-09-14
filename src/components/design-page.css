@@ -1,3 +1,62 @@
+/* Mobile loader: turn the desktop-wide collage into a full, editorial portrait
+   composition. Each tile keeps its timed reveal from DesignPage.jsx. */
+@media (max-width: 600px) {
+  [data-collage] {
+    width: min(100vw, calc(100svh * .92)) !important;
+    aspect-ratio: 4 / 5 !important;
+  }
+
+  [data-collage] [data-piece]:nth-child(1) {
+    left: 5% !important;
+    top: 18% !important;
+    width: 31% !important;
+    height: 28% !important;
+    z-index: 1;
+  }
+
+  [data-collage] [data-piece]:nth-child(2) {
+    left: 64% !important;
+    top: 13% !important;
+    width: 30% !important;
+    height: 31% !important;
+    z-index: 1;
+  }
+
+  [data-collage] [data-piece]:nth-child(3) {
+    left: 7% !important;
+    top: 66% !important;
+    width: 40% !important;
+    height: 20% !important;
+    z-index: 1;
+  }
+
+  [data-collage] [data-piece]:nth-child(4) {
+    left: 65% !important;
+    top: 68% !important;
+    width: 27% !important;
+    height: 18% !important;
+    z-index: 1;
+  }
+
+  [data-collage] [data-center] {
+    left: 14% !important;
+    top: 32% !important;
+    width: 72% !important;
+    height: 39% !important;
+  }
+
+  [data-collage] h2 {
+    top: 6% !important;
+    padding: 0 7% !important;
+    font-size: clamp(28px, 8vw, 36px) !important;
+    line-height: .94 !important;
+  }
+
+  [data-collage] h2 span {
+    margin-right: .16em;
+  }
+}
+
 /* latin-ext */
 @font-face {
   font-family: "Instrument Serif";
