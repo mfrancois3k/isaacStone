@@ -830,7 +830,8 @@ export default class DesignPage extends React.Component {
       onSubmit: async (e) => {
         e.preventDefault();
         if (this.state.formSubmitting) return;
-        const fd = new FormData(e.currentTarget);
+        const form = e.currentTarget;
+        const fd = new FormData(form);
         const name = (fd.get("name") || "").toString().trim();
         const phone = (fd.get("phone") || "").toString().trim();
         const email = (fd.get("email") || "").toString().trim();
@@ -864,7 +865,7 @@ export default class DesignPage extends React.Component {
               ? data.message + (email ? " Check your email for a confirmation." : "")
               : "Your request is with the team. Check your email for confirmation.",
           });
-          e.currentTarget.reset();
+          form.reset();
           this.setState({ formDetails: "", photoName: "" });
         } catch (error) {
           this.setState({
