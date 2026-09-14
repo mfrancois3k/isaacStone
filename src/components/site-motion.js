@@ -76,23 +76,26 @@ export function startSiteMotion(root, reduced) {
     hover = e.target.closest?.("[data-cur]") || null;
   };
   const activeCounts = new Map();
+  const counts = all("[data-count]");
+  const beginCount = (target) => {
+    if (!target || target.dataset.counted) return;
+    target.dataset.counted = "1";
+    countObserver.unobserve(target);
+    activeCounts.set(target, {
+      start: performance.now(),
+      target: Number(target.dataset.count),
+      decimals: Number(target.dataset.decimals || 0),
+    });
+  };
   const countObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach(({ target, isIntersecting }) => {
-        if (!isIntersecting) return;
-        countObserver.unobserve(target);
-        if (target.dataset.counted) return;
-        target.dataset.counted = "1";
-        activeCounts.set(target, {
-          start: performance.now(),
-          target: Number(target.dataset.count),
-          decimals: Number(target.dataset.decimals || 0),
-        });
+        if (isIntersecting) beginCount(target);
       });
     },
     { threshold: 0.12 },
   );
-  all("[data-count]").forEach((el) => {
+  counts.forEach((el) => {
     if (reduced || el.dataset.counted) {
       el.textContent = Number(el.dataset.count).toFixed(
         Number(el.dataset.decimals || 0),
@@ -326,6 +329,15 @@ export function startSiteMotion(root, reduced) {
       }
     }
     const scrollChanged = refresh || moved;
+    // IntersectionObserver is the fast path. This scroll fallback covers mobile
+    // browser handoffs where the observer can miss a section already in view.
+    if (!reduced && scrollChanged) {
+      counts.forEach((el) => {
+        if (el.dataset.counted) return;
+        const r = rect(el);
+        if (r && r.top < vh * .82 && r.bottom > vh * .1) beginCount(el);
+      });
+    }
     const scrubChanged = scrollChanged || smoothY !== previousSmooth;
     const visible = r => r && r.bottom >= 0 && r.top <= vh;
     // WRITE PHASE: one loop owns every continuously scrubbed effect, including the cursor.
