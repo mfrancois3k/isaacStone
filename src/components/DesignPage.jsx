@@ -239,7 +239,7 @@ export default class DesignPage extends React.Component {
       add("meta", {
         property: "og:description",
         content:
-          "Owner-led tile, marble and stone installation for bathrooms, kitchens and floors across Long Island and New York City.",
+          "Owner-led tile, marble and stone installation for bathrooms, kitchens and floors across Long Island, New York City and Florida.",
       });
       add("meta", {
         property: "og:image",
@@ -264,7 +264,7 @@ export default class DesignPage extends React.Component {
           addressRegion: "NY",
           addressCountry: "US",
         },
-        areaServed: ["Suffolk County NY", "Nassau County NY", "New York City"],
+        areaServed: ["Suffolk County NY", "Nassau County NY", "New York City", "Florida"],
         openingHours: "Mo-Sa 07:00-18:30",
         sameAs: ["https://www.instagram.com/jafettile____com/"],
       });
@@ -274,7 +274,7 @@ export default class DesignPage extends React.Component {
       const m = document.createElement("meta");
       m.name = "description";
       m.content =
-        "Owner-led tile, marble and stone installation for bathrooms, kitchens and floors across Long Island and New York City. Clear written estimates before work begins. Call (631) 530-5883.";
+        "Owner-led tile, marble and stone installation for bathrooms, kitchens and floors across Long Island, New York City and Florida. Clear written estimates before work begins. Call (631) 530-5883.";
       document.head.appendChild(m);
     }
     this.reduced =
@@ -1683,7 +1683,7 @@ export default class DesignPage extends React.Component {
                   }}
                 ></span>
                 <span style={{ color: "#d6cfc4" }}>
-                  {"BRENTWOOD, NY · LONG ISLAND & NYC"}
+                  {"LONG ISLAND · NYC · FLORIDA"}
                 </span>
               </div>
               <h1
@@ -1769,7 +1769,7 @@ export default class DesignPage extends React.Component {
                 }}
               >
                 {
-                  "Owner-led tile and stone work for bathrooms, kitchens, floors and custom interior surfaces across Long Island and New York City."
+                  "Owner-led tile and stone work for bathrooms, kitchens, floors and custom interior surfaces across Long Island, New York City and Florida."
                 }
               </p>
               <span
@@ -5068,7 +5068,7 @@ export default class DesignPage extends React.Component {
               }}
             >
               {
-                "Tile, marble and stone for Long Island homes — planned carefully, installed precisely, finished to belong."
+                "Tile, marble and stone for homes across New York and Florida — planned carefully, installed precisely, finished to belong."
               }
             </p>
             <div
@@ -5145,7 +5145,7 @@ export default class DesignPage extends React.Component {
                   {"TERRITORY"}
                 </span>
                 <span style={{ font: "400 30px 'Instrument Serif',serif" }}>
-                  {"NY & Long Island"}
+                  {"NY, Long Island & Florida"}
                 </span>
               </div>
               <div
@@ -5166,7 +5166,7 @@ export default class DesignPage extends React.Component {
                   {"BASED IN"}
                 </span>
                 <span style={{ font: "400 30px 'Instrument Serif',serif" }}>
-                  {"New York"}
+                  {"New York & Florida"}
                 </span>
               </div>
             </div>
@@ -9797,7 +9797,7 @@ export default class DesignPage extends React.Component {
                       }}
                     >
                       {
-                        "Yes. Kitchens, bathrooms and floors in homes across Long Island and NYC, plus commercial fit-outs and structural foundation work."
+                        "Yes. Kitchens, bathrooms and floors in homes across Long Island, NYC and Florida, plus commercial fit-outs and structural foundation work."
                       }
                     </p>
                   </div>
@@ -10363,7 +10363,7 @@ export default class DesignPage extends React.Component {
                         color: "#d6cfc4",
                       }}
                     >
-                      {"Brentwood, NY · Suffolk · Nassau · New York City"}
+                      {"Long Island · New York City · Florida"}
                     </span>
                   </div>
                   <a
