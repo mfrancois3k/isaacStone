@@ -1,14 +1,28 @@
 import { frameAlpha, normalizedVelocity, galleryHeight } from './motion-math.js';
+import { gsap } from 'gsap';
 const clamp = (n) => Math.max(0, Math.min(1, n));
 export function startSiteMotion(root, reduced) {
   const put = (el, property, value) => {
     if (el && el.style[property] !== value) el.style[property] = value;
   };
-  const touchGallery = matchMedia('(max-width: 768px) and (pointer: coarse)');
+  let geometryDirty = true;
+  // Motion changes by layout, not merely by the visitor's input device.
+  let motionMode = 'desktop';
+  const media = gsap.matchMedia();
+  media.add({
+    mobile: '(max-width: 767px)',
+    tablet: '(min-width: 768px) and (max-width: 1100px)',
+    desktop: '(min-width: 1101px)',
+  }, (context) => {
+    const { mobile, tablet } = context.conditions;
+    motionMode = mobile ? 'mobile' : tablet ? 'tablet' : 'desktop';
+    root.dataset.motionMode = motionMode;
+    geometryDirty = true;
+    return () => { delete root.dataset.motionMode; };
+  });
   const one = (s) => root.querySelector(s),
     all = (s) => [...root.querySelectorAll(s)];
   let disposed = false, disposeHeadings, serviceMotion;
-  let geometryDirty = true;
   const invalidate = () => { geometryDirty = true; };
   const headings = all('[data-panel] h2, #work h2, #reels h2, #owner h2, #why h2, #beforeafter h2, #faq h2, #contact h2');
   if (!reduced && headings.length) {
@@ -207,7 +221,6 @@ export function startSiteMotion(root, reduced) {
   root.addEventListener?.('load', invalidate, true);
   document.fonts?.addEventListener('loadingdone', invalidate);
   document.fonts?.ready.then(() => { if (!disposed) invalidate(); });
-  touchGallery.addEventListener?.('change', invalidate);
   const focusGallery = event => {
     const target = event.target;
     if (!target.matches?.(':focus-visible')) return;
@@ -219,7 +232,7 @@ export function startSiteMotion(root, reduced) {
     const viewport = window.innerWidth;
     const x = Math.max(0, Math.min(gallery.scrollWidth - viewport,
       card.offsetLeft + card.offsetWidth / 2 - viewport / 2));
-    if (reduced || touchGallery.matches) {
+    if (reduced || motionMode === 'mobile') {
       gallery.scrollTo({left:x, behavior:'instant'});
     } else {
       // Keyboard navigation must reveal the focused card immediately. Setting
@@ -235,7 +248,7 @@ export function startSiteMotion(root, reduced) {
     // Stable sizes are cached. Scroll only refreshes viewport-relative positions;
     // idle ticker/cursor frames never remeasure the page.
     const y = window.scrollY, vh = window.innerHeight, vw = window.innerWidth;
-    const native = reduced || touchGallery.matches;
+    const native = reduced || motionMode === 'mobile';
     const resized = measuredVw !== vw || measuredVh !== vh || previousNative !== native;
     const refresh = geometryDirty || resized || !metrics;
     const moved = measuredY !== y;
@@ -317,15 +330,17 @@ export function startSiteMotion(root, reduced) {
         }
         const hp = clamp(y / vh);
         if (hero) {
-          put(hero, "transform", `translateY(${hp * 90}px)`);
+          const heroTravel = motionMode === 'desktop' ? 90 : 48;
+          const imageTravel = motionMode === 'desktop' ? 70 : 34;
+          put(hero, "transform", `translateY(${hp * heroTravel}px)`);
           put(hero, "opacity", String(Math.max(0, 1 - hp * 1.1)));
         }
         if (heroImage)
-          put(heroImage, "transform", `translateY(${-hp * 70}px) scale(${1 + hp * 0.06})`);
+          put(heroImage, "transform", `translateY(${-hp * imageTravel}px) scale(${1 + hp * (motionMode === 'desktop' ? .06 : .025)})`);
         parallax.forEach((el, i) => {
           const r = parallaxRects[i];
           if (r.bottom >= 0 && r.top <= vh)
-            put(el, "transform", `translateY(${((r.top + r.height / 2 - vh / 2) / vh) * -100 * parseFloat(el.dataset.plx)}%)`);
+            put(el, "transform", `translateY(${((r.top + r.height / 2 - vh / 2) / vh) * -100 * parseFloat(el.dataset.plx) * (motionMode === 'desktop' ? 1 : .55)}%)`);
         });
         words.forEach((el, i) => {
           const r = wordRects[i],
@@ -336,7 +351,7 @@ export function startSiteMotion(root, reduced) {
           spans.forEach((w, j) => put(w, 'opacity', String(
             .14 + .86 * clamp((p * (spans.length + 3) - j) / 3))));
         });
-        if (stackRect && !touchGallery.matches) {
+        if (stackRect && motionMode !== 'mobile') {
           let offset = 0;
           panels.forEach((el, i) => {
             const p =
@@ -478,7 +493,7 @@ export function startSiteMotion(root, reduced) {
     root.removeEventListener?.('load', invalidate, true);
     root.removeEventListener?.('focusin', focusGallery);
     document.fonts?.removeEventListener('loadingdone', invalidate);
-    touchGallery.removeEventListener?.('change', invalidate);
+    media.revert();
     [strip, reelStrip].forEach((el, i) => { if (el) el.style.height = originalHeights[i]; });
     disposeHeadings?.();
     serviceMotion?.destroy();
