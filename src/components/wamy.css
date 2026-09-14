@@ -317,6 +317,36 @@
 .wamy-review p {
   margin: 8px 0;
 }
+.wamy-review label:not(.wamy-consent) {
+  display: grid;
+  gap: 5px;
+  margin-top: 10px;
+  color: #5f584e;
+  font: 600 11px "DM Mono", monospace;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.wamy-review input:not([type="checkbox"]) {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #d6cbbd;
+  border-radius: 4px;
+  background: #fffdf8;
+  color: #292824;
+  padding: 9px 10px;
+  font: 14px "DM Sans", sans-serif;
+  letter-spacing: 0;
+  text-transform: none;
+}
+.wamy-review .wamy-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 13px 0;
+  color: #5f584e;
+  font: 12px/1.35 "DM Sans", sans-serif;
+}
+.wamy-review .wamy-consent input { margin-top: 2px; }
 .wamy-dialog button:disabled {
   opacity: 0.45;
   cursor: not-allowed;

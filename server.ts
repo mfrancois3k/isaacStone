@@ -13,6 +13,7 @@ import {
   missingFieldsMessage,
   missingLeadFields,
 } from "./shared/leads.js";
+import { notifyLead } from './shared/lead-notifications.js';
 
 dotenv.config();
 dotenv.config({ path: '.env.local' });
@@ -88,7 +89,11 @@ app.post("/api/leads/book-call", async (req, res) => {
     await appendLeadToDisk(lead);
     leadsStore.unshift(lead);
 
-    console.log(`[LEAD] ${lead.source} request from ${lead.name} (${lead.phone}) stored as ${lead.id}`);
+    // Local development has the JSONL lead inbox as its durable store. Alerts
+    // are best effort here, as the record is already safely written.
+    const notifications = await notifyLead(lead);
+
+    console.log(`[LEAD] ${lead.source} request from ${lead.name} (${lead.phone}) stored as ${lead.id}`, notifications);
 
     return res.json({
       success: true,

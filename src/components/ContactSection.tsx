@@ -32,9 +32,10 @@ export function ContactSection() {
     phone: '',
     email: '',
     jobType: CONTACT.jobTypes[0] as string,
+    preferredCallTime: '',
     message: '',
+    smsConsent: false,
   });
-  const [photoName, setPhotoName] = useState('');
   const [errors, setErrors] = useState<Partial<Record<FieldKey, string>>>({});
   const [status, setStatus] = useState<Status>('idle');
 
@@ -48,7 +49,7 @@ export function ContactSection() {
     if (!values.name.trim()) next.name = 'Please enter your name.';
     if (values.phone.replace(/\D/g, '').length < 10)
       next.phone = 'Please enter a phone number we can call you back on.';
-    if (!EMAIL_RE.test(values.email.trim()))
+    if (values.email.trim() && !EMAIL_RE.test(values.email.trim()))
       next.email = 'Please enter an email address so we can send the estimate.';
     return next;
   }
@@ -76,13 +77,14 @@ export function ContactSection() {
           phone: values.phone.trim(),
           email: values.email.trim(),
           projectType: values.jobType,
+          preferredCallTime: values.preferredCallTime.trim(),
           notes: values.message.trim(),
+          customerSmsConsent: values.smsConsent,
         }),
       });
       if (!res.ok) throw new Error(String(res.status));
       setStatus('sent');
-      setValues((v) => ({ ...v, name: '', phone: '', email: '', message: '' }));
-      setPhotoName('');
+      setValues((v) => ({ ...v, name: '', phone: '', email: '', preferredCallTime: '', message: '', smsConsent: false }));
     } catch {
       setStatus('error');
     }
@@ -273,14 +275,13 @@ export function ContactSection() {
 
               <div className="flex flex-col gap-[7px]">
                 <label htmlFor="ct-email" className={LABEL_CLASS}>
-                  Email <span aria-hidden="true" className="text-brand">*</span>
+                  Email <span className="font-normal text-mute-2">(optional)</span>
                 </label>
                 <input
                   id="ct-email"
                   name="email"
                   type="email"
                   autoComplete="email"
-                  required
                   ref={(el) => {
                     fieldRefs.current.email = el;
                   }}
@@ -296,6 +297,22 @@ export function ContactSection() {
                   </p>
                 )}
               </div>
+            </div>
+
+            <div className="flex flex-col gap-[7px]">
+              <label htmlFor="ct-callback" className={LABEL_CLASS}>
+                Best time to call <span className="font-normal text-mute-2">(optional)</span>
+              </label>
+              <input
+                id="ct-callback"
+                name="preferredCallTime"
+                type="text"
+                autoComplete="off"
+                placeholder="e.g. Weekdays after 4 PM"
+                value={values.preferredCallTime}
+                onChange={(e) => set('preferredCallTime', e.target.value)}
+                className={INPUT_CLASS}
+              />
             </div>
 
             <div className="flex flex-col gap-[7px]">
@@ -317,23 +334,16 @@ export function ContactSection() {
               </select>
             </div>
 
-            <div className="flex flex-col gap-[7px]">
-              <label htmlFor="ct-photo" className={LABEL_CLASS}>
-                A photo of the space{' '}
-                <span className="font-normal text-mute-2">(optional)</span>
-              </label>
+            <label className="flex cursor-pointer items-start gap-3 pt-1 font-sans text-[13px] leading-[1.45] text-mute-3">
               <input
-                id="ct-photo"
-                name="photo"
-                type="file"
-                accept="image/*"
-                onChange={(e) => setPhotoName(e.target.files?.[0]?.name ?? '')}
-                className="min-h-11 py-2.5 font-sans text-[15px] text-ink focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-brand"
+                name="smsConsent"
+                type="checkbox"
+                checked={values.smsConsent}
+                onChange={(e) => setValues((v) => ({ ...v, smsConsent: e.target.checked }))}
+                className="mt-0.5 h-4 w-4 accent-brand"
               />
-              {photoName && (
-                <p className="m-0 font-sans text-[14px] text-mute-2">{photoName}</p>
-              )}
-            </div>
+              <span>Text me a confirmation about this request. Message and data rates may apply.</span>
+            </label>
 
             <div className="flex flex-col gap-[7px]">
               <label htmlFor="ct-details" className={LABEL_CLASS}>
@@ -349,6 +359,10 @@ export function ContactSection() {
                 className={`${INPUT_CLASS} resize-y`}
               />
             </div>
+
+            <p className="m-0 border-l-2 border-sand-2 pl-3 font-sans text-[13px] leading-[1.45] text-mute-3">
+              Have photos? Mention it in the details. The team will text you so you can send them directly.
+            </p>
 
             <button
               type="submit"
