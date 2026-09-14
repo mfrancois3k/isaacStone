@@ -146,6 +146,40 @@ async function twilio(to: string, body: string): Promise<boolean> {
 }
 
 /**
+ * Telnyx is the primary SMS transport for this MVP. Keeping Twilio below as a
+ * fallback makes the notification flow portable while a business changes
+ * providers; neither provider is contacted unless its server-only credentials
+ * are configured.
+ */
+async function telnyx(to: string, body: string): Promise<boolean> {
+  const key = process.env.TELNYX_API_KEY;
+  const from = phone(process.env.TELNYX_FROM_NUMBER);
+  const destination = phone(to);
+  if (!key || !from || !destination) return false;
+  const messagingProfileId = process.env.TELNYX_MESSAGING_PROFILE_ID?.trim();
+  const response = await fetch('https://api.telnyx.com/v2/messages', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      from,
+      to: destination,
+      text: body,
+      type: 'SMS',
+      ...(messagingProfileId ? { messaging_profile_id: messagingProfileId } : {}),
+    }),
+  });
+  if (!response.ok) throw new Error(`Telnyx returned ${response.status}`);
+  return true;
+}
+
+async function sms(to: string, body: string): Promise<boolean> {
+  // A configured Telnyx number deliberately takes priority over legacy Twilio
+  // configuration. This lets us migrate without leaking or changing secrets.
+  if (process.env.TELNYX_API_KEY && process.env.TELNYX_FROM_NUMBER) return telnyx(to, body);
+  return twilio(to, body);
+}
+
+/**
  * Notifications never create a fake success. The caller must first persist the
  * lead (or, in the email-only fallback, await owner-email delivery). Alerts are
  * intentionally independent: one broken channel does not erase the lead.
@@ -163,8 +197,8 @@ export async function notifyLead(lead: LeadRecord): Promise<LeadNotificationResu
   await Promise.all([
     send('ownerEmail', () => resend(process.env.OWNER_EMAIL ?? '', `New Wamy estimate request — ${lead.name}`, ownerText, ownerEmailHtml(lead))),
     send('customerEmail', () => lead.email ? resend(lead.email, 'We’ve got your project — Isaac Stone and Tile', customerText, customerEmailHtml(lead)) : Promise.resolve(false)),
-    send('ownerSms', () => twilio(process.env.TWILIO_OWNER_TO_NUMBER ?? '', `NEW LEAD: ${lead.name} · ${lead.phone}${lead.projectType ? ` · ${lead.projectType}` : ''}`)),
-    send('customerSms', () => lead.customerSmsConsent ? twilio(lead.phone, customerText) : Promise.resolve(false)),
+    send('ownerSms', () => sms(process.env.TELNYX_OWNER_TO_NUMBER ?? process.env.TWILIO_OWNER_TO_NUMBER ?? '', `NEW LEAD: ${lead.name} · ${lead.phone}${lead.projectType ? ` · ${lead.projectType}` : ''}`)),
+    send('customerSms', () => lead.customerSmsConsent ? sms(lead.phone, customerText) : Promise.resolve(false)),
   ]);
   return result;
 }
