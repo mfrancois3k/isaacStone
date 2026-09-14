@@ -752,20 +752,34 @@ export default class DesignPage extends React.Component {
       onSubmit: (e) => {
         e.preventDefault();
         const fd = new FormData(e.currentTarget);
+        const clientName = (fd.get("name") || "").toString().trim();
+        const phone = (fd.get("phone") || "").toString().trim();
+        const email = (fd.get("email") || "").toString().trim();
+        const service = (fd.get("service") || "stone work").toString();
+        const details = (fd.get("details") || "").toString().trim();
         const body = [
-          "Name: " + (fd.get("name") || ""),
-          "Phone: " + (fd.get("phone") || ""),
-          "Email: " + (fd.get("email") || ""),
-          "Service: " + (fd.get("service") || ""),
-          "Details: " + (fd.get("details") || ""),
-          s.photoName ? "Photo attached separately: " + s.photoName : "",
+          "ISAAC STONE AND TILE",
+          "ESTIMATE REQUEST",
+          "",
+          "CLIENT CONTACT",
+          "Name: " + clientName,
+          "Phone: " + phone,
+          "Email: " + (email || "Not provided"),
+          "",
+          "PROJECT BRIEF",
+          "Requested service: " + service,
+          "Scope / notes: " + (details || "To discuss during the first call"),
+          "Photo: " + (s.photoName ? "Provided separately — " + s.photoName : "Not provided"),
+          "",
+          "NEXT STEP",
+          "Please contact the client to arrange a free on-site visit. After the visit, provide a written, itemized estimate covering preparation, materials, labor, and timeline.",
         ]
           .filter(Boolean)
           .join("\n");
         const mailto =
           "mailto:jafet.tile@gmail.com?subject=" +
           encodeURIComponent(
-            "Estimate request — " + (fd.get("service") || "stone work"),
+            "Estimate request — " + service + " — " + clientName,
           ) +
           "&body=" +
           encodeURIComponent(body);

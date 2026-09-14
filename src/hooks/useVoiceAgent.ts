@@ -3,9 +3,6 @@ import { VoicePlayback } from './voice-playback';
 
 type VoiceState = 'idle' | 'connecting' | 'listening' | 'thinking' | 'speaking';
 type Transcript = (id: string, sender: 'user' | 'bot', text: string) => void;
-// This is sent with each browser session so the live agent cannot claim an
-// appointment was created when this site has no calendar connection.
-const LEAD_INTAKE_INSTRUCTIONS = `You are Wamy, Isaac Stone and Tile's lead-intake voice assistant. You do not have access to a calendar, crew availability, or any booking system. Never say an appointment is booked, created, confirmed, or held. Never state a date or time is available. You may collect a preferred day or time, but call it a preference only. After collecting details, say: "I can help you send this estimate request to the team. They will confirm availability with you." Do not say a request was sent unless the visitor has explicitly used the on-screen "Send request to the team" action. Never quote a price or promise a callback. Keep replies concise, warm, and easy to understand aloud.`;
 interface Call {
   cancelled: boolean;
   ready: boolean;
@@ -98,12 +95,12 @@ export function useVoiceAgent(onTranscript: Transcript) {
         let event: any;
         try { event = JSON.parse(raw); } catch { return; }
         if (event.type === 'session.updated') {
-          // The saved agent supplies its voice. These runtime rules keep the
-          // public site honest about what it can actually complete.
+          // Keep the saved agent's voice, persona, tools, and connector access.
+          // This update changes browser audio transport only; it must not replace
+          // the agent configuration managed in the xAI console.
           if (!configured) {
             configured = true;
             send({ type: 'session.update', session: {
-              instructions: LEAD_INTAKE_INSTRUCTIONS,
               // End a normal turn promptly; keep the louder activation threshold for speakers.
               turn_detection: { type: 'server_vad', silence_duration_ms: 500, threshold: 0.85 },
               audio: { input: { format: { type: 'audio/pcm', rate: context.sampleRate } }, output: { format: { type: 'audio/pcm', rate: 24000 } } },

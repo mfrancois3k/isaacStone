@@ -176,7 +176,9 @@ export function WamyDialog() {
   );
   const lastBot = [...messages].reverse().find((m) => m.sender === "bot");
   const status = voice.error
-    ? "Voice unavailable"
+    ? "Voice needs attention"
+    : voice.notice
+      ? "Conversation complete"
     : busy
       ? "Thinking…"
       : voice.state === "speaking"
