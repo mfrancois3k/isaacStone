@@ -19,7 +19,7 @@ export function startSiteMotion(root, reduced) {
     reelCount = one("[data-reelcount]");
   const parallax = all("[data-plx]"),
     words = all("[data-words]"),
-    process = one("[data-process]"),
+    process = one("[data-process] ol"),
     line = one("[data-pline]"),
     steps = all("[data-pstep]"),
     footer = one("[data-footer]"),
@@ -39,7 +39,33 @@ export function startSiteMotion(root, reduced) {
   const over = (e) => {
     hover = e.target.closest?.("[data-cur]") || null;
   };
+  const activeCounts = new Map();
+  const countObserver = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(({ target, isIntersecting }) => {
+        if (!isIntersecting) return;
+        countObserver.unobserve(target);
+        if (target.dataset.counted) return;
+        target.dataset.counted = "1";
+        activeCounts.set(target, {
+          start: performance.now(),
+          target: Number(target.dataset.count),
+          decimals: Number(target.dataset.decimals || 0),
+        });
+      });
+    },
+    { threshold: 0.12 },
+  );
+  all("[data-count]").forEach((el) => {
+    if (reduced || el.dataset.counted) {
+      el.textContent = Number(el.dataset.count).toFixed(
+        Number(el.dataset.decimals || 0),
+      );
+      el.dataset.counted = "1";
+    } else countObserver.observe(el);
+  });
   const reveal = (el) => {
+    el.dataset.revealed = "1";
     el.style.opacity = "1";
     el.style.transform = "none";
     el.querySelectorAll("[data-rv-line],[data-rv-item]").forEach((n) => {
@@ -52,11 +78,6 @@ export function startSiteMotion(root, reduced) {
       n.style.clipPath = "inset(0)";
       n.style.transform = "none";
     });
-    el.querySelectorAll("[data-count]").forEach((n) => {
-      n.textContent = Number(n.dataset.count).toFixed(
-        Number(n.dataset.decimals || 0),
-      );
-    });
   };
   const io = new IntersectionObserver(
     (entries) =>
@@ -68,7 +89,9 @@ export function startSiteMotion(root, reduced) {
       }),
     { threshold: 0.12 },
   );
-  all("[data-rv]").forEach((el) => (reduced ? reveal(el) : io.observe(el)));
+  all("[data-rv]").forEach((el) =>
+    reduced || el.dataset.revealed ? reveal(el) : io.observe(el),
+  );
   // Hero starts with the loader's fill, not when the overlay finishes wiping.
   all("#top [data-rv]").forEach((el) => {
     reveal(el);
@@ -175,6 +198,15 @@ export function startSiteMotion(root, reduced) {
     velocity += (y - lastY - velocity) * 0.12;
     lastY = y;
     // WRITE PHASE: one loop owns every continuously scrubbed effect, including the cursor.
+    // Entrance counters use elapsed time, independently of scroll, in the shared frame scheduler.
+    activeCounts.forEach((value, el) => {
+      const progress = clamp((time - value.start) / 1600);
+      const text = (value.target * (1 - Math.pow(1 - progress, 3))).toFixed(
+        value.decimals,
+      );
+      if (el.textContent !== text) el.textContent = text;
+      if (progress === 1) activeCounts.delete(el);
+    });
     if (bar) bar.style.transform = `scaleX(${docH > 0 ? clamp(y / docH) : 1})`;
     if (!reduced) {
       if (y > 140 && y - directionY > 6) hidden = true;
@@ -218,8 +250,11 @@ export function startSiteMotion(root, reduced) {
       }
       if (stripRect && track && vw > 768) {
         const max = Math.max(0, trackWidth - vw),
-          p = clamp(-stripRect.top / Math.max(1, stripRect.height - vh)),
+          p = clamp(-stripRect.top / Math.max(1, max)),
           x = -max * p;
+        // Size the sticky travel to the actual horizontal overflow: one pixel per pixel.
+        const height = `${vh + max}px`;
+        if (strip.style.height !== height) strip.style.height = height;
         track.style.transform = `translateX(${x}px)`;
         if (rule) rule.style.transform = `scaleX(${p})`;
         count(counter, nearest(cardCenters, vw / 2 - x));
@@ -297,6 +332,8 @@ export function startSiteMotion(root, reduced) {
     cancelAnimationFrame(raf);
     heroAnimations.forEach((a) => a.cancel());
     io.disconnect();
+    countObserver.disconnect();
+    activeCounts.clear();
     window.removeEventListener("pointermove", move);
     document.removeEventListener("pointerover", over);
     document.removeEventListener("visibilitychange", wake);

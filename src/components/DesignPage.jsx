@@ -5063,6 +5063,8 @@ export default class DesignPage extends React.Component {
               }}
             ></div>
             <div
+              data-rv=""
+              data-block-reveal=""
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -5203,6 +5205,8 @@ export default class DesignPage extends React.Component {
               }}
             ></div>
             <div
+              data-rv=""
+              data-block-reveal=""
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -5340,6 +5344,8 @@ export default class DesignPage extends React.Component {
               }}
             ></div>
             <div
+              data-rv=""
+              data-block-reveal=""
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -5480,6 +5486,8 @@ export default class DesignPage extends React.Component {
               }}
             ></div>
             <div
+              data-rv=""
+              data-block-reveal=""
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -8198,6 +8206,8 @@ export default class DesignPage extends React.Component {
             ></div>
           </div>
           <div
+            data-rv=""
+            data-block-reveal=""
             style={{
               maxWidth: "1400px",
               margin: "0 auto",
