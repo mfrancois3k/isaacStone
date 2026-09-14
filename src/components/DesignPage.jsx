@@ -96,11 +96,11 @@ const FRAMES = [
   },
 ];
 const LOADER_LINES = [
-  "TILES TAILORED TO YOUR HOME — BESPOKE STONEWORK",
-  "LOADING COMPLETED PROJECT PHOTOGRAPHY (@jafettile____com)…",
-  "BRENTWOOD · NASSAU · SUFFOLK · NYC · THE HAMPTONS",
-  "TWENTY-FIVE YEARS OF TILE, GRANITE AND MARBLE",
-  "TILES TAILORED TO YOUR HOME — ISAAC STONE AND TILE LLC VERIFIED",
+  "WHERE CRAFTSMANSHIP MEETS EVERY SPACE",
+  "REVEALING COMPLETED STONE, TILE AND MARBLE WORK…",
+  "NEW YORK · LONG ISLAND · FLORIDA",
+  "TWENTY-FIVE YEARS OF CRAFT IN EVERY DETAIL",
+  "ISAAC STONE AND TILE · BUILT TO BELONG",
 ];
 // proactive agent prompts, keyed by the section the visitor is reading
 const HINTS = {
@@ -1203,62 +1203,88 @@ export default class DesignPage extends React.Component {
                   />
                 </div>
                 <h2
+                  aria-label={"Where craftsmanship meets every space."}
                   style={{
                     position: "absolute",
                     left: "7%",
                     right: "5%",
-                    top: "8%",
+                    top: "7%",
                     margin: "0",
                     textAlign: "left",
-                    font: "700 clamp(42px,9vw,150px)/.8 Arial,sans-serif",
-                    letterSpacing: "-0.075em",
+                    font: "700 clamp(38px,8.4vw,142px)/.78 Arial,sans-serif",
+                    letterSpacing: "-0.08em",
                     color: "#f6efdd",
                     zIndex: "4",
                     pointerEvents: "none",
+                    textShadow: "0 2px 18px rgba(22,19,15,.18)",
                   }}
                 >
                   <span
+                    aria-hidden={"true"}
                     data-stag={""}
                     style={{
                       display: "block",
-                      fontSize: ".7em",
+                      marginLeft: "2%",
+                      font: "400 clamp(9px,.95vw,13px)/1 'JetBrains Mono',monospace",
+                      letterSpacing: "0.22em",
+                      textTransform: "uppercase",
                       transform: v.titleShift(6),
                       opacity: v.titleOpacity(6),
                       transition:
-                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity 1.6s cubic-bezier(.6,.01,-.05,.95) 0s",
+                        "transform 1.1s cubic-bezier(.6,.01,-.05,.95) 0s,opacity 1.1s cubic-bezier(.6,.01,-.05,.95) 0s",
                     }}
                   >
-                    {"Crafted"}
+                    {"Where"}
                   </span>
                   <span
+                    aria-hidden={"true"}
                     data-stag={""}
                     style={{
                       display: "block",
-                      marginLeft: "9%",
-                      fontSize: ".92em",
+                      marginTop: ".08em",
+                      fontSize: ".72em",
+                      letterSpacing: "-.075em",
                       transform: v.titleShift(7),
                       opacity: v.titleOpacity(7),
                       transition:
-                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity 1.6s cubic-bezier(.6,.01,-.05,.95) 0s",
+                        "transform 1.35s cubic-bezier(.6,.01,-.05,.95) 0s,opacity 1.35s cubic-bezier(.6,.01,-.05,.95) 0s",
                     }}
                   >
-                    {"for your"}
+                    {"craftsmanship"}
                   </span>
                   <span
+                    aria-hidden={"true"}
                     data-stag={""}
                     style={{
                       display: "block",
-                      marginLeft: "22%",
-                      fontSize: "1.38em",
-                      letterSpacing: "-0.1em",
+                      marginLeft: "15%",
+                      marginTop: ".08em",
+                      fontSize: ".82em",
+                      transform: v.titleShift(8),
+                      opacity: v.titleOpacity(8),
+                      transition:
+                        "transform 1.35s cubic-bezier(.6,.01,-.05,.95) 0s,opacity 1.35s cubic-bezier(.6,.01,-.05,.95) 0s",
+                    }}
+                  >
+                    {"meets every"}
+                  </span>
+                  <span
+                    aria-hidden={"true"}
+                    data-stag={""}
+                    style={{
+                      display: "block",
+                      marginLeft: "43%",
+                      marginTop: "-.04em",
+                      fontSize: "1.34em",
+                      letterSpacing: "-.105em",
                       color: "#b05f44",
                       transform: v.titleShift(8),
                       opacity: v.titleOpacity(8),
                       transition:
-                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity 1.6s cubic-bezier(.6,.01,-.05,.95) 0s",
+                        "transform 1.45s cubic-bezier(.6,.01,-.05,.95) .22s,opacity 1.45s cubic-bezier(.6,.01,-.05,.95) .22s",
                     }}
                   >
-                    {"HOME."}
+                    {"space."}
                   </span>
                 </h2>
                 <div
