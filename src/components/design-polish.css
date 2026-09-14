@@ -290,6 +290,31 @@ h1[tabindex="-1"]:focus {
     transform: none !important;
   }
 }
+/* A stacked process intro must leave the scroll flow before the steps arrive. */
+@media (max-width: 768px) {
+  .wamy-launcher {
+    bottom: calc(84px + env(safe-area-inset-bottom));
+  }
+}
+@media (max-width: 960px) {
+  [data-process] > div {
+    grid-template-columns: minmax(0, 1fr) !important;
+    gap: 48px !important;
+  }
+  [data-process] > div > [data-rv] {
+    position: relative !important;
+    top: auto !important;
+  }
+}
+@media (max-width: 480px) {
+  [data-process] [data-pstep] {
+    grid-template-columns: 56px minmax(0, 1fr) !important;
+    gap: 16px !important;
+  }
+  [data-process] [data-pstep] > span:nth-child(2) {
+    font-size: 56px !important;
+  }
+}
 /* Wamy: independent float, pointer attraction, and real audio response layers. */
 .marble-hit{position:absolute;inset:0;width:100%;height:100%;padding:0;background:none;border:0;border-radius:50%;cursor:pointer;touch-action:manipulation;}
 .marble-hit:disabled{cursor:wait;}
