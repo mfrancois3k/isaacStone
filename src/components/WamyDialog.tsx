@@ -30,6 +30,7 @@ export function WamyDialog() {
   const [note, setNote] = useState("");
   const [messages, setMessages] = useState<Message[]>([]);
   const abort = useRef<AbortController | null>(null);
+  const modalAnimation = useRef<Animation | null>(null);
   const voice = useVoiceAgent((id, sender, text) =>
     setMessages((old) =>
       old.some((m) => m.id === id)
@@ -45,7 +46,30 @@ export function WamyDialog() {
     voice.stop();
     abort.current?.abort();
     setBusy(false);
-    setOpen(false);
+    const element = dialog.current;
+    modalAnimation.current?.cancel();
+    if (!element || matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setOpen(false);
+      return;
+    }
+    const mobile = matchMedia("(max-width:600px)").matches;
+    const animation = element.animate(
+      [
+        { opacity: 1, transform: "none" },
+        {
+          opacity: mobile ? 1 : 0,
+          transform: mobile ? "translateY(100%)" : "scale(.96)",
+        },
+      ],
+      { duration: 250, easing: "cubic-bezier(.23,1,.32,1)", fill: "forwards" },
+    );
+    modalAnimation.current = animation;
+    animation.finished
+      .then(() => {
+        setOpen(false);
+        animation.cancel();
+      })
+      .catch(() => {});
   };
   useEffect(() => {
     window.addEventListener("open-voice-bot", show);
@@ -58,10 +82,27 @@ export function WamyDialog() {
       return;
     }
     dialog.current?.showModal();
+    if (
+      dialog.current &&
+      !matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      const mobile = matchMedia("(max-width:600px)").matches;
+      modalAnimation.current = dialog.current.animate(
+        [
+          {
+            opacity: mobile ? 1 : 0,
+            transform: mobile ? "translateY(100%)" : "scale(.96)",
+          },
+          { opacity: 1, transform: "none" },
+        ],
+        { duration: 250, easing: "cubic-bezier(.23,1,.32,1)" },
+      );
+    }
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
+      modalAnimation.current?.cancel();
     };
   }, [open]);
   useEffect(() => {

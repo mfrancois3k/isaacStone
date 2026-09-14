@@ -1,3 +1,4 @@
+import { startSiteMotion } from "./site-motion";
 import React from "react";
 import "./design-page.css";
 const ASSETS = {
@@ -156,6 +157,20 @@ const HINTS = {
   },
 };
 const clamp01 = (v) => Math.max(0, Math.min(1, v));
+const loaderVisited = () => {
+  try {
+    return sessionStorage.getItem("isaac-loader-visit") === "1";
+  } catch {
+    return false;
+  }
+};
+const markLoaderVisited = () => {
+  try {
+    sessionStorage.setItem("isaac-loader-visit", "1");
+  } catch {
+    /* Storage can be unavailable in private embeds. */
+  }
+};
 
 export default class DesignPage extends React.Component {
   state = {
@@ -187,7 +202,7 @@ export default class DesignPage extends React.Component {
     ],
     progress: 0,
     loaderExiting: false,
-    loaderDone: false,
+    loaderDone: loaderVisited(),
     loaderIn: false,
     expanding: false,
     frame: 0,
@@ -279,54 +294,53 @@ export default class DesignPage extends React.Component {
     window.addEventListener("keydown", this._keys);
     document.body.style.overflow = "hidden";
 
-    const mode = this.props.loaderMode ?? "once per session";
-    let seen = false;
-    try {
-      seen = sessionStorage.getItem("isv-loader-seen") === "1";
-    } catch (err) {}
+    this._loaded = document.readyState === "complete";
+    this._onLoad = () => {
+      this._loaded = true;
+    };
+    window.addEventListener("load", this._onLoad, { once: true });
+    this._motionPreference = matchMedia("(prefers-reduced-motion: reduce)");
+    this._onMotionPreference = () => {
+      this.reduced = this._motionPreference.matches;
+      this._disposeMotion?.();
+      this._motionStarted = false;
+      if (this.reduced) this.finishLoader();
+      this.startMotion();
+    };
+    this._motionPreference.addEventListener("change", this._onMotionPreference);
     if (
-      mode === "off" ||
       this.reduced ||
-      (mode === "once per session" && seen)
+      this.state.loaderDone ||
+      this.props.loaderMode === "off"
     ) {
+      markLoaderVisited();
       this.setState({ loaderDone: true, progress: 100 }, () => {
         document.body.style.overflow = "";
         this.startMotion();
       });
     } else {
-      try {
-        sessionStorage.setItem("isv-loader-seen", "1");
-      } catch (err) {}
-      this._inT = setTimeout(
-        () => this.setState({ loaderIn: true, focusSkip: true }),
-        120,
-      );
-      setTimeout(() => {
-        const b = document.querySelector('[data-cur="SKIP"]');
-        if (b) b.focus({ preventScroll: true });
-      }, 200);
+      this._inT = setTimeout(() => this.setState({ loaderIn: true }), 20);
       this._t0 = performance.now();
       this._tick = setInterval(() => {
-        if (!this.state.loaderIn || performance.now() - this._t0 < 300) return;
-        this.setState((s) => {
-          if (s.loaderExiting) return null;
-          const el = clamp01((performance.now() - this._t0 - 300) / 3900);
-          const eased =
-            el < 0.5 ? 2 * el * el : 1 - Math.pow(-2 * el + 2, 2) / 2;
-          const next =
-            el >= 1 ? 100 : Math.min(99, Math.round(clamp01(eased) * 100));
-          if (next === s.progress) return null;
-          if (next >= 100) {
-            clearInterval(this._tick);
-            this._exit = setTimeout(() => this.finishLoader(), 150);
-          }
-          return { progress: next };
-        });
-      }, 42);
+        const t = clamp01((performance.now() - this._t0 - 300) / 1900);
+        const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        const progress = Math.min(
+          this._loaded ? 100 : 99,
+          Math.round(eased * 100),
+        );
+        if (progress !== this.state.progress) this.setState({ progress });
+        if (progress === 100) this.finishLoader();
+      }, 32);
     }
   }
 
   componentWillUnmount() {
+    this._disposeMotion?.();
+    window.removeEventListener("load", this._onLoad);
+    this._motionPreference?.removeEventListener(
+      "change",
+      this._onMotionPreference,
+    );
     window.removeEventListener("resize", this._remeasure);
     this._motionStarted = false;
     if (this._slotObs) this._slotObs.disconnect();
@@ -350,6 +364,17 @@ export default class DesignPage extends React.Component {
   }
 
   finishLoader() {
+    markLoaderVisited();
+    if (this.reduced) {
+      clearInterval(this._tick);
+      clearTimeout(this._exit);
+      clearTimeout(this._unmount);
+      document.body.style.overflow = "";
+      this.setState({ loaderDone: true, progress: 100 }, () =>
+        this.startMotion(),
+      );
+      return;
+    }
     if (this.state.expanding || this.state.loaderDone) return;
     clearInterval(this._tick);
     clearTimeout(this._exit);
@@ -357,12 +382,14 @@ export default class DesignPage extends React.Component {
     const c = document.querySelector("[data-center]");
     let tf = "scale(1)";
     if (c) {
-      const r = c.getBoundingClientRect(),
+      const parent = c.offsetParent.getBoundingClientRect(),
+        width = c.offsetWidth,
+        height = c.offsetHeight,
         vw = window.innerWidth,
         vh = window.innerHeight;
-      const s = Math.max(vw / r.width, vh / r.height);
-      const dx = vw / 2 - (r.left + r.width / 2),
-        dy = vh / 2 - (r.top + r.height / 2);
+      const s = Math.max(vw / width, vh / height);
+      const dx = vw / 2 - (parent.left + c.offsetLeft + width / 2),
+        dy = vh / 2 - (parent.top + c.offsetTop + height / 2);
       tf =
         "translate(" +
         dx.toFixed(1) +
@@ -377,7 +404,7 @@ export default class DesignPage extends React.Component {
       el.style.transition =
         "opacity .2s ease, transform .35s cubic-bezier(.76,0,.24,1)";
     });
-    this.setState({ progress: 100, expanding: true }, () => {
+    this.setState({ progress: 100, expanding: true, loaderIn: true }, () => {
       document.body.style.overflow = "";
       this.startMotion();
       // once the image fills the screen, lift it to reveal the hero
@@ -392,7 +419,7 @@ export default class DesignPage extends React.Component {
           }
           this._unmount = setTimeout(
             () => this.setState({ loaderDone: true }),
-            650,
+            600,
           );
         });
       }, 450);
@@ -484,483 +511,7 @@ export default class DesignPage extends React.Component {
   startMotion() {
     if (this._motionStarted) return;
     this._motionStarted = true;
-    const root = document.body;
-
-    const reveal = (el) => {
-      el.style.opacity = "1";
-      el.style.transform = "none";
-      el.querySelectorAll("[data-rv-line]").forEach((l) => {
-        l.style.transform = "none";
-      });
-      const imgs = Array.from(el.querySelectorAll("[data-rv-img]"));
-      if (el.hasAttribute("data-rv-img")) imgs.push(el);
-      imgs.forEach((im) => {
-        im.style.clipPath = "inset(0)";
-        if (!im.hasAttribute("data-cur")) im.style.transform = "none";
-        im.dataset.rvDone = "1";
-      });
-      el.querySelectorAll("[data-rv-item]").forEach((it) => {
-        it.style.opacity = "1";
-        it.style.transform = "none";
-      });
-      el.querySelectorAll("[data-count]").forEach((c) => {
-        if (!c.dataset.done) {
-          c.dataset.done = "1";
-          if (this.reduced)
-            c.textContent = Number(c.dataset.count).toFixed(
-              Number(c.dataset.decimals || 0),
-            );
-          else
-            this.countUp(
-              c,
-              parseFloat(c.dataset.count),
-              parseInt(c.dataset.decimals || "0", 10),
-            );
-        }
-      });
-    };
-    if (this.reduced || !("IntersectionObserver" in window)) {
-      root.querySelectorAll("[data-rv]").forEach(reveal);
-    } else {
-      this._io = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((en) => {
-            if (en.isIntersecting) {
-              reveal(en.target);
-              this._io.unobserve(en.target);
-            }
-          });
-        },
-        { threshold: 0.12, rootMargin: "0px 0px -8% 0px" },
-      );
-      // line-mask reveal on every heading: split into visual lines, wrap each in an overflow-hidden mask,
-      // start at y:110%, rise on a custom cubic-bezier with an index-based stagger
-      root.querySelectorAll("[data-rv]").forEach((el) => this._io.observe(el));
-      root.querySelectorAll("[data-words]").forEach((p) => this.splitWords(p));
-      // agent prompts per section
-      this._ioA = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((en) => {
-            if (en.isIntersecting && en.target.dataset.agent)
-              this.showHint(en.target.dataset.agent);
-          });
-        },
-        { threshold: 0.35 },
-      );
-      root.querySelectorAll("[data-agent]").forEach((el) => {
-        if (el.dataset.agent) this._ioA.observe(el);
-      });
-    }
-
-    const bar = document.getElementById("isv-progress"),
-      header = document.getElementById("isv-header");
-    const heroText = root.querySelector("[data-hero-text]"),
-      heroImg = root.querySelector("[data-hero-img]");
-    const plx = Array.from(root.querySelectorAll("[data-plx]"));
-    const wordEls = Array.from(root.querySelectorAll("[data-words]"));
-    const stack = root.querySelector("[data-stack]"),
-      panels = stack ? Array.from(stack.querySelectorAll("[data-panel]")) : [];
-    const hstrip = root.querySelector("[data-hstrip]"),
-      htrack = root.querySelector("[data-htrack]"),
-      hbar = root.querySelector("[data-hbar]"),
-      hcount = root.querySelector("[data-hcount]");
-    const vmarq = root.querySelector("[data-vmarq]");
-    const rstrip = root.querySelector("[data-reelstrip]"),
-      rtrack = root.querySelector("[data-reeltrack]"),
-      rbar = root.querySelector("[data-reelbar]"),
-      rcount = root.querySelector("[data-reelcount]"),
-      rghost = root.querySelector("[data-reelghost]");
-    const rcards = rtrack
-      ? Array.from(rtrack.querySelectorAll("[data-reelcard]"))
-      : [];
-    if (rtrack && !rtrack.dataset.bound) {
-      rtrack.dataset.bound = "1";
-      rtrack.addEventListener("click", (e) => {
-        const t = e.target.closest && e.target.closest("[data-video]");
-        if (!t || this.state.lb) return;
-        const v = t.getAttribute("data-video");
-        if (v)
-          this.setState({
-            lb: v,
-            lbVideo: v,
-            lbTitle: t.getAttribute("data-title") || "",
-            lbVideoFailed: false,
-          });
-      });
-    }
-    const proc = root.querySelector("[data-process]"),
-      pline = root.querySelector("[data-pline]"),
-      psteps = Array.from(root.querySelectorAll("[data-pstep]"));
-    const fmark = root.querySelector("[data-fmark]"),
-      footer = root.querySelector("[data-footer]");
-    const hfigs = htrack ? Array.from(htrack.querySelectorAll("figure")) : [];
-    let lastY = window.scrollY,
-      vel = 0,
-      mx = 0,
-      hidden = false,
-      lastDirY = lastY;
-    let sy = lastY; // smoothed scroll for the horizontal stages (inertia)
-    const off = (el) => {
-      let t = 0;
-      while (el) {
-        t += el.offsetTop;
-        el = el.offsetParent;
-      }
-      return t;
-    };
-    const M = {
-      stackTop: 0,
-      hTop: 0,
-      hH: 0,
-      hMax: 0,
-      hFig: [],
-      rTop: 0,
-      rH: 0,
-      rMax: 0,
-      rCard: [],
-      procTop: 0,
-      procH: 0,
-      stepTop: [],
-      footTop: 0,
-      footH: 0,
-      vh: 0,
-      vw: 0,
-    };
-    const measure = () => {
-      const vh = window.innerHeight,
-        vw = window.innerWidth;
-      M.vh = vh;
-      M.vw = vw;
-      if (stack) M.stackTop = off(stack);
-      if (hstrip && htrack) {
-        M.hTop = off(hstrip);
-        M.hH = hstrip.offsetHeight;
-        M.hMax = Math.max(0, htrack.scrollWidth - vw);
-        M.hFig = hfigs.map((el) => el.offsetLeft);
-      }
-      if (rstrip && rtrack) {
-        M.rTop = off(rstrip);
-        M.rH = rstrip.offsetHeight;
-        M.rMax = Math.max(0, rtrack.scrollWidth - vw);
-        M.rCard = rcards.map((el) => ({
-          l: el.offsetLeft,
-          w: el.offsetWidth,
-          ring: el.querySelector("[data-playring]"),
-        }));
-      }
-      if (proc) {
-        M.procTop = off(proc);
-        M.procH = proc.offsetHeight;
-        M.stepTop = psteps.map((s) => off(s));
-      }
-      if (footer) {
-        M.footTop = off(footer);
-        M.footH = footer.offsetHeight;
-      }
-    };
-    measure();
-    let mt = 0;
-    const remeasure = () => {
-      clearTimeout(mt);
-      mt = setTimeout(measure, 120);
-    };
-    this._remeasure = remeasure;
-    window.addEventListener("resize", remeasure, { passive: true });
-    window.addEventListener("load", remeasure, { once: true });
-    if ("ResizeObserver" in window) {
-      this._ro = new ResizeObserver(remeasure);
-      this._ro.observe(document.body);
-    }
-    setTimeout(measure, 1200);
-    setTimeout(measure, 3000);
-
-    this._idleFrames = 0;
-    const frame = () => {
-      const y = window.scrollY,
-        vh = M.vh || window.innerHeight,
-        vw = M.vw || window.innerWidth;
-      const dy = y - lastY;
-      lastY = y;
-      vel += (dy - vel) * 0.12;
-      sy += (y - sy) * (this.reduced ? 1 : 0.11);
-      if (Math.abs(y - sy) < 0.3) sy = y;
-      if (
-        dy === 0 &&
-        Math.abs(vel) < 0.05 &&
-        y === sy &&
-        this._idleFrames++ > 2
-      ) {
-        if (vmarq && !this.reduced) {
-          const half = vmarq.scrollWidth / 2;
-          mx -= 0.9;
-          if (mx <= -half) mx += half;
-          vmarq.style.transform = "translateX(" + mx.toFixed(1) + "px)";
-        }
-        this._raf = requestAnimationFrame(frame);
-        return;
-      }
-      if (dy !== 0) this._idleFrames = 0;
-      const docH = document.documentElement.scrollHeight - vh;
-      if (bar) bar.style.width = (docH > 0 ? (y / docH) * 100 : 0) + "%";
-      if (header) {
-        if (y > 140 && y - lastDirY > 6 && !hidden) {
-          hidden = true;
-          header.style.transform = "translateY(-110%)";
-        } else if ((y - lastDirY < -6 || y < 140) && hidden) {
-          hidden = false;
-          header.style.transform = "translateY(0)";
-        }
-        if (Math.abs(y - lastDirY) > 6) lastDirY = y;
-        const solid = y > vh * 0.9;
-        if (solid !== this._hdrSolid) {
-          this._hdrSolid = solid;
-          header.style.mixBlendMode = "normal";
-          header.style.background = solid
-            ? "rgba(28,26,23,.92)"
-            : "rgba(28,26,23,.55)";
-          header.style.backdropFilter = "blur(10px)";
-        }
-      }
-      if (!this.reduced) {
-        if (heroText && heroImg && y < vh * 1.2) {
-          const p = clamp01(y / vh);
-          heroText.style.transform =
-            "translateY(" + (p * 90).toFixed(1) + "px)";
-          heroText.style.opacity = (1 - p * 1.1).toFixed(3);
-          if (heroImg.dataset.rvDone)
-            heroImg.style.transform =
-              "translateY(" +
-              (p * -70).toFixed(1) +
-              "px) scale(" +
-              (1 + p * 0.06).toFixed(3) +
-              ")";
-        }
-        plx.forEach((el) => {
-          const r = el.parentElement.getBoundingClientRect();
-          if (r.bottom < 0 || r.top > vh) return;
-          const p = (r.top + r.height / 2 - vh / 2) / vh;
-          el.style.transform =
-            "translateY(" +
-            (p * parseFloat(el.dataset.plx) * -100).toFixed(2) +
-            "%)";
-        });
-        wordEls.forEach((p) => {
-          const r = p.getBoundingClientRect();
-          if (r.bottom < 0 || r.top > vh) return;
-          const prog = clamp01((vh * 0.85 - r.top) / (r.height + vh * 0.35));
-          const ws = p.querySelectorAll("[data-w]"),
-            n = ws.length;
-          ws.forEach((w, i) => {
-            const t = clamp01((prog * (n + 3) - i) / 3);
-            w.style.opacity = (0.14 + 0.86 * t).toFixed(3);
-          });
-        });
-        if (panels.length) {
-          const top = M.stackTop;
-          panels.forEach((pn, i) => {
-            if (i === panels.length - 1) return;
-            const p = clamp01((y - (top + i * vh)) / vh);
-            pn.style.transform =
-              "scale(" +
-              (1 - p * 0.07).toFixed(4) +
-              ") translateY(" +
-              (p * -24).toFixed(1) +
-              "px)";
-            const sh = pn.firstElementChild;
-            if (sh) sh.style.opacity = (p * 0.5).toFixed(3);
-          });
-        }
-        if (hstrip && htrack) {
-          const p = clamp01((sy - M.hTop) / (M.hH - vh)),
-            tx = -p * M.hMax;
-          if (vw > 768)
-            htrack.style.transform = "translate3d(" + tx.toFixed(1) + "px,0,0)";
-          if (hbar) hbar.style.width = (p * 100).toFixed(2) + "%";
-          if (hcount && M.hFig.length) {
-            let idx = 0;
-            const cx = vw * 0.5;
-            M.hFig.forEach((l, i) => {
-              if (l + tx < cx) idx = i;
-            });
-            const label = String(idx + 1).padStart(2, "0") + " ";
-            if (hcount.firstChild && hcount.firstChild.nodeValue !== label)
-              hcount.firstChild.nodeValue = label;
-          }
-        }
-        if (rstrip && rtrack) {
-          const top = M.rTop,
-            p = clamp01((sy - top) / (M.rH - vh)),
-            tx = -p * M.rMax;
-          rtrack.style.transform = "translate3d(" + tx.toFixed(1) + "px,0,0)";
-          if (rbar) rbar.style.width = (p * 100).toFixed(2) + "%";
-          if (rghost)
-            rghost.style.transform =
-              "translate3d(" + (p * -18 + 4).toFixed(2) + "vw,-50%,0)";
-          const cx = vw * 0.5;
-          let idx = 0;
-          const enter = clamp01((y - (top - vh * 0.6)) / (vh * 0.9));
-          const skew = Math.max(-1, Math.min(1, vel / 40));
-          M.rCard.forEach((m, i) => {
-            const c = rcards[i],
-              left = m.l + tx,
-              d = (left + m.w / 2 - cx) / vw,
-              ad = Math.min(1, Math.abs(d));
-            const ei = clamp01(enter * 1.6 - i * 0.12),
-              ee = 1 - Math.pow(1 - ei, 3);
-            c.style.transform =
-              "perspective(1400px) rotateY(" +
-              (-d * 18 - skew * 5).toFixed(2) +
-              "deg) rotateX(" +
-              ((1 - ee) * 14).toFixed(2) +
-              "deg) translate3d(0," +
-              (ad * 30 + (1 - ee) * 160).toFixed(1) +
-              "px,0) scale(" +
-              (1 - ad * 0.16).toFixed(3) +
-              ")";
-            c.style.opacity = (Math.min(1, ee) * (1 - ad * 0.5)).toFixed(3);
-            c.style.zIndex = String(10 - Math.round(ad * 9));
-            if (m.ring) {
-              m.ring.style.transform =
-                "scale(" + (1 + (1 - ad) * 0.35).toFixed(3) + ")";
-              m.ring.style.background =
-                ad < 0.18 ? "rgba(161,86,63,.85)" : "rgba(15,14,13,.35)";
-            }
-            if (left < cx) idx = i;
-          });
-          if (rcount) {
-            const label = String(idx + 1).padStart(2, "0");
-            if (
-              rcount.firstChild &&
-              rcount.firstChild.nodeValue !== label + " "
-            )
-              rcount.firstChild.nodeValue = label + " ";
-          }
-        }
-        if (vmarq) {
-          const half = vmarq.scrollWidth / 2;
-          mx -= 0.9 + Math.min(Math.abs(vel), 60) * 0.12 * (vel < 0 ? -1 : 1);
-          if (mx <= -half) mx += half;
-          if (mx > 0) mx -= half;
-          vmarq.style.transform = "translateX(" + mx.toFixed(1) + "px)";
-          vmarq.style.fontStyle = Math.abs(vel) > 25 ? "italic" : "normal";
-        }
-        if (proc && pline) {
-          const rt = M.procTop - y,
-            p = clamp01((vh * 0.7 - rt) / M.procH);
-          pline.style.transform = "scaleY(" + p.toFixed(3) + ")";
-          psteps.forEach((s, si) => {
-            const on = M.stepTop[si] - y < vh * 0.7;
-            s.style.opacity = on ? "1" : "0.35";
-            const dot = s.firstElementChild;
-            if (dot) {
-              dot.style.background = on ? "#a1563f" : "#d8d1c4";
-              dot.style.transform = on ? "scale(1.4)" : "scale(1)";
-            }
-          });
-        }
-        if (footer && fmark) {
-          const p = clamp01((vh - (M.footTop - y)) / Math.min(M.footH, vh));
-          fmark.style.transform =
-            "translateY(" + ((1 - p) * 38).toFixed(1) + "%)";
-          fmark.style.opacity = (0.15 + 0.85 * p).toFixed(3);
-        }
-      }
-      this._raf = requestAnimationFrame(frame);
-    };
-    this._raf = requestAnimationFrame(frame);
-
-    if (
-      (this.props.customCursor ?? true) &&
-      !this.reduced &&
-      window.matchMedia &&
-      window.matchMedia("(pointer:fine)").matches
-    ) {
-      const dot = document.getElementById("isv-cur-dot"),
-        ring = document.getElementById("isv-cur-ring"),
-        lab = document.getElementById("isv-cur-label");
-      if (dot && ring) {
-        document.body.style.cursor = "none";
-        let rx = 0,
-          ry = 0,
-          tx = 0,
-          ty = 0,
-          shown = false;
-        this._move = (e) => {
-          tx = e.clientX;
-          ty = e.clientY;
-          dot.style.transform = "translate(" + tx + "px," + ty + "px)";
-          if (!shown) {
-            shown = true;
-            dot.style.opacity = "1";
-            ring.style.opacity = "1";
-          }
-        };
-        window.addEventListener("mousemove", this._move, { passive: true });
-        let cs = 1,
-          rs = 1;
-        const follow = () => {
-          rx += (tx - rx) * 0.16;
-          ry += (ty - ry) * 0.16;
-          cs += (rs - cs) * 0.18;
-          ring.style.transform =
-            "translate3d(" +
-            rx.toFixed(1) +
-            "px," +
-            ry.toFixed(1) +
-            "px,0) scale(" +
-            cs.toFixed(3) +
-            ")";
-          this._raf2 = requestAnimationFrame(follow);
-        };
-        follow();
-        const grow = (label) => {
-          rs = 2.1;
-          ring.style.background = "rgba(161,86,63,.92)";
-          ring.style.borderColor = "transparent";
-          lab.textContent = label;
-          lab.style.transform = "scale(" + (1 / rs).toFixed(3) + ")";
-        };
-        const shrink = () => {
-          rs = 1;
-          ring.style.background = "transparent";
-          ring.style.borderColor = "#a1563f";
-          lab.textContent = "";
-        };
-        let curT = null;
-        this._over = (e) => {
-          const t = e.target.closest && e.target.closest("[data-cur]");
-          if (t && t !== curT) {
-            curT = t;
-            grow(t.dataset.cur);
-          }
-        };
-        this._out = (e) => {
-          const t = e.target.closest && e.target.closest("[data-cur]");
-          if (
-            t &&
-            t === curT &&
-            !(e.relatedTarget && t.contains(e.relatedTarget))
-          ) {
-            curT = null;
-            shrink();
-          }
-        };
-        document.addEventListener("mouseover", this._over);
-        document.addEventListener("mouseout", this._out);
-      }
-    }
-  }
-
-  countUp(el, target, decimals) {
-    const t0 = performance.now(),
-      dur = 1600;
-    const step = (t) => {
-      const p = Math.min(1, (t - t0) / dur),
-        e = 1 - Math.pow(1 - p, 3);
-      el.textContent = (e * target).toFixed(decimals);
-      if (p < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
+    this._disposeMotion = startSiteMotion(document.body, this.reduced);
   }
 
   renderVals() {
@@ -1030,7 +581,11 @@ export default class DesignPage extends React.Component {
       },
       lbTitle: s.lbTitle || "",
       previewOn: (e) => {
-        if (this.reduced) return;
+        if (
+          this.reduced ||
+          !matchMedia("(hover:hover) and (pointer:fine)").matches
+        )
+          return;
         const v = e.currentTarget.querySelector("video[data-preview]");
         if (!v) return;
         if (!v.src) v.src = v.getAttribute("data-src");
@@ -1071,7 +626,7 @@ export default class DesignPage extends React.Component {
           ? "translateY(0) scale(1)"
           : "translateY(46px) scale(.96)",
       shellClip: s.loaderExiting ? "inset(0 0 100% 0)" : "inset(0 0 0 0)",
-      centerDur: s.expanding ? "0.45s" : "1s",
+      centerDur: s.expanding ? "0.45s" : "0.3s",
       centerEase: s.expanding
         ? "cubic-bezier(.76,0,.24,1)"
         : "cubic-bezier(.16,1,.3,1)",
@@ -1082,10 +637,20 @@ export default class DesignPage extends React.Component {
       skipLoader: () => this.finishLoader(),
 
       magnet: (e) => {
-        if (this.reduced) return;
+        if (
+          this.reduced ||
+          !matchMedia("(hover:hover) and (pointer:fine)").matches
+        )
+          return;
         const r = e.currentTarget.getBoundingClientRect();
-        const x = (e.clientX - r.left - r.width / 2) * 0.22,
-          y = (e.clientY - r.top - r.height / 2) * 0.3;
+        const x = Math.max(
+            -18,
+            Math.min(18, (e.clientX - r.left - r.width / 2) * 0.22),
+          ),
+          y = Math.max(
+            -12,
+            Math.min(12, (e.clientY - r.top - r.height / 2) * 0.22),
+          );
         e.currentTarget.style.transform =
           "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px)";
       },
@@ -1620,9 +1185,11 @@ export default class DesignPage extends React.Component {
                   <div
                     style={{
                       height: "2px",
-                      width: v.progressPct,
+                      width: "100%",
+                      transform: `scaleX(${v.progress / 100})`,
+                      transformOrigin: "left",
                       background: "#a1563f",
-                      transition: "width .1s linear",
+                      transition: "transform .1s linear",
                     }}
                   ></div>
                 </div>
@@ -5260,10 +4827,11 @@ export default class DesignPage extends React.Component {
             }}
           >
             <div
+              data-ticker=""
               style={{
                 display: "flex",
                 width: "max-content",
-                animation: "tick 40s linear infinite",
+                animation: "none",
                 font: "400 11px 'JetBrains Mono',monospace",
                 letterSpacing: "1.8px",
               }}
@@ -9369,9 +8937,17 @@ export default class DesignPage extends React.Component {
               aria-valuemax={98}
               aria-valuenow={this.state.ba}
               onKeyDown={(e) => {
-                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
                   e.preventDefault();
-                  this.setState({ba: Math.max(2, Math.min(98, this.state.ba + (e.key === 'ArrowRight' ? 5 : -5)))});
+                  this.setState({
+                    ba: Math.max(
+                      2,
+                      Math.min(
+                        98,
+                        this.state.ba + (e.key === "ArrowRight" ? 5 : -5),
+                      ),
+                    ),
+                  });
                 }
               }}
               onPointerMove={v.baMove}
@@ -10937,8 +10513,13 @@ export default class DesignPage extends React.Component {
         {v.lbOpen && (
           <>
             <dialog
-              ref={(element) => { if (element && !element.open) element.showModal(); }}
-              onCancel={(event) => { event.preventDefault(); v.closeReel(); }}
+              ref={(element) => {
+                if (element && !element.open) element.showModal();
+              }}
+              onCancel={(event) => {
+                event.preventDefault();
+                v.closeReel();
+              }}
               onClick={v.closeReel}
               role={"dialog"}
               aria-label={"Video"}
