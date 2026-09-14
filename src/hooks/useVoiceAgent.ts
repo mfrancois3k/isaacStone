@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { VoicePlayback } from './voice-playback';
 
 type VoiceState = 'idle' | 'connecting' | 'listening' | 'thinking' | 'speaking';
 type Transcript = (id: string, sender: 'user' | 'bot', text: string) => void;
@@ -13,10 +14,9 @@ interface Call {
   timer?: ReturnType<typeof setTimeout>;
   timeout?: ReturnType<typeof setTimeout>;
   playbackTimer?: ReturnType<typeof setTimeout>;
-  sources: Set<AudioBufferSourceNode>;
-  nextTime: number;
-  outputItem?: string;
-  outputStart?: number;
+  playback?: VoicePlayback;
+  inputMeter?: AnalyserNode;
+  outputMeter?: AnalyserNode;
 }
 
 export function useVoiceAgent(onTranscript: Transcript) {
@@ -37,7 +37,7 @@ export function useVoiceAgent(onTranscript: Transcript) {
       clearTimeout(call.timer); clearTimeout(call.timeout); clearTimeout(call.playbackTimer);
       call.stream?.getTracks().forEach(track => track.stop());
       call.capture?.disconnect(); call.source?.disconnect();
-      for (const source of call.sources) { try { source.stop(); } catch {} }
+      call.playback?.clear();
       call.socket?.close();
       void call.context?.close().catch(() => {});
     }
@@ -52,7 +52,7 @@ export function useVoiceAgent(onTranscript: Transcript) {
 
   const start = useCallback(async () => {
     if (callRef.current) return;
-    const call: Call = { cancelled: false, ready: false, sources: new Set(), nextTime: 0 };
+    const call: Call = { cancelled: false, ready: false };
     callRef.current = call;
     setError(''); setState('connecting');
     const fail = (message: string) => {
@@ -67,6 +67,10 @@ export function useVoiceAgent(onTranscript: Transcript) {
       // Request audio only from this explicit click; closing cancels every pending step.
       const context = new AudioContext({ sampleRate: 24000 });
       call.context = context;
+      call.outputMeter = context.createAnalyser();
+      call.outputMeter.fftSize = 256;
+      call.outputMeter.connect(context.destination);
+      call.playback = new VoicePlayback(context, call.outputMeter);
       await context.resume();
       if (call.cancelled) return;
       const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1 }, video: false });
@@ -84,28 +88,26 @@ export function useVoiceAgent(onTranscript: Transcript) {
       call.timeout = setTimeout(() => fail('Voice took too long to connect. Please try again.'), 15_000);
       const transcripts = new Map<string, string>();
       let configured = false;
-      let ignoreAudio = false;
-      const clearPlayback = () => {
-        clearTimeout(call.playbackTimer);
-        for (const source of call.sources) { try { source.stop(); } catch {} }
-        call.sources.clear(); call.nextTime = context.currentTime;
-      };
+      const playback = call.playback;
       socket.onmessage = ({ data: raw }) => {
         if (call.cancelled) return;
         let event: any;
         try { event = JSON.parse(raw); } catch { return; }
         if (event.type === 'session.updated') {
-          // Saved agent configuration arrives first. Change only audio transport afterward.
+          // Keep the saved agent's voice/tools; configure browser audio and turn-taking.
           if (!configured) {
             configured = true;
             send({ type: 'session.update', session: {
-              turn_detection: { type: 'server_vad', silence_duration_ms: 900, threshold: 0.6 },
+              turn_detection: { type: 'server_vad', silence_duration_ms: 1100, threshold: 0.85 },
               audio: { input: { format: { type: 'audio/pcm', rate: context.sampleRate } }, output: { format: { type: 'audio/pcm', rate: 24000 } } },
             } });
           } else if (!call.ready && event.session?.audio?.input?.format) {
             call.ready = true;
             clearTimeout(call.timeout);
             call.source = context.createMediaStreamSource(stream);
+            call.inputMeter = context.createAnalyser();
+            call.inputMeter.fftSize = 256;
+            call.source.connect(call.inputMeter);
             call.capture = new AudioWorkletNode(context, 'voice-capture');
             call.capture.port.onmessage = ({ data: buffer }: MessageEvent<ArrayBuffer>) => {
               if (call.cancelled || mutedRef.current || socket.readyState !== WebSocket.OPEN) return;
@@ -124,41 +126,30 @@ export function useVoiceAgent(onTranscript: Transcript) {
           }
         }
         if (event.type === 'input_audio_buffer.speech_started') {
-          if (call.outputItem && call.outputStart !== undefined && call.sources.size) {
-            send({ type: 'conversation.item.truncate', item_id: call.outputItem, content_index: 0, audio_end_ms: Math.max(0, Math.floor((context.currentTime - call.outputStart) * 1000)) });
-          }
-          ignoreAudio = true; clearPlayback(); setState('listening');
+          clearTimeout(call.playbackTimer);
+          const truncated = playback.interrupt();
+          if (truncated) send({ type: 'conversation.item.truncate', ...truncated });
+          setState('listening');
         }
         if (event.type === 'input_audio_buffer.speech_stopped') setState('thinking');
         if (event.type === 'conversation.item.input_audio_transcription.completed' && event.transcript) callback.current(`voice-user-${event.item_id}`, 'user', event.transcript);
-        if (event.type === 'response.created') { ignoreAudio = false; call.outputItem = undefined; call.outputStart = undefined; }
-        if (event.type === 'response.output_audio_transcript.delta') {
+        if (event.type === 'response.created') { clearTimeout(call.playbackTimer); playback.begin(event.response.id, call.ready); }
+        if (event.type === 'response.output_audio_transcript.delta' && playback.accepts(event.response_id)) {
           const id = `voice-bot-${event.item_id || event.response_id}`;
           const text = (transcripts.get(id) || '') + event.delta;
           transcripts.set(id, text); callback.current(id, 'bot', text);
         }
-        if (event.type === 'response.output_audio.delta' && !ignoreAudio) {
-          const binary = atob(event.delta);
-          const bytes = Uint8Array.from(binary, c => c.charCodeAt(0));
-          const view = new DataView(bytes.buffer);
-          const buffer = context.createBuffer(1, Math.floor(bytes.length / 2), 24000);
-          const samples = buffer.getChannelData(0);
-          for (let i = 0; i < samples.length; i++) samples[i] = view.getInt16(i * 2, true) / 32768;
-          const source = context.createBufferSource();
-          source.buffer = buffer; source.connect(context.destination);
-          call.nextTime = Math.max(context.currentTime + 0.02, call.nextTime);
-          if (call.outputStart === undefined) { call.outputStart = call.nextTime; call.outputItem = event.item_id; }
-          call.sources.add(source); source.onended = () => { call.sources.delete(source); source.disconnect(); };
-          source.start(call.nextTime); call.nextTime += buffer.duration; setState('speaking');
+        if (event.type === 'response.output_audio.delta') {
+          if (playback.append(event.response_id, event.item_id, event.delta)) setState('speaking');
         }
-        if (event.type === 'response.done') {
+        if (event.type === 'response.done' && playback.accepts(event.response?.id)) {
           if (event.response?.status === 'failed') { fail('Voice could not answer. Please reconnect or type below.'); return; }
           clearTimeout(call.playbackTimer);
-          call.playbackTimer = setTimeout(() => { if (!call.cancelled) setState('listening'); }, Math.max(0, (call.nextTime - context.currentTime) * 1000));
+          call.playbackTimer = setTimeout(() => { if (!call.cancelled) setState('listening'); }, playback.remainingMs());
         }
         if (event.type === 'response.function_call_arguments.done' && event.name === 'end_call') {
           clearTimeout(call.timer);
-          call.timer = setTimeout(stop, Math.max(250, (call.nextTime - context.currentTime) * 1000 + 250));
+          call.timer = setTimeout(stop, playback.remainingMs() + 250);
         }
         if (event.type === 'error') fail('Voice ran into a problem. Please reconnect or type below.');
       };
@@ -185,5 +176,12 @@ export function useVoiceAgent(onTranscript: Transcript) {
     setState('thinking');
     return true;
   }, []);
-  return { state, error, muted, supported, start, stop, toggleMute, sendText, active: state !== 'idle' };
+  const meterSamples = useRef(new Float32Array(256));
+  const getAudioLevel = useCallback((output: boolean) => {
+    const meter = output ? callRef.current?.outputMeter : callRef.current?.inputMeter;
+    if (!meter || (!output && mutedRef.current)) return 0;
+    meter.getFloatTimeDomainData(meterSamples.current);
+    return Math.min(1, Math.sqrt(meterSamples.current.reduce((sum, value) => sum + value * value, 0) / 256) * 5);
+  }, []);
+  return { state, error, muted, supported, start, stop, toggleMute, sendText, getAudioLevel, active: state !== 'idle' };
 }
