@@ -98,7 +98,8 @@ export function useVoiceAgent(onTranscript: Transcript) {
           if (!configured) {
             configured = true;
             send({ type: 'session.update', session: {
-              turn_detection: { type: 'server_vad', silence_duration_ms: 1100, threshold: 0.85 },
+              // End a normal turn promptly; keep the louder activation threshold for speakers.
+              turn_detection: { type: 'server_vad', silence_duration_ms: 500, threshold: 0.85 },
               audio: { input: { format: { type: 'audio/pcm', rate: context.sampleRate } }, output: { format: { type: 'audio/pcm', rate: 24000 } } },
             } });
           } else if (!call.ready && event.session?.audio?.input?.format) {
