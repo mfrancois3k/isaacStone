@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { BUSINESS } from '../data/site';
+import { useVoiceAgent } from '../hooks/useVoiceAgent';
 
 /**
  * The estimate helper. It asks four things — name, phone, room/material and
@@ -122,10 +123,6 @@ export function VoiceChatBot() {
   ]);
   const [draft, setDraft] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isListening, setIsListening] = useState(false);
-  const [speechSupported, setSpeechSupported] = useState(true);
-  const [micError, setMicError] = useState('');
-  const [speakOn, setSpeakOn] = useState(false);
   const [hintIndex, setHintIndex] = useState(0);
   const [hintDismissed, setHintDismissed] = useState(false);
   const [handoff, setHandoff] = useState<{ state: 'idle' | 'sending' | 'sent' | 'error'; note: string }>(
@@ -135,9 +132,11 @@ export function VoiceChatBot() {
   const launcherRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const transcriptEndRef = useRef<HTMLDivElement>(null);
-  const recognitionRef = useRef<{ start: () => void; stop: () => void; abort: () => void } | null>(null);
-  const speakOnRef = useRef(speakOn);
-  speakOnRef.current = speakOn;
+  const voice = useVoiceAgent((id, sender, text) => {
+    setMessages(prev => prev.some(message => message.id === id)
+      ? prev.map(message => message.id === id ? { ...message, text } : message)
+      : [...prev, { id, sender, text }]);
+  });
 
   const details = useMemo(
     () => captureDetails(messages.filter((m) => m.sender === 'user').map((m) => m.text)),
@@ -145,12 +144,6 @@ export function VoiceChatBot() {
   );
   const summary = summarise(details);
   const missing = (['name', 'phone', 'email'] as const).filter((k) => !details[k]);
-
-  const speak = useCallback((text: string) => {
-    if (!speakOnRef.current || typeof window === 'undefined' || !('speechSynthesis' in window)) return;
-    window.speechSynthesis.cancel();
-    window.speechSynthesis.speak(new SpeechSynthesisUtterance(text));
-  }, []);
 
   const pushMessage = useCallback((sender: 'user' | 'bot', text: string) => {
     setMessages((prev) => [...prev, { id: `${sender}-${Date.now()}-${prev.length}`, sender, text }]);
@@ -160,6 +153,7 @@ export function VoiceChatBot() {
     async (text: string) => {
       const content = text.trim();
       if (!content || isLoading) return;
+      if (voice.active) { if (voice.sendText(content)) setDraft(''); return; }
 
       const history = messages.slice(-5).map((m) => ({ sender: m.sender, text: m.text }));
       pushMessage('user', content);
@@ -178,59 +172,15 @@ export function VoiceChatBot() {
             ? data.reply
             : `I did not catch that. You can always call ${BUSINESS.phone}.`;
         pushMessage('bot', reply);
-        speak(reply);
       } catch {
         const reply = `Something went wrong on our end — sorry. Call ${BUSINESS.phone} and Jonathan will pick up, Monday to Saturday.`;
         pushMessage('bot', reply);
-        speak(reply);
       } finally {
         setIsLoading(false);
       }
     },
-    [isLoading, messages, pushMessage, speak],
+    [isLoading, messages, pushMessage, voice.active, voice.sendText],
   );
-
-  // Latest sender, so the recognition instance below is built once and never
-  // torn down mid-utterance just because a message arrived.
-  const sendMessageRef = useRef(sendMessage);
-  sendMessageRef.current = sendMessage;
-
-  // --- Web Speech API. Absent in Firefox and elsewhere; the drawer stays a text chat.
-  useEffect(() => {
-    const SpeechRecognitionCtor =
-      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (!SpeechRecognitionCtor) {
-      setSpeechSupported(false);
-      return;
-    }
-    const recognition = new SpeechRecognitionCtor();
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.lang = 'en-US';
-    recognition.onstart = () => {
-      setMicError('');
-      setIsListening(true);
-    };
-    recognition.onresult = (event: any) => {
-      const result = event.results[event.resultIndex];
-      setDraft(result[0].transcript);
-      if (result.isFinal) {
-        setIsListening(false);
-        void sendMessageRef.current(result[0].transcript);
-      }
-    };
-    recognition.onerror = (event: any) => {
-      setIsListening(false);
-      setMicError(
-        event.error === 'not-allowed' || event.error === 'service-not-allowed'
-          ? 'No microphone access — type your answer instead, or just call us.'
-          : 'The microphone did not catch that. Try again, or type it below.',
-      );
-    };
-    recognition.onend = () => setIsListening(false);
-    recognitionRef.current = recognition;
-    return () => recognition.abort();
-  }, []);
 
   // Opened from the navbar / hero CTA.
   useEffect(() => {
@@ -251,37 +201,20 @@ export function VoiceChatBot() {
     if (!isOpen) return;
     closeRef.current?.focus();
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setIsOpen(false);
+      if (e.key === 'Escape') { voice.stop(); setIsOpen(false); launcherRef.current?.focus(); }
     };
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [isOpen]);
+  }, [isOpen, voice.stop]);
 
   useEffect(() => {
     if (isOpen) transcriptEndRef.current?.scrollIntoView({ block: 'nearest' });
   }, [messages, isOpen, isLoading]);
 
   const closeDrawer = () => {
-    recognitionRef.current?.abort();
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
-    setIsListening(false);
+    voice.stop();
     setIsOpen(false);
     launcherRef.current?.focus();
-  };
-
-  const toggleMic = () => {
-    if (!recognitionRef.current) return;
-    if (isListening) {
-      recognitionRef.current.stop();
-      setIsListening(false);
-      return;
-    }
-    if (typeof window !== 'undefined' && 'speechSynthesis' in window) window.speechSynthesis.cancel();
-    try {
-      recognitionRef.current.start();
-    } catch {
-      setMicError('The microphone is already running. Give it a moment.');
-    }
   };
 
   const sendToJonathan = async () => {
@@ -377,17 +310,12 @@ export function VoiceChatBot() {
                 <span className="font-display text-[20px] leading-none">Wamy</span>
               </span>
               <span className="flex gap-1.5">
-                <button
-                  type="button"
-                  onClick={() => {
-                    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-                    setSpeakOn((on) => !on);
-                  }}
-                  aria-pressed={speakOn}
-                  className={`h-[34px] border border-ink-line-2 px-2.5 font-mono text-[9px] uppercase tracking-[0.14em] text-paper ${FOCUS} ${speakOn ? 'bg-brand' : 'bg-transparent'}`}
-                >
-                  {speakOn ? 'Voice on' : 'Voice off'}
-                </button>
+                {voice.active && (
+                  <button type="button" onClick={voice.toggleMute} aria-pressed={voice.muted}
+                    className={`h-[34px] border border-ink-line-2 px-2.5 font-mono text-[9px] uppercase tracking-[0.14em] text-paper ${FOCUS}`}>
+                    {voice.muted ? 'Unmute mic' : 'Mute mic'}
+                  </button>
+                )}
                 <button
                   ref={closeRef}
                   type="button"
@@ -437,31 +365,20 @@ export function VoiceChatBot() {
             )}
 
             <div className="flex flex-none flex-col gap-3 px-4 pb-4 pt-3.5">
-              {speechSupported ? (
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={toggleMic}
-                    aria-label={isListening ? 'Stop listening' : 'Start talking'}
-                    aria-pressed={isListening}
-                    className={`relative flex h-12 w-12 flex-none items-center justify-center rounded-full text-white ${FOCUS} ${isListening ? 'bg-brand' : 'bg-ink'}`}
-                  >
-                    <span className="text-[15px] leading-none">●</span>
+              {voice.supported ? (
+                <div className="flex flex-col gap-2">
+                  <button type="button" onClick={() => voice.active ? voice.stop() : void voice.start()}
+                    disabled={isLoading}
+                    aria-label={voice.active ? 'End voice call' : 'Start voice call'}
+                    className={`min-h-12 w-full px-4 font-sans text-[15px] font-bold text-white disabled:opacity-40 ${FOCUS} ${voice.active ? 'bg-brand' : 'bg-ink'}`}>
+                    {voice.state === 'connecting' ? 'Cancel connection' : voice.active ? 'End voice call' : 'Start voice call'}
                   </button>
-                  <span className="min-w-0 flex-1 font-sans text-[15px] leading-[1.35] text-mute-3">
-                    {micError ||
-                      (isListening ? (
-                        <span className="font-medium text-brand">● listening — speak now, or tap again to stop.</span>
-                      ) : (
-                        'Tap to talk, or type below. Nothing is recorded until you tap.'
-                      ))}
-                  </span>
+                  <p role="status" className="font-sans text-[13px] leading-snug text-mute-3">
+                    {voice.error || (voice.state === 'connecting' ? 'Connecting to Wamy…' : voice.muted ? 'Microphone muted. You can still type below.' : voice.state === 'speaking' ? 'Wamy is speaking — you can interrupt.' : voice.state === 'thinking' ? 'Wamy is thinking…' : voice.active ? 'Listening — speak naturally, or type below.' : 'Talk with Wamy live. Your microphone starts only when you tap. Audio is processed by xAI.')}
+                  </p>
                 </div>
               ) : (
-                <p className="font-sans text-[15px] leading-[1.35] text-mute-3">
-                  This browser does not support voice input, so type your answer below — it works
-                  exactly the same. Or call {BUSINESS.phone}.
-                </p>
+                <p className="font-sans text-[13px] text-mute-3">Voice is unavailable in this browser. Type below or call {BUSINESS.phone}.</p>
               )}
 
               <form
@@ -485,7 +402,7 @@ export function VoiceChatBot() {
                 />
                 <button
                   type="submit"
-                  disabled={!draft.trim() || isLoading}
+                  disabled={!draft.trim() || isLoading || (voice.active && voice.state !== 'listening')}
                   className={`min-h-[46px] bg-ink px-4 font-sans text-[15px] font-bold text-white disabled:opacity-40 ${FOCUS}`}
                 >
                   Send

@@ -3,6 +3,7 @@ import fs from "fs";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import dotenv from "dotenv";
+import { createVoiceSession } from './shared/voice-session.js';
 import { XAI_MODEL, askWamy, keywordFallback, toChatTurns } from "./shared/consultant.js";
 import {
   LEAD_ACCEPTED_MESSAGE,
@@ -14,11 +15,19 @@ import {
 } from "./shared/leads.js";
 
 dotenv.config();
+dotenv.config({ path: '.env.local' });
 
 const app = express();
 const PORT = 3000;
 
 app.use(express.json());
+
+app.post('/api/voice-session', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  if (req.get('origin') !== `${req.protocol}://${req.get('host')}`) return res.status(403).json({ error: 'Origin not allowed.' });
+  const result = await createVoiceSession(req.ip || 'unknown');
+  return res.status(result.status).json(result.body);
+});
 
 // Leads are also appended to disk. An in-memory array alone loses every request
 // made since the last restart, and a lost lead is a lost customer.
