@@ -886,7 +886,11 @@ export default class DesignPage extends React.Component {
           }}
         >
           <a
-            href={"tel:+16315305883"}
+            href={"#wamy"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  v.toggleVoice();
+                }}
             style={{
               flex: "1",
               display: "flex",
@@ -901,7 +905,7 @@ export default class DesignPage extends React.Component {
               textDecoration: "none",
             }}
           >
-            {"Call (631) 530-5883"}
+            {"Talk with Wammy"}
           </a>
           <a
             href={"#contact"}
@@ -1352,7 +1356,11 @@ export default class DesignPage extends React.Component {
                 {"SKIP [ESC] →"}
               </button>
               <a
-                href={"tel:+16315305883"}
+                href={"#wamy"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  v.toggleVoice();
+                }}
                 style={{
                   position: "absolute",
                   top: "18px",
@@ -1369,7 +1377,7 @@ export default class DesignPage extends React.Component {
                   backdropFilter: "blur(4px)",
                 }}
               >
-                {"(631) 530-5883"}
+                {"TALK WITH WAMMY"}
               </a>
             </div>
           </>
@@ -1507,7 +1515,11 @@ export default class DesignPage extends React.Component {
                 {v.menuLabel}
               </button>
               <a
-                href={"tel:+16315305883"}
+                href={"#wamy"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  v.toggleVoice();
+                }}
                 data-cur={"CALL"}
                 style={{
                   display: "flex",
@@ -1522,7 +1534,7 @@ export default class DesignPage extends React.Component {
                   whiteSpace: "nowrap",
                 }}
               >
-                {"(631) 530-5883"}
+                {"TALK WITH WAMMY"}
               </a>
             </div>
           </div>
@@ -2170,7 +2182,11 @@ export default class DesignPage extends React.Component {
                   {"Request an on-site estimate"}
                 </span></a>
                 <a
-                  href={"tel:+16315305883"}
+                  href={"#wamy"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  v.toggleVoice();
+                }}
                   data-cur={"CALL"}
                   onMouseMove={v.magnet}
                   onMouseLeave={v.unmagnet}
@@ -2187,7 +2203,7 @@ export default class DesignPage extends React.Component {
                     transition: "transform .4s cubic-bezier(.16,1,.3,1)",
                   }}
                 ><span className="magnetic-face">
-                  {"Call (631) 530-5883"}
+                  {"Talk with Wammy"}
                 </span></a>
               </div>
               <a
@@ -5721,7 +5737,11 @@ export default class DesignPage extends React.Component {
                 <span>{"Clean transitions"}</span>
               </div>
               <a
-                href={"tel:+16315305883"}
+                href={"#wamy"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  v.toggleVoice();
+                }}
                 data-cur={"CALL"}
                 onMouseMove={v.magnet}
                 onMouseLeave={v.unmagnet}
@@ -5739,7 +5759,7 @@ export default class DesignPage extends React.Component {
                   marginTop: "8px",
                 }}
               ><span className="magnetic-face">
-                {"Not sure which? Call and ask"}
+                {"Ask Wammy about your project"}
               </span></a>
             </div>
             <div
@@ -8596,7 +8616,11 @@ export default class DesignPage extends React.Component {
                 <span>{"BRENTWOOD, NY"}</span>
               </div>
               <a
-                href={"tel:+16315305883"}
+                href={"#wamy"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  v.toggleVoice();
+                }}
                 data-cur={"CALL"}
                 onMouseMove={v.magnet}
                 onMouseLeave={v.unmagnet}
@@ -8613,7 +8637,7 @@ export default class DesignPage extends React.Component {
                   transition: "transform .4s cubic-bezier(.16,1,.3,1)",
                 }}
               ><span className="magnetic-face">
-                {"Call (631) 530-5883"}
+                {"Talk with Wammy"}
               </span></a>
             </div>
           </div>
@@ -9707,11 +9731,15 @@ export default class DesignPage extends React.Component {
                 }}
               >
                 {
-                  "The things people ask before they call. Anything else, the phone works."
+                  "The things people ask before they talk with Wammy. Anything else, send the details."
                 }
               </p>
               <a
-                href={"tel:+16315305883"}
+                href={"#wamy"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  v.toggleVoice();
+                }}
                 data-cur={"CALL"}
                 style={{
                   alignSelf: "flex-start",
@@ -9725,7 +9753,7 @@ export default class DesignPage extends React.Component {
                   textDecoration: "none",
                 }}
               >
-                {"Call (631) 530-5883"}
+                {"Talk with Wammy"}
               </a>
             </div>
             <div
@@ -10166,10 +10194,14 @@ export default class DesignPage extends React.Component {
                   color: "#a89f92",
                 }}
               >
-                {"Get an estimate. Call, or send the details."}
+                {"Get an estimate. Talk with Wammy, or send the details."}
               </h2>
               <a
-                href={"tel:+16315305883"}
+                href={"#wamy"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  v.toggleVoice();
+                }}
                 data-cur={"CALL"}
                 style={{
                   display: "flex",
@@ -10195,7 +10227,7 @@ export default class DesignPage extends React.Component {
                       transition: "transform .9s cubic-bezier(.16,1,.3,1)",
                     }}
                   >
-                    {"(631)"}
+                    {"Talk"}
                   </span>
                 </span>
                 <span
@@ -10214,7 +10246,7 @@ export default class DesignPage extends React.Component {
                       transition: "transform .9s cubic-bezier(.16,1,.3,1) .08s",
                     }}
                   >
-                    {"530"}
+                    {"with"}
                   </span>
                 </span>
                 <span
@@ -10233,7 +10265,7 @@ export default class DesignPage extends React.Component {
                       transition: "transform .9s cubic-bezier(.16,1,.3,1) .16s",
                     }}
                   >
-                    {"5883"}
+                    {"Wammy"}
                   </span>
                 </span>
               </a>
@@ -10827,7 +10859,11 @@ export default class DesignPage extends React.Component {
           }}
         >
           <a
-            href={"tel:+16315305883"}
+            href={"#wamy"}
+                onClick={(e) => {
+                  e.preventDefault();
+                  v.toggleVoice();
+                }}
             style={{
               flex: "1",
               display: "flex",
@@ -10840,7 +10876,7 @@ export default class DesignPage extends React.Component {
               background: "#1c1a17",
             }}
           >
-            {"Call"}
+            {"Talk with Wammy"}
           </a>
           <a
             href={"#contact"}
@@ -10955,7 +10991,7 @@ export default class DesignPage extends React.Component {
                   href={"tel:+16315305883"}
                   style={{ color: "#f6efdd", textDecoration: "none" }}
                 >
-                  {"(631) 530-5883"}
+                  {"TALK WITH WAMMY"}
                 </a>
                 <a
                   href={"mailto:jafet.tile@gmail.com"}
