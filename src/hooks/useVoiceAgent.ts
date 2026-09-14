@@ -98,7 +98,10 @@ export function useVoiceAgent(onTranscript: Transcript) {
           // Saved agent configuration arrives first. Change only audio transport afterward.
           if (!configured) {
             configured = true;
-            send({ type: 'session.update', session: { audio: { input: { format: { type: 'audio/pcm', rate: context.sampleRate } }, output: { format: { type: 'audio/pcm', rate: 24000 } } } } });
+            send({ type: 'session.update', session: {
+              turn_detection: { type: 'server_vad', silence_duration_ms: 900, threshold: 0.6 },
+              audio: { input: { format: { type: 'audio/pcm', rate: context.sampleRate } }, output: { format: { type: 'audio/pcm', rate: 24000 } } },
+            } });
           } else if (!call.ready && event.session?.audio?.input?.format) {
             call.ready = true;
             clearTimeout(call.timeout);
