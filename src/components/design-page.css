@@ -626,6 +626,8 @@ select {
   [data-mobilebar] {
     display: flex;
   }
+}
+@media (max-width: 768px) and (pointer: coarse) {
   [data-hstrip] {
     height: auto !important;
   }
@@ -644,6 +646,8 @@ select {
   [data-htrack] > figure {
     scroll-snap-align: start;
   }
+}
+@media (max-width: 768px) and (pointer: coarse) {
   [data-panel] {
     position: relative !important;
     min-height: auto !important;

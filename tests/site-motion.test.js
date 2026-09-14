@@ -79,6 +79,11 @@ test("entrance counters use elapsed time once; gallery maps its full sticky trav
       undefined,
       "preserve the reference sticky-section height",
     );
+    window.innerWidth = 662;
+    frame(start + 16);
+    assert.ok(Math.abs(parseFloat(track.style.transform.slice(11)) - (-250 / (9999 - 720)) * 1338) < 0.01,
+      "narrow desktop panes retain scroll-driven horizontal movement");
+    window.innerWidth = 1000;
     observers[0].callback([{ target: stat, isIntersecting: true }]);
     frame(start + 800);
     assert.ok(

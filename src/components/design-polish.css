@@ -130,7 +130,7 @@ h1[tabindex="-1"]:focus {
     grid-template-columns: minmax(0, 1fr) !important;
   }
 }
-@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+@media (max-width: 768px) and (pointer: coarse), (prefers-reduced-motion: reduce) {
   [data-reelstrip],
   [data-hstrip] {
     height: auto !important;
@@ -273,12 +273,16 @@ h1[tabindex="-1"]:focus {
   [data-reelstrip] > div > div:nth-child(2) {
     top: 48px !important;
   }
+}
+@media (max-width: 768px) and (pointer: coarse), (prefers-reduced-motion: reduce) {
   [data-panel] [data-shade] {
     opacity: 0 !important;
   }
   [data-panel] {
     transform: none !important;
     filter: none !important;
+    opacity: 1 !important;
+    top: 0 !important;
   }
 }
 @media (prefers-reduced-motion: reduce) {

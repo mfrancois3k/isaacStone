@@ -1,8 +1,9 @@
 const clamp = (n) => Math.max(0, Math.min(1, n));
 export function startSiteMotion(root, reduced) {
+  const touchGallery = matchMedia('(max-width: 768px) and (pointer: coarse)');
   const one = (s) => root.querySelector(s),
     all = (s) => [...root.querySelectorAll(s)];
-  let disposed = false, disposeHeadings;
+  let disposed = false, disposeHeadings, serviceMotion;
   const headings = all('[data-panel] h2, #work h2, #reels h2, #owner h2, #why h2, #beforeafter h2, #faq h2, #contact h2');
   if (!reduced && headings.length) {
     import('./heading-motion.js').then(({startHeadingMotion}) => {
@@ -20,6 +21,11 @@ export function startSiteMotion(root, reduced) {
     cards = all("[data-htrack]>figure"),
     rule = one("[data-hbar]"),
     counter = one("[data-hcount]");
+  if (!reduced && panels.length) {
+    import('./service-motion.js').then(({createServiceMotion}) => {
+      if (!disposed) serviceMotion = createServiceMotion(panels);
+    }).catch(() => { /* Sticky panels remain readable without the optional chunk. */ });
+  }
   const reelTrack = one("[data-reeltrack]"),
     reelStrip = one("[data-reelstrip]"),
     reelGhost = one("[data-reelghost]"),
@@ -253,21 +259,20 @@ export function startSiteMotion(root, reduced) {
             )),
         );
       });
-      if (stackRect && vw > 768) {
+      if (stackRect && !touchGallery.matches) {
         let offset = 0;
         panels.forEach((el, i) => {
           const p =
             i === panels.length - 1
               ? 0
-              : clamp((-stackRect.top - offset) / panelHeights[i]);
-          el.style.transform = `scale(${1 - p * 0.07}) translateY(${-p * 24}px)`;
-          el.style.filter = "none";
-          const shade = el.querySelector("[data-shade]");
-          if (shade) shade.style.opacity = String(p * 0.5);
+              : clamp((-stackRect.top - offset - Math.max(0, panelHeights[i] - vh)) / vh);
+          const pinTop = `${Math.min(0, vh - panelHeights[i])}px`;
+          if (el.style.top !== pinTop) el.style.top = pinTop;
+          serviceMotion?.update(i, p);
           offset += panelHeights[i];
         });
       }
-      if (stripRect && track && vw > 768) {
+      if (stripRect && track && !touchGallery.matches) {
         const max = Math.max(0, trackWidth - vw),
           p = clamp(
             (smoothY - y - stripRect.top) / Math.max(1, stripRect.height - vh),
@@ -277,7 +282,7 @@ export function startSiteMotion(root, reduced) {
         if (rule) rule.style.transform = `scaleX(${p})`;
         count(counter, nearest(cardCenters, vw / 2 - x));
       }
-      if (reelRect && reelTrack && vw > 768) {
+      if (reelRect && reelTrack && !touchGallery.matches) {
         const p = clamp(
           (smoothY - y - reelRect.top) / Math.max(1, reelRect.height - vh),
         );
@@ -354,13 +359,13 @@ export function startSiteMotion(root, reduced) {
         }
       }
     }
-    if (track && (vw <= 768 || reduced)) {
+    if (track && (touchGallery.matches || reduced)) {
       const p =
         trackScroll / Math.max(1, trackWidth - (trackRect?.width || vw));
       if (rule) rule.style.transform = `scaleX(${clamp(p)})`;
       count(counter, nearest(cardCenters, trackScroll + vw / 2));
     }
-    if (reelTrack && (vw <= 768 || reduced)) {
+    if (reelTrack && (touchGallery.matches || reduced)) {
       if (reelRule)
         reelRule.style.transform = `scaleX(${clamp(reelScroll / Math.max(1, reelWidth - reelClient))})`;
       count(reelCount, nearest(reelCenters, reelScroll + reelClient / 2));
@@ -376,6 +381,8 @@ export function startSiteMotion(root, reduced) {
   return () => {
     disposed = true;
     disposeHeadings?.();
+    serviceMotion?.destroy();
+    panels.forEach(panel => { panel.style.top = '0px'; });
     cancelAnimationFrame(raf);
     heroAnimations.forEach((a) => a.cancel());
     io.disconnect();
