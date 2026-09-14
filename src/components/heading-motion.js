@@ -9,7 +9,16 @@ export function startHeadingMotion(headings) {
     if(!isIntersecting)return;
     target.dataset.headingEntered='1';records.get(target)?.tween?.play();observer.unobserve(target);
   }),{threshold:.15,rootMargin:'0px 0px -8% 0px'});
-  headings.forEach(el=>{
+  // Read all candidates before SplitText mutates any layout. Late-loaded
+  // enhancement must never hide a heading the visitor can already see.
+  const candidates=headings.filter(el=>{
+    const rect=el.getBoundingClientRect();
+    if(rect.top < window.innerHeight) {
+      el.dataset.headingEntered='1'; return false;
+    }
+    return el.dataset.headingEntered!=='1';
+  });
+  candidates.forEach(el=>{
     const record={split:null,tween:null};records.set(el,record);
     record.split=SplitText.create(el,{type:'lines',mask:'lines',autoSplit:true,linesClass:'isaac-heading-line',onSplit(self){
       const entered=el.dataset.headingEntered==='1';

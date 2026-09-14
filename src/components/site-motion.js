@@ -1,13 +1,19 @@
+import { frameAlpha, normalizedVelocity, galleryHeight } from './motion-math.js';
 const clamp = (n) => Math.max(0, Math.min(1, n));
 export function startSiteMotion(root, reduced) {
+  const put = (el, property, value) => {
+    if (el && el.style[property] !== value) el.style[property] = value;
+  };
   const touchGallery = matchMedia('(max-width: 768px) and (pointer: coarse)');
   const one = (s) => root.querySelector(s),
     all = (s) => [...root.querySelectorAll(s)];
   let disposed = false, disposeHeadings, serviceMotion;
+  let geometryDirty = true;
+  const invalidate = () => { geometryDirty = true; };
   const headings = all('[data-panel] h2, #work h2, #reels h2, #owner h2, #why h2, #beforeafter h2, #faq h2, #contact h2');
   if (!reduced && headings.length) {
     import('./heading-motion.js').then(({startHeadingMotion}) => {
-      if (!disposed) disposeHeadings = startHeadingMotion(headings);
+      if (!disposed) { disposeHeadings = startHeadingMotion(headings); invalidate(); }
     }).catch(() => { /* Copy remains visible if the optional animation chunk cannot load. */ });
   }
   const bar = one("#isv-progress"),
@@ -23,7 +29,7 @@ export function startSiteMotion(root, reduced) {
     counter = one("[data-hcount]");
   if (!reduced && panels.length) {
     import('./service-motion.js').then(({createServiceMotion}) => {
-      if (!disposed) serviceMotion = createServiceMotion(panels);
+      if (!disposed) { serviceMotion = createServiceMotion(panels); invalidate(); }
     }).catch(() => { /* Sticky panels remain readable without the optional chunk. */ });
   }
   const reelTrack = one("[data-reeltrack]"),
@@ -39,6 +45,9 @@ export function startSiteMotion(root, reduced) {
     steps = all("[data-pstep]"),
     footer = one("[data-footer]"),
     mark = one("[data-fmark]");
+  const craft = one('[data-craft-section]'), craftImage = one('[data-craft-image]'),
+    craftDetail = one('[data-craft-detail]'), craftRule = one('[data-craft-rule]');
+  if (reduced) { put(craftImage, 'transform', 'scale(1)'); put(craftDetail, 'opacity', '0'); put(craftRule, 'transform', 'scaleX(1)'); }
   const tickers = all("[data-vmarq],[data-ticker]").map((el) => ({ el, x: 0 }));
   const dot = one("#isv-cur-dot"),
     ring = one("#isv-cur-ring"),
@@ -81,17 +90,17 @@ export function startSiteMotion(root, reduced) {
   });
   const reveal = (el) => {
     el.dataset.revealed = "1";
-    el.style.opacity = "1";
-    el.style.transform = "none";
+    put(el, "opacity", "1");
+    put(el, "transform", "none");
     el.querySelectorAll("[data-rv-line],[data-rv-item]").forEach((n) => {
-      n.style.transform = "none";
-      n.style.opacity = "1";
+      put(n, "transform", "none");
+      put(n, "opacity", "1");
     });
     const images = [...el.querySelectorAll("[data-rv-img]")];
     if (el.matches("[data-rv-img]")) images.push(el);
     images.forEach((n) => {
-      n.style.clipPath = "inset(0)";
-      n.style.transform = "none";
+      put(n, "clipPath", "inset(0)");
+      put(n, "transform", "none");
     });
   };
   const io = new IntersectionObserver(
@@ -148,19 +157,20 @@ export function startSiteMotion(root, reduced) {
           const span = document.createElement("span");
           span.textContent = t;
           span.dataset.w = "1";
-          span.style.opacity = reduced ? "1" : ".14";
+          put(span, "opacity", reduced ? "1" : ".14");
           return span;
         }),
       );
     }
   });
+  const wordProgress = [];
   const wordSpans = words.map((el) => [...el.querySelectorAll("[data-w]")]);
   [bar, rule, reelRule, line].filter(Boolean).forEach((el) => {
-    el.style.transformOrigin = el === line ? "top" : "left";
+    put(el, "transformOrigin", el === line ? "top" : "left");
     if (el !== line) el.style.width = "100%";
   });
   tickers.forEach(({ el }) => {
-    el.style.animation = "none";
+    put(el, "animation", "none");
   });
   if (cursorEnabled) {
     document.body.style.cursor = "none";
@@ -186,36 +196,105 @@ export function startSiteMotion(root, reduced) {
       0,
     );
   const rect = (el) => el?.getBoundingClientRect();
+  const originalHeights = [strip, reelStrip].map(el => el?.style.height || '');
+  const playRings = reelCards.map(card => card.querySelector('[data-playring]'));
+  let metrics, positions, measuredY, measuredVw, measuredVh, previousNative;
+  let lastTrackScroll = -1, lastReelScroll = -1;
+  const resizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(invalidate);
+  [root, track, reelTrack, ...panels, ...cards, ...reelCards, ...tickers.map(t => t.el)]
+    .filter(Boolean).forEach(el => resizeObserver?.observe(el));
+  window.addEventListener('resize', invalidate, {passive:true});
+  root.addEventListener?.('load', invalidate, true);
+  document.fonts?.addEventListener('loadingdone', invalidate);
+  document.fonts?.ready.then(() => { if (!disposed) invalidate(); });
+  touchGallery.addEventListener?.('change', invalidate);
+  const focusGallery = event => {
+    const target = event.target;
+    if (!target.matches?.(':focus-visible')) return;
+    const card = target.closest?.('[data-reelcard], [data-htrack] > figure');
+    const isReel = reelCards.includes(card);
+    const gallery = isReel ? reelTrack : track;
+    const section = isReel ? reelStrip : strip;
+    if (!card || !gallery || !section || (!isReel && !cards.includes(card))) return;
+    const viewport = window.innerWidth;
+    const x = Math.max(0, Math.min(gallery.scrollWidth - viewport,
+      card.offsetLeft + card.offsetWidth / 2 - viewport / 2));
+    if (reduced || touchGallery.matches) {
+      gallery.scrollTo({left:x, behavior:'instant'});
+    } else {
+      // Keyboard navigation must reveal the focused card immediately. Setting
+      // smoothY as well prevents the visual track lagging behind browser focus.
+      const top = section.getBoundingClientRect().top + window.scrollY + x;
+      smoothY = top;
+      window.scrollTo({top, behavior:'instant'});
+    }
+    invalidate();
+  };
+  root.addEventListener?.('focusin', focusGallery);
   const frame = (time) => {
-    // READ PHASE: complete every layout read before any style mutation.
-    const y = window.scrollY,
-      vh = window.innerHeight,
-      vw = window.innerWidth,
-      docH = document.documentElement.scrollHeight - vh;
-    const stackRect = rect(stack),
-      stripRect = rect(strip),
-      trackRect = rect(track),
-      trackWidth = track?.scrollWidth || 0,
-      trackScroll = track?.scrollLeft || 0;
-    const cardCenters = cards.map((c) => c.offsetLeft + c.offsetWidth / 2);
-    const reelWidth = reelTrack?.scrollWidth || 0,
-      reelRect = rect(reelStrip),
-      reelClient = reelTrack?.clientWidth || 1,
-      reelScroll = reelTrack?.scrollLeft || 0,
-      reelCenters = reelCards.map((c) => c.offsetLeft + c.offsetWidth / 2);
-    const parallaxRects = parallax.map((e) => rect(e.parentElement)),
-      wordRects = words.map(rect),
-      processRect = rect(process),
-      stepRects = steps.map(rect),
-      footerRect = rect(footer);
-    const panelHeights = panels.map((p) => p.offsetHeight),
-      tickerWidths = tickers.map((t) => t.el.scrollWidth / 2);
-    const dt = Math.min(3, (time - (lastTime || time)) / 16.667 || 1);
+    // Stable sizes are cached. Scroll only refreshes viewport-relative positions;
+    // idle ticker/cursor frames never remeasure the page.
+    const y = window.scrollY, vh = window.innerHeight, vw = window.innerWidth;
+    const native = reduced || touchGallery.matches;
+    const resized = measuredVw !== vw || measuredVh !== vh || previousNative !== native;
+    const refresh = geometryDirty || resized || !metrics;
+    const moved = measuredY !== y;
+    const dt = Math.max(.01, Math.min(3, (time - (lastTime || time)) / (1000 / 60) || 1));
     lastTime = time;
-    smoothY += (y - smoothY) * (reduced ? 1 : 1 - Math.pow(0.89, dt));
-    if (Math.abs(y - smoothY) < 0.3) smoothY = y;
-    velocity += (y - lastY - velocity) * 0.12;
+    const previousSmooth = smoothY;
+    smoothY += (y - smoothY) * (reduced ? 1 : frameAlpha(.11, dt));
+    if (Math.abs(y - smoothY) < .3) smoothY = y;
+    const previousVelocity = velocity;
+    velocity = normalizedVelocity(velocity, y - lastY, dt);
+    if (Math.abs(velocity) < .01) velocity = 0;
     lastY = y;
+    if (refresh) {
+      metrics = {
+        trackWidth: track?.scrollWidth || 0,
+        trackClient: track?.clientWidth || vw,
+        cardCenters: cards.map(c => c.offsetLeft + c.offsetWidth / 2),
+        reelWidth: reelTrack?.scrollWidth || 0,
+        reelClient: reelTrack?.clientWidth || vw,
+        reelCenters: reelCards.map(c => c.offsetLeft + c.offsetWidth / 2),
+        panelHeights: panels.map(p => p.offsetHeight),
+        tickerWidths: tickers.map(t => t.el.scrollWidth / 2),
+      };
+      measuredVw = vw; measuredVh = vh; previousNative = native;
+    }
+    if (refresh || moved || !positions) {
+      positions = {
+        stackRect: rect(stack), stripRect: rect(strip), reelRect: rect(reelStrip),
+        parallaxRects: parallax.map(e => rect(e.parentElement)),
+        wordRects: words.map(rect), processRect: rect(process), stepRects: steps.map(rect),
+        footerRect: rect(footer), craftRect: rect(craft), tickerRects: tickers.map(t => rect(t.el.parentElement || t.el)),
+        docH: document.documentElement.scrollHeight - vh,
+      };
+      measuredY = y;
+    }
+    const {trackWidth, trackClient, cardCenters, reelWidth, reelClient, reelCenters, panelHeights, tickerWidths} = metrics;
+    const {stackRect, stripRect, reelRect, parallaxRects, wordRects, processRect, stepRects, footerRect, craftRect, tickerRects, docH} = positions;
+    const trackScroll = native ? track?.scrollLeft || 0 : 0;
+    const reelScroll = native ? reelTrack?.scrollLeft || 0 : 0;
+    // All reads are complete before sizing or motion writes.
+    if (refresh) {
+      geometryDirty = false;
+      let resizedSections = false;
+      [[strip, trackWidth, 0], [reelStrip, reelWidth, 1]].forEach(([el, width, i]) => {
+        if (!el) return;
+        const height = native ? originalHeights[i] : `${galleryHeight(width, vw, vh)}px`;
+        if (el.style.height !== height) { el.style.height = height; resizedSections = true; }
+      });
+      if (resizedSections) {
+        // Section sizing affects all following positions. Remeasure next frame,
+        // never force a second layout in this frame's write phase.
+        geometryDirty = true;
+        raf = requestAnimationFrame(frame);
+        return;
+      }
+    }
+    const scrollChanged = refresh || moved;
+    const scrubChanged = scrollChanged || smoothY !== previousSmooth;
+    const visible = r => r && r.bottom >= 0 && r.top <= vh;
     // WRITE PHASE: one loop owns every continuously scrubbed effect, including the cursor.
     // Entrance counters use elapsed time, independently of scroll, in the shared frame scheduler.
     activeCounts.forEach((value, el) => {
@@ -226,153 +305,167 @@ export function startSiteMotion(root, reduced) {
       if (el.textContent !== text) el.textContent = text;
       if (progress === 1) activeCounts.delete(el);
     });
-    if (bar) bar.style.transform = `scaleX(${docH > 0 ? clamp(y / docH) : 1})`;
+    if (bar && scrollChanged) bar.style.transform = `scaleX(${docH > 0 ? clamp(y / docH) : 1})`;
     if (!reduced) {
-      if (y > 140 && y - directionY > 6) hidden = true;
-      else if (y - directionY < -6 || y < 140) hidden = false;
-      if (Math.abs(y - directionY) > 6) directionY = y;
-      if (header) {
-        header.style.transform = hidden ? "translateY(-110%)" : "translateY(0)";
-        header.style.background =
-          y > vh * 0.9 ? "rgba(28,26,23,.92)" : "rgba(28,26,23,.55)";
-      }
-      const hp = clamp(y / vh);
-      if (hero) {
-        hero.style.transform = `translateY(${hp * 90}px)`;
-        hero.style.opacity = String(Math.max(0, 1 - hp * 1.1));
-      }
-      if (heroImage)
-        heroImage.style.transform = `translateY(${-hp * 70}px) scale(${1 + hp * 0.06})`;
-      parallax.forEach((el, i) => {
-        const r = parallaxRects[i];
-        if (r.bottom >= 0 && r.top <= vh)
-          el.style.transform = `translateY(${((r.top + r.height / 2 - vh / 2) / vh) * -100 * parseFloat(el.dataset.plx)}%)`;
-      });
-      words.forEach((el, i) => {
-        const r = wordRects[i],
-          p = clamp((vh * 0.85 - r.top) / (r.height + vh * 0.35)),
-          spans = wordSpans[i];
-        spans.forEach(
-          (w, j) =>
-            (w.style.opacity = String(
-              0.14 + 0.86 * clamp((p * (spans.length + 3) - j) / 3),
-            )),
-        );
-      });
-      if (stackRect && !touchGallery.matches) {
-        let offset = 0;
-        panels.forEach((el, i) => {
-          const p =
-            i === panels.length - 1
-              ? 0
-              : clamp((-stackRect.top - offset - Math.max(0, panelHeights[i] - vh)) / vh);
-          const pinTop = `${Math.min(0, vh - panelHeights[i])}px`;
-          if (el.style.top !== pinTop) el.style.top = pinTop;
-          serviceMotion?.update(i, p);
-          offset += panelHeights[i];
+      if (scrollChanged) {
+        if (y > 140 && y - directionY > 6) hidden = true;
+        else if (y - directionY < -6 || y < 140) hidden = false;
+        if (Math.abs(y - directionY) > 6) directionY = y;
+        if (header) {
+          put(header, "transform", hidden ? "translateY(-110%)" : "translateY(0)");
+          put(header, 'background', y > vh * .9 ? 'rgba(28,26,23,.92)' : 'rgba(28,26,23,.55)');
+        }
+        const hp = clamp(y / vh);
+        if (hero) {
+          put(hero, "transform", `translateY(${hp * 90}px)`);
+          put(hero, "opacity", String(Math.max(0, 1 - hp * 1.1)));
+        }
+        if (heroImage)
+          put(heroImage, "transform", `translateY(${-hp * 70}px) scale(${1 + hp * 0.06})`);
+        parallax.forEach((el, i) => {
+          const r = parallaxRects[i];
+          if (r.bottom >= 0 && r.top <= vh)
+            put(el, "transform", `translateY(${((r.top + r.height / 2 - vh / 2) / vh) * -100 * parseFloat(el.dataset.plx)}%)`);
         });
+        words.forEach((el, i) => {
+          const r = wordRects[i],
+            p = clamp((vh * 0.85 - r.top) / (r.height + vh * 0.35)),
+            spans = wordSpans[i];
+          if (wordProgress[i] === p) return;
+          wordProgress[i] = p;
+          spans.forEach((w, j) => put(w, 'opacity', String(
+            .14 + .86 * clamp((p * (spans.length + 3) - j) / 3))));
+        });
+        if (stackRect && !touchGallery.matches) {
+          let offset = 0;
+          panels.forEach((el, i) => {
+            const p =
+              i === panels.length - 1
+                ? 0
+                : clamp((-stackRect.top - offset - Math.max(0, panelHeights[i] - vh)) / vh);
+            const pinTop = `${Math.min(0, vh - panelHeights[i])}px`;
+            if (el.style.top !== pinTop) el.style.top = pinTop;
+            serviceMotion?.update(i, p);
+            offset += panelHeights[i];
+          });
+        }
       }
-      if (stripRect && track && !touchGallery.matches) {
+      if (scrubChanged && stripRect && track && !native) {
         const max = Math.max(0, trackWidth - vw),
           p = clamp(
             (smoothY - y - stripRect.top) / Math.max(1, stripRect.height - vh),
           ),
           x = -max * p;
-        track.style.transform = `translateX(${x}px)`;
-        if (rule) rule.style.transform = `scaleX(${p})`;
+        put(track, "transform", `translateX(${x}px)`);
+        put(rule, "transform", `scaleX(${p})`);
         count(counter, nearest(cardCenters, vw / 2 - x));
       }
-      if (reelRect && reelTrack && !touchGallery.matches) {
+      if ((scrubChanged || previousVelocity !== velocity) && reelRect && reelTrack && !native) {
         const p = clamp(
           (smoothY - y - reelRect.top) / Math.max(1, reelRect.height - vh),
         );
         const tx = -p * Math.max(0, reelWidth - vw);
-        reelTrack.style.transform = `translateX(${tx}px)`;
-        if (reelRule) reelRule.style.transform = `scaleX(${p})`;
+        put(reelTrack, "transform", `translateX(${tx}px)`);
+        put(reelRule, "transform", `scaleX(${p})`);
         if (reelGhost)
-          reelGhost.style.transform = `translate(${4 - p * 18}vw,-50%)`;
+          put(reelGhost, "transform", `translate(${4 - p * 18}vw,-50%)`);
         const enter = clamp((vh * 0.6 - reelRect.top) / (vh * 0.9));
-        const skew = Math.max(-1, Math.min(1, velocity / 40));
+        const skew = visible(reelRect) ? Math.max(-1, Math.min(1, velocity / 40)) : 0;
         reelCards.forEach((card, i) => {
           const distance = (reelCenters[i] + tx - vw * 0.5) / vw;
           const edge = Math.min(1, Math.abs(distance));
           const entry = 1 - Math.pow(1 - clamp(enter * 1.6 - i * 0.12), 3);
-          card.style.transform = `perspective(1400px) rotateY(${-distance * 18 - skew * 5}deg) rotateX(${(1 - entry) * 14}deg) translateY(${edge * 30 + (1 - entry) * 160}px) scale(${1 - edge * 0.16})`;
-          card.style.opacity = String(entry * (1 - edge * 0.5));
-          card.style.zIndex = String(10 - Math.round(edge * 9));
-          const play = card.querySelector("[data-playring]");
+          put(card, "transform", `perspective(1400px) rotateY(${-distance * 18 - skew * 5}deg) rotateX(${(1 - entry) * 14}deg) translateY(${edge * 30 + (1 - entry) * 160}px) scale(${1 - edge * 0.16})`);
+          put(card, "opacity", String(entry * (1 - edge * 0.5)));
+          put(card, "zIndex", String(10 - Math.round(edge * 9)));
+          const play = playRings[i];
           if (play) {
-            play.style.transform = `scale(${1 + (1 - edge) * 0.35})`;
-            play.style.background =
-              edge < 0.18 ? "rgba(191,29,26,.85)" : "rgba(15,14,13,.35)";
+            put(play, "transform", `scale(${1 + (1 - edge) * 0.35})`);
+            put(play, 'background', edge < .18 ? 'rgba(191,29,26,.85)' : 'rgba(15,14,13,.35)');
           }
         });
         count(reelCount, nearest(reelCenters, vw * 0.5 - tx));
       }
       tickers.forEach((t, i) => {
         const half = tickerWidths[i];
-        if (half) {
+        if (half && visible(tickerRects[i])) {
           t.x -=
             (0.9 +
               Math.min(Math.abs(velocity), 60) * 0.12 * Math.sign(velocity)) *
             dt;
           t.x = ((t.x % half) - half) % half;
           t.el.style.transform = `translateX(${t.x}px)`;
-          t.el.style.fontStyle = Math.abs(velocity) > 25 ? "italic" : "normal";
+          const italic = Math.abs(velocity) > 25 ? 'italic' : 'normal';
+          if (t.el.style.fontStyle !== italic) { put(t.el, 'fontStyle', italic); invalidate(); }
         }
       });
-      if (processRect && line)
-        line.style.transform = `scaleY(${clamp((vh * 0.7 - processRect.top) / processRect.height)})`;
-      steps.forEach((el, i) => {
-        const on = stepRects[i].top < vh * 0.7;
-        el.style.opacity = on ? "1" : ".35";
-        const dot = el.firstElementChild;
-        const number = dot?.nextElementSibling;
-        if (number) {
-          number.style.color = on ? "#a1563f" : "#857e72";
-          number.style.transform = on ? "scale(1.04)" : "scale(1)";
+      if (scrollChanged) {
+        if (processRect && line)
+          put(line, "transform", `scaleY(${clamp((vh * 0.7 - processRect.top) / processRect.height)})`);
+        steps.forEach((el, i) => {
+          const on = stepRects[i].top < vh * 0.7;
+          put(el, "opacity", on ? "1" : ".35");
+          const dot = el.firstElementChild;
+          const number = dot?.nextElementSibling;
+          if (number) {
+            put(number, "color", on ? "#a1563f" : "#857e72");
+            put(number, "transform", on ? "scale(1.04)" : "scale(1)");
+          }
+          if (dot) {
+            put(dot, "transform", on ? "scale(1.4)" : "scale(1)");
+            put(dot, "background", on ? "#a1563f" : "#d8d1c4");
+            put(dot, "color", on ? "#a1563f" : "");
+          }
+        });
+        if (craftRect) {
+          const p = clamp(-craftRect.top / Math.max(1, craftRect.height - vh));
+          put(craftImage, 'transform', `scale(${1.65 - p * .65})`);
+          put(craftDetail, 'opacity', String(1 - clamp((p - .15) / .3)));
+          put(craftRule, 'transform', `scaleX(${p})`);
         }
-        if (dot) {
-          dot.style.transform = on ? "scale(1.4)" : "scale(1)";
-          dot.style.background = on ? "#a1563f" : "#d8d1c4";
-          dot.style.color = on ? "#a1563f" : "";
+        if (footerRect && mark) {
+          const p = clamp(
+            (vh - footerRect.top) / Math.min(footerRect.height, vh),
+          );
+          put(mark, "transform", `translateY(${(1 - p) * 38}%)`);
+          put(mark, "opacity", String(0.15 + 0.85 * p));
         }
-      });
-      if (footerRect && mark) {
-        const p = clamp(
-          (vh - footerRect.top) / Math.min(footerRect.height, vh),
-        );
-        mark.style.transform = `translateY(${(1 - p) * 38}%)`;
-        mark.style.opacity = String(0.15 + 0.85 * p);
       }
       if (cursorEnabled && dot && ring) {
-        follow.x += (pointer.x - follow.x) * 0.16;
-        follow.y += (pointer.y - follow.y) * 0.16;
-        scale += ((hover ? 2.1 : 1) - scale) * 0.16;
-        dot.style.transform = `translate(${pointer.x}px,${pointer.y}px)`;
-        ring.style.transform = `translate(${follow.x}px,${follow.y}px) scale(${scale})`;
-        dot.style.opacity = ring.style.opacity = pointer.seen ? "1" : "0";
-        ring.style.background = hover ? "#a1563f" : "transparent";
+        follow.x += (pointer.x - follow.x) * frameAlpha(.16, dt);
+        follow.y += (pointer.y - follow.y) * frameAlpha(.16, dt);
+        scale += ((hover ? 2.1 : 1) - scale) * frameAlpha(.16, dt);
+        if (Math.abs(pointer.x-follow.x)<.01) follow.x=pointer.x;
+        if (Math.abs(pointer.y-follow.y)<.01) follow.y=pointer.y;
+        if (Math.abs((hover?2.1:1)-scale)<.001) scale=hover?2.1:1;
+        put(dot, "transform", `translate(${pointer.x}px,${pointer.y}px)`);
+        put(ring, "transform", `translate(${follow.x}px,${follow.y}px) scale(${scale})`);
+        put(dot, 'opacity', pointer.seen ? '1' : '0');
+        put(ring, 'opacity', pointer.seen ? '1' : '0');
+        put(ring, "background", hover ? "#a1563f" : "transparent");
         if (label) {
-          label.textContent = hover?.dataset.cur || "";
-          label.style.transform = `scale(${1 / scale})`;
+          const text = hover?.dataset.cur || "";
+          if (label.textContent !== text) label.textContent = text;
+          put(label, "transform", `scale(${1 / scale})`);
         }
       }
     }
-    if (track && (touchGallery.matches || reduced)) {
+    if (track && native && (scrollChanged || trackScroll !== lastTrackScroll)) {
       const p =
-        trackScroll / Math.max(1, trackWidth - (trackRect?.width || vw));
+        trackScroll / Math.max(1, trackWidth - trackClient);
       if (rule) rule.style.transform = `scaleX(${clamp(p)})`;
       count(counter, nearest(cardCenters, trackScroll + vw / 2));
     }
-    if (reelTrack && (touchGallery.matches || reduced)) {
+    if (reelTrack && native && (scrollChanged || reelScroll !== lastReelScroll)) {
       if (reelRule)
-        reelRule.style.transform = `scaleX(${clamp(reelScroll / Math.max(1, reelWidth - reelClient))})`;
+        put(reelRule, "transform", `scaleX(${clamp(reelScroll / Math.max(1, reelWidth - reelClient))})`);
       count(reelCount, nearest(reelCenters, reelScroll + reelClient / 2));
     }
+    lastTrackScroll = trackScroll; lastReelScroll = reelScroll;
     if (!document.hidden) raf = requestAnimationFrame(frame);
   };
   const wake = () => {
+    invalidate(); lastTime = 0;
     cancelAnimationFrame(raf);
     if (!document.hidden) raf = requestAnimationFrame(frame);
   };
@@ -380,6 +473,13 @@ export function startSiteMotion(root, reduced) {
   wake();
   return () => {
     disposed = true;
+    resizeObserver?.disconnect();
+    window.removeEventListener('resize', invalidate);
+    root.removeEventListener?.('load', invalidate, true);
+    root.removeEventListener?.('focusin', focusGallery);
+    document.fonts?.removeEventListener('loadingdone', invalidate);
+    touchGallery.removeEventListener?.('change', invalidate);
+    [strip, reelStrip].forEach((el, i) => { if (el) el.style.height = originalHeights[i]; });
     disposeHeadings?.();
     serviceMotion?.destroy();
     panels.forEach(panel => { panel.style.top = '0px'; });

@@ -5,6 +5,7 @@ import { gsap } from 'gsap';
 export function createServiceMotion(panels) {
   const context = gsap.context(() => {});
   let timelines;
+  const previous = [];
   context.add(() => {
     timelines = panels.map(panel => {
       const timeline = gsap.timeline({ paused: true });
@@ -18,7 +19,10 @@ export function createServiceMotion(panels) {
     });
   });
   return {
-    update(index, progress) { timelines[index].progress(progress); },
+    update(index, progress) {
+      if (previous[index] === progress) return;
+      previous[index] = progress; timelines[index].progress(progress);
+    },
     destroy() { context.revert(); },
   };
 }

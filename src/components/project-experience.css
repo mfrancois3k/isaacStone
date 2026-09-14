@@ -1,0 +1,24 @@
+.project-dialog{margin:auto;border:0;padding:0;background:#eee9df;color:#292621;width:min(1200px,calc(100vw - 40px));max-width:none;max-height:calc(100dvh - 40px);overflow:auto;overscroll-behavior:contain}
+.project-dialog::backdrop{background:rgba(19,18,16,.82)}
+.project-sheet{padding:clamp(20px,3vw,44px)}
+.project-top,.project-navigation{display:flex;justify-content:space-between;align-items:center;gap:20px}
+.project-eyebrow{font:400 10px/1.5 'JetBrains Mono',monospace;letter-spacing:1.8px}
+.project-close,.project-navigation button{font:600 14px 'Source Sans 3',sans-serif;color:inherit;background:none;border:1px solid #bdb5a7;padding:12px 18px;cursor:pointer;min-height:44px}
+.project-close span{font-size:22px;line-height:0;margin-left:15px}
+.project-layout{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(250px,.8fr);gap:clamp(24px,4vw,60px);margin:26px 0}
+.project-photo{background:#ddd6ca;display:flex;align-items:center;justify-content:center;min-width:0;overflow:visible}
+.project-photo img{display:block;width:100%;height:100%;max-height:62dvh;object-fit:contain;transform-origin:top left}
+.project-copy h2{font:400 clamp(32px,4vw,54px)/1.03 'Instrument Serif',serif;letter-spacing:-1px;margin:12px 0 22px}
+.project-copy>p:not(.project-eyebrow){font:400 17px/1.65 'Source Sans 3',sans-serif;color:#635c52}
+.project-copy dl{margin:28px 0}.project-copy dl>div{padding:12px 0;border-top:1px solid #d1c8b9}.project-copy dt{font:400 10px 'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:1px;color:#857765}.project-copy dd{margin:7px 0 0;font:400 16px 'Source Sans 3',sans-serif}
+.project-estimate{display:flex;justify-content:space-between;gap:20px;background:#a1563f;color:#fff5e5;padding:17px 20px;text-decoration:none;font:600 16px 'Source Sans 3',sans-serif}
+.project-navigation{border-top:1px solid #d1c8b9;padding-top:20px;font:400 12px 'JetBrains Mono',monospace}
+.project-navigation button:disabled{opacity:.35;cursor:default}.project-dialog :focus-visible{outline:3px solid #a1563f;outline-offset:4px}.project-close:active,.project-navigation button:active{transform:scale(.98)}
+.stone-craft{height:180vh;position:relative;background:#25221d;color:#f4edde}.stone-craft-sticky{position:sticky;top:0;height:100svh;min-height:520px;overflow:hidden}.stone-craft-photo,.stone-craft-shade{position:absolute;inset:0}.stone-craft-photo img{width:100%;height:100%;object-fit:cover;transform:scale(1.65);transform-origin:65% 55%;will-change:transform}.stone-craft-shade{background:linear-gradient(90deg,rgba(20,18,15,.72),rgba(20,18,15,.12) 75%),linear-gradient(0deg,rgba(20,18,15,.65),transparent 30%)}
+.stone-craft-copy{position:absolute;left:clamp(24px,6vw,100px);top:20%;max-width:540px}.stone-craft-copy h2{font:400 clamp(50px,6.5vw,100px)/.99 'Instrument Serif',serif;letter-spacing:-2px;margin:24px 0}.stone-craft-copy em{color:#e4b19c}.stone-craft-copy>p:last-child{font:400 18px/1.5 'Source Sans 3',sans-serif;max-width:290px}
+.stone-craft-detail{position:absolute;right:12%;top:28%;width:24%;height:35%;pointer-events:none}.stone-craft-detail span{position:absolute;width:26px;height:26px;border-color:#f4edde;border-style:solid}.stone-craft-detail span:nth-child(1){top:0;left:0;border-width:1px 0 0 1px}.stone-craft-detail span:nth-child(2){top:0;right:0;border-width:1px 1px 0 0}.stone-craft-detail span:nth-child(3){bottom:0;left:0;border-width:0 0 1px 1px}.stone-craft-detail span:nth-child(4){bottom:0;right:0;border-width:0 1px 1px 0}
+.stone-craft-caption{position:absolute;bottom:40px;left:clamp(24px,6vw,100px);right:clamp(24px,6vw,100px);display:flex;justify-content:space-between;flex-wrap:wrap;gap:18px;font:400 9px 'JetBrains Mono',monospace;letter-spacing:1.3px}.stone-craft-caption>div{width:100%;height:1px;background:#ffffff40}.stone-craft-caption i{height:100%;display:block;background:#eee5d5;transform:scaleX(0);transform-origin:left}
+@media(max-width:700px){.project-dialog{width:calc(100vw - 20px);max-height:calc(100dvh - 20px)}.project-layout{grid-template-columns:1fr}.project-photo img{height:auto;max-height:46dvh}.project-copy h2{font-size:38px}.project-top{gap:10px}.project-eyebrow{font-size:9px}.project-navigation button{padding:10px}.stone-craft-detail{display:none}.stone-craft-copy{top:18%;right:24px}.stone-craft-copy h2{font-size:clamp(46px,11vw,72px)}.stone-craft-sticky{min-height:480px}}
+@media(prefers-reduced-motion:reduce){.stone-craft{height:auto}.stone-craft-sticky{position:relative;height:85svh}.stone-craft-photo img{transform:none!important;will-change:auto}.stone-craft-detail{display:none}.stone-craft-caption i{transform:scaleX(1)!important}.project-close:active,.project-navigation button:active{transform:none}}
+
+.project-top{position:sticky;top:0;z-index:2;background:#eee9df;padding:8px 0;}

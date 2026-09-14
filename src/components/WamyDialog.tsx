@@ -31,6 +31,7 @@ export function WamyDialog() {
   const [messages, setMessages] = useState<Message[]>([]);
   const abort = useRef<AbortController | null>(null);
   const modalAnimation = useRef<Animation | null>(null);
+  const closing = useRef(false);
   const voice = useVoiceAgent((id, sender, text) =>
     setMessages((old) =>
       old.some((m) => m.id === id)
@@ -39,14 +40,20 @@ export function WamyDialog() {
     ),
   );
   const show = useCallback(() => {
+    if (closing.current) return;
     opener.current = document.activeElement as HTMLElement;
     setOpen(true);
   }, []);
   const close = () => {
+    if (closing.current) return;
+    closing.current = true;
     voice.stop();
     abort.current?.abort();
     setBusy(false);
     const element = dialog.current;
+    // Read before cancelling the entrance so dismissal continues from what is visible.
+    const current = element ? getComputedStyle(element) : null;
+    const from = { opacity: current?.opacity || "1", transform: current?.transform || "none" };
     modalAnimation.current?.cancel();
     if (!element || matchMedia("(prefers-reduced-motion: reduce)").matches) {
       setOpen(false);
@@ -55,7 +62,7 @@ export function WamyDialog() {
     const mobile = matchMedia("(max-width:600px)").matches;
     const animation = element.animate(
       [
-        { opacity: 1, transform: "none" },
+        from,
         {
           opacity: mobile ? 1 : 0,
           transform: mobile ? "translateY(100%)" : "scale(.96)",
@@ -77,6 +84,7 @@ export function WamyDialog() {
   }, [show]);
   useEffect(() => {
     if (!open) {
+      closing.current = false;
       dialog.current?.close();
       opener.current?.focus();
       return;
@@ -257,7 +265,7 @@ export function WamyDialog() {
               {lastBot?.text ||
                 "A beautiful space begins with a conversation. Share your ideas, ask a question, or plan an estimate."}
             </div>
-            {messages.length > 0 && (
+            <div className="wamy-reveal" hidden={messages.length === 0} inert={messages.length === 0}>
               <details className="wamy-history">
                 <summary>
                   Conversation <span>{messages.length} messages</span>
@@ -271,8 +279,8 @@ export function WamyDialog() {
                   ))}
                 </div>
               </details>
-            )}
-            {review && (
+            </div>
+            <div className="wamy-reveal" hidden={!review} inert={!review}>
               <section className="wamy-review">
                 <h3>Review your request</h3>
                 <p>
@@ -295,13 +303,13 @@ export function WamyDialog() {
                   Prepare estimate email <ArrowUpRight size={16} />
                 </button>
               </section>
-            )}
+            </div>
             {note && (
               <p className="wamy-note" role="status">
                 {note}
               </p>
             )}
-            {typing && (
+            <div className="wamy-reveal" hidden={!typing} inert={!typing}>
               <form className="wamy-input" onSubmit={send}>
                 <label className="sr-only" htmlFor="wamy-message">
                   Your message
@@ -321,7 +329,7 @@ export function WamyDialog() {
                   <Send size={18} />
                 </button>
               </form>
-            )}
+            </div>
           </div>
           <footer className="wamy-controls">
             <div className="wamy-actions">

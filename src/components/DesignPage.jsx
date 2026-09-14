@@ -1,5 +1,6 @@
 import { startSiteMotion } from "./site-motion";
 import React from "react";
+import { StoneCraftSection, projects } from './ProjectExperience';
 import "./design-page.css";
 const ASSETS = {
   img13: "/assets/design/img13.png",
@@ -281,11 +282,11 @@ export default class DesignPage extends React.Component {
     this._keys = (e) => {
       if (e.key !== "Escape") return;
       if (this.state.lb) {
-        this.setState({ lb: null });
+        this.closeReel();
         return;
       }
-      if (this.state.lb) {
-        this.setState({ lb: null, lbVideo: "", lbVideoFailed: false });
+      if (this.state.menuOpen) {
+        this.closeMenu(true);
         return;
       }
       if (!this.state.loaderDone) this.finishLoader();
@@ -322,11 +323,12 @@ export default class DesignPage extends React.Component {
       this._inT = setTimeout(() => this.setState({ loaderIn: true }), 20);
       this._t0 = performance.now();
       this._tick = setInterval(() => {
-        const t = clamp01((performance.now() - this._t0 - 300) / 3900);
+        const elapsed = performance.now() - this._t0;
+        const t = clamp01((elapsed - 150) / 1400);
         const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         const progress = Math.min(
           this._loaded ? 100 : 99,
-          Math.round(eased * 100),
+          this._loaded && elapsed >= 700 ? 100 : Math.round(eased * 100),
         );
         if (progress !== this.state.progress) this.setState({ progress });
         if (progress === 100) this.finishLoader();
@@ -335,6 +337,8 @@ export default class DesignPage extends React.Component {
   }
 
   componentWillUnmount() {
+    this._menuAnimation?.cancel();
+    this._reelAnimation?.cancel();
     this._disposeMotion?.();
     window.removeEventListener("load", this._onLoad);
     this._motionPreference?.removeEventListener(
@@ -426,6 +430,66 @@ export default class DesignPage extends React.Component {
     });
   }
 
+  openMenuElement(element) {
+    if (!element || element === this._menuElement) return;
+    this._menuElement = element;
+    this._menuClosing = false;
+    if (!this.reduced) this._menuAnimation = element.animate(
+      [{ opacity: 0, transform: 'translateY(-8px) scale(.98)' }, { opacity: 1, transform: 'none' }],
+      { duration: 200, easing: 'cubic-bezier(.23,1,.32,1)' });
+  }
+  closeMenu(restoreFocus = false) {
+    if (this._menuClosing) return;
+    this._menuClosing = true;
+    const element = this._menuElement;
+    const done = () => {
+      this._menuElement = null;
+      this._menuClosing = false;
+      this.setState({ menuOpen: false }, () => {
+        if (restoreFocus) document.querySelector('#isv-header button')?.focus();
+      });
+    };
+    if (!element || this.reduced) return done();
+    const current = getComputedStyle(element);
+    const from = { opacity: current.opacity, transform: current.transform };
+    this._menuAnimation?.cancel();
+    this._menuAnimation = element.animate([from, { opacity: 0, transform: 'translateY(-8px) scale(.98)' }],
+      { duration: 160, easing: 'cubic-bezier(.23,1,.32,1)', fill: 'forwards' });
+    this._menuAnimation.finished.then(done).catch(() => {});
+  }
+  openReelElement(element) {
+    if (!element || element.open) return;
+    this._reelElement = element;
+    this._reelOpener = document.activeElement;
+    this._reelOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    this._reelClosing = false;
+    element.showModal();
+    if (!this.reduced) this._reelAnimation = element.animate(
+      [{ opacity: 0, transform: 'scale(.97)' }, { opacity: 1, transform: 'none' }],
+      { duration: 240, easing: 'cubic-bezier(.23,1,.32,1)' });
+  }
+  closeReel() {
+    if (this._reelClosing) return;
+    this._reelClosing = true;
+    const element = this._reelElement;
+    element?.querySelectorAll('video').forEach(video => video.pause());
+    const done = () => {
+      document.body.style.overflow = this._reelOverflow || '';
+      this.setState({ lb: null, lbVideo: '', lbVideoFailed: false }, () => {
+        this._reelOpener?.focus({ preventScroll: true });
+        this._reelElement = null;
+        this._reelClosing = false;
+      });
+    };
+    if (!element || this.reduced) return done();
+    const current = getComputedStyle(element);
+    const from = { opacity: current.opacity, transform: current.transform };
+    this._reelAnimation?.cancel();
+    this._reelAnimation = element.animate([from, { opacity: 0, transform: 'scale(.97)' }],
+      { duration: 180, easing: 'cubic-bezier(.23,1,.32,1)', fill: 'forwards' });
+    this._reelAnimation.finished.then(done).catch(() => {});
+  }
   showHint() {}
   dismissHint() {}
   splitLines(el) {
@@ -602,13 +666,7 @@ export default class DesignPage extends React.Component {
         v.pause();
         v.style.opacity = "0";
       },
-      closeReel: () => {
-        try {
-          const v = document.querySelector('[role="dialog"] video');
-          if (v) v.pause();
-        } catch (err) {}
-        this.setState({ lb: null, lbVideo: "", lbVideoFailed: false });
-      },
+      closeReel: () => this.closeReel(),
       stop: (e) => e.stopPropagation(),
       loaderActive: !s.loaderDone,
       loaderPointer: s.expanding ? "none" : "auto",
@@ -651,11 +709,11 @@ export default class DesignPage extends React.Component {
             -12,
             Math.min(12, (e.clientY - r.top - r.height / 2) * 0.22),
           );
-        e.currentTarget.style.transform =
+        e.currentTarget.querySelector(".magnetic-face").style.transform =
           "translate(" + x.toFixed(1) + "px," + y.toFixed(1) + "px)";
       },
       unmagnet: (e) => {
-        e.currentTarget.style.transform = "translate(0,0)";
+        e.currentTarget.querySelector(".magnetic-face").style.transform = "translate(0,0)";
       },
 
       formDetails: s.formDetails,
@@ -663,8 +721,8 @@ export default class DesignPage extends React.Component {
       formNote:
         s.formError ||
         (s.sent
-          ? "Your email app has opened with the details. Send the email there to complete your request."
-          : "This opens an email draft for the team. You can also speak with Wamy to arrange a visit."),
+          ? "Your draft is ready below. Review it, then open your email app to send it."
+          : "Prepare and review your details before opening an email draft. Nothing is sent from this form."),
       baPct: s.ba + "%",
       baClip: "inset(0 " + (100 - s.ba) + "% 0 0)",
       baDown: (e) => {
@@ -704,21 +762,22 @@ export default class DesignPage extends React.Component {
         ]
           .filter(Boolean)
           .join("\n");
-        // prototype: hands the request to the client's inbox; swap for a form endpoint at launch
-        window.location.href =
+        const mailto =
           "mailto:jafet.tile@gmail.com?subject=" +
           encodeURIComponent(
             "Estimate request — " + (fd.get("service") || "stone work"),
           ) +
           "&body=" +
           encodeURIComponent(body);
-        this.setState({ sent: true });
+        this.setState({ sent: true, formDraft: { body, mailto }, draftCopied: false, formError: '' }, () => {
+          document.querySelector('.estimate-review')?.scrollIntoView({ behavior: 'instant', block: 'nearest' });
+        });
       },
 
       menuOpen: !!s.menuOpen,
       menuLabel: s.menuOpen ? "CLOSE ×" : "MENU ☰",
-      toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }),
-      closeMenu: () => this.setState({ menuOpen: false }),
+      toggleMenu: () => s.menuOpen ? this.closeMenu(true) : this.setState({ menuOpen: true }),
+      closeMenu: () => this.closeMenu(),
       toggleVoice: () => window.dispatchEvent(new Event("open-voice-bot")),
     };
   }
@@ -1297,6 +1356,7 @@ export default class DesignPage extends React.Component {
               />
             </a>
             <nav
+              ref={element => this.openMenuElement(element)}
               data-topnav={""}
               style={{
                 display: "flex",
@@ -2020,9 +2080,9 @@ export default class DesignPage extends React.Component {
                     textDecoration: "none",
                     transition: "transform .4s cubic-bezier(.16,1,.3,1)",
                   }}
-                >
+                ><span className="magnetic-face">
                   {"Request an on-site estimate"}
-                </a>
+                </span></a>
                 <a
                   href={"tel:+16315305883"}
                   data-cur={"CALL"}
@@ -2040,9 +2100,9 @@ export default class DesignPage extends React.Component {
                     textDecoration: "none",
                     transition: "transform .4s cubic-bezier(.16,1,.3,1)",
                   }}
-                >
+                ><span className="magnetic-face">
                   {"Call (631) 530-5883"}
-                </a>
+                </span></a>
               </div>
               <a
                 href={"https://www.instagram.com/jafettile____com/"}
@@ -5592,9 +5652,9 @@ export default class DesignPage extends React.Component {
                   transition: "transform .4s cubic-bezier(.16,1,.3,1)",
                   marginTop: "8px",
                 }}
-              >
+              ><span className="magnetic-face">
                 {"Not sure which? Call and ask"}
-              </a>
+              </span></a>
             </div>
             <div
               data-cur={"VIEW"}
@@ -5629,6 +5689,7 @@ export default class DesignPage extends React.Component {
             </div>
           </div>
         </section>
+        <StoneCraftSection />
         <section
           id={"work"}
           data-hstrip={""}
@@ -5828,6 +5889,7 @@ export default class DesignPage extends React.Component {
                     {"MARBLE"}
                   </span>
                 </figcaption>
+              <button type="button" className="work-project-trigger" aria-label={`View ${projects[0].title}`} onClick={event => window.dispatchEvent(new CustomEvent('open-project', { detail: { index: 0, source: event.currentTarget } }))}><span>Explore project</span><span aria-hidden="true">↗</span></button>
               </figure>
               <figure
                 data-cur={"VIEW"}
@@ -5910,6 +5972,7 @@ export default class DesignPage extends React.Component {
                     {"MARBLE"}
                   </span>
                 </figcaption>
+              <button type="button" className="work-project-trigger" aria-label={`View ${projects[1].title}`} onClick={event => window.dispatchEvent(new CustomEvent('open-project', { detail: { index: 1, source: event.currentTarget } }))}><span>Explore project</span><span aria-hidden="true">↗</span></button>
               </figure>
               <figure
                 data-cur={"VIEW"}
@@ -5992,6 +6055,7 @@ export default class DesignPage extends React.Component {
                     {"GRANITE"}
                   </span>
                 </figcaption>
+              <button type="button" className="work-project-trigger" aria-label={`View ${projects[2].title}`} onClick={event => window.dispatchEvent(new CustomEvent('open-project', { detail: { index: 2, source: event.currentTarget } }))}><span>Explore project</span><span aria-hidden="true">↗</span></button>
               </figure>
               <figure
                 data-cur={"VIEW"}
@@ -6074,6 +6138,7 @@ export default class DesignPage extends React.Component {
                     {"ADDITIONAL WORK"}
                   </span>
                 </figcaption>
+              <button type="button" className="work-project-trigger" aria-label={`View ${projects[3].title}`} onClick={event => window.dispatchEvent(new CustomEvent('open-project', { detail: { index: 3, source: event.currentTarget } }))}><span>Explore project</span><span aria-hidden="true">↗</span></button>
               </figure>
               <figure
                 data-cur={"VIEW"}
@@ -6156,6 +6221,7 @@ export default class DesignPage extends React.Component {
                     {"ADDITIONAL WORK"}
                   </span>
                 </figcaption>
+              <button type="button" className="work-project-trigger" aria-label={`View ${projects[4].title}`} onClick={event => window.dispatchEvent(new CustomEvent('open-project', { detail: { index: 4, source: event.currentTarget } }))}><span>Explore project</span><span aria-hidden="true">↗</span></button>
               </figure>
               <figure
                 data-cur={"VIEW"}
@@ -6238,6 +6304,7 @@ export default class DesignPage extends React.Component {
                     {"ADDITIONAL WORK"}
                   </span>
                 </figcaption>
+              <button type="button" className="work-project-trigger" aria-label={`View ${projects[5].title}`} onClick={event => window.dispatchEvent(new CustomEvent('open-project', { detail: { index: 5, source: event.currentTarget } }))}><span>Explore project</span><span aria-hidden="true">↗</span></button>
               </figure>
               <div
                 style={{
@@ -6535,14 +6602,12 @@ export default class DesignPage extends React.Component {
                   willChange: "transform,opacity",
                 }}
               >
-                <div
+                <button type="button" className="reel-trigger"
                   onClick={v.openReel}
                   onMouseEnter={v.previewOn}
                   onMouseLeave={v.previewOff}
                   data-video={"/uploads/reels/01-raising-the-bar.mp4"}
                   data-title={"Raising the bar, one beam at a time"}
-                  role={"button"}
-                  tabIndex={"0"}
                   aria-label={"Play: Raising the bar, one beam at a time"}
                   style={{
                     position: "relative",
@@ -6686,7 +6751,7 @@ export default class DesignPage extends React.Component {
                   >
                     {"01"}
                   </span>
-                </div>
+                </button>
                 <figcaption
                   style={{
                     display: "flex",
@@ -6732,14 +6797,12 @@ export default class DesignPage extends React.Component {
                   willChange: "transform,opacity",
                 }}
               >
-                <div
+                <button type="button" className="reel-trigger"
                   onClick={v.openReel}
                   onMouseEnter={v.previewOn}
                   onMouseLeave={v.previewOff}
                   data-video={"/uploads/reels/02-crafted-with-precision.mp4"}
                   data-title={"Crafted with precision — marble detailing"}
-                  role={"button"}
-                  tabIndex={"0"}
                   aria-label={"Play: Crafted with precision — marble detailing"}
                   style={{
                     position: "relative",
@@ -6883,7 +6946,7 @@ export default class DesignPage extends React.Component {
                   >
                     {"02"}
                   </span>
-                </div>
+                </button>
                 <figcaption
                   style={{
                     display: "flex",
@@ -6929,14 +6992,12 @@ export default class DesignPage extends React.Component {
                   willChange: "transform,opacity",
                 }}
               >
-                <div
+                <button type="button" className="reel-trigger"
                   onClick={v.openReel}
                   onMouseEnter={v.previewOn}
                   onMouseLeave={v.previewOff}
                   data-video={"/uploads/reels/03-designing-tomorrow.mp4"}
                   data-title={"Designing tomorrow, building today"}
-                  role={"button"}
-                  tabIndex={"0"}
                   aria-label={"Play: Designing tomorrow, building today"}
                   style={{
                     position: "relative",
@@ -7080,7 +7141,7 @@ export default class DesignPage extends React.Component {
                   >
                     {"03"}
                   </span>
-                </div>
+                </button>
                 <figcaption
                   style={{
                     display: "flex",
@@ -7126,14 +7187,12 @@ export default class DesignPage extends React.Component {
                   willChange: "transform,opacity",
                 }}
               >
-                <div
+                <button type="button" className="reel-trigger"
                   onClick={v.openReel}
                   onMouseEnter={v.previewOn}
                   onMouseLeave={v.previewOff}
                   data-video={"/uploads/reels/04-floors-into-masterpieces.mp4"}
                   data-title={"Turning floors into masterpieces"}
-                  role={"button"}
-                  tabIndex={"0"}
                   aria-label={"Play: Turning floors into masterpieces"}
                   style={{
                     position: "relative",
@@ -7277,7 +7336,7 @@ export default class DesignPage extends React.Component {
                   >
                     {"04"}
                   </span>
-                </div>
+                </button>
                 <figcaption
                   style={{
                     display: "flex",
@@ -7323,14 +7382,12 @@ export default class DesignPage extends React.Component {
                   willChange: "transform,opacity",
                 }}
               >
-                <div
+                <button type="button" className="reel-trigger"
                   onClick={v.openReel}
                   onMouseEnter={v.previewOn}
                   onMouseLeave={v.previewOff}
                   data-video={"/uploads/reels/05-crafting-elegance.mp4"}
                   data-title={"Crafting elegance, tile by tile — New York"}
-                  role={"button"}
-                  tabIndex={"0"}
                   aria-label={
                     "Play: Crafting elegance, tile by tile — New York"
                   }
@@ -7476,7 +7533,7 @@ export default class DesignPage extends React.Component {
                   >
                     {"05"}
                   </span>
-                </div>
+                </button>
                 <figcaption
                   style={{
                     display: "flex",
@@ -7522,14 +7579,12 @@ export default class DesignPage extends React.Component {
                   willChange: "transform,opacity",
                 }}
               >
-                <div
+                <button type="button" className="reel-trigger"
                   onClick={v.openReel}
                   onMouseEnter={v.previewOn}
                   onMouseLeave={v.previewOff}
                   data-video={"/uploads/reels/06-blueprints-into-bubbles.mp4"}
                   data-title={"Blueprints into bubbles — dream bathroom"}
-                  role={"button"}
-                  tabIndex={"0"}
                   aria-label={"Play: Blueprints into bubbles — dream bathroom"}
                   style={{
                     position: "relative",
@@ -7673,7 +7728,7 @@ export default class DesignPage extends React.Component {
                   >
                     {"06"}
                   </span>
-                </div>
+                </button>
                 <figcaption
                   style={{
                     display: "flex",
@@ -7719,14 +7774,12 @@ export default class DesignPage extends React.Component {
                   willChange: "transform,opacity",
                 }}
               >
-                <div
+                <button type="button" className="reel-trigger"
                   onClick={v.openReel}
                   onMouseEnter={v.previewOn}
                   onMouseLeave={v.previewOff}
                   data-video={"/uploads/reels/07-job-site.mp4"}
                   data-title={"On the job site"}
-                  role={"button"}
-                  tabIndex={"0"}
                   aria-label={"Play: On the job site"}
                   style={{
                     position: "relative",
@@ -7870,7 +7923,7 @@ export default class DesignPage extends React.Component {
                   >
                     {"07"}
                   </span>
-                </div>
+                </button>
                 <figcaption
                   style={{
                     display: "flex",
@@ -7916,14 +7969,12 @@ export default class DesignPage extends React.Component {
                   willChange: "transform,opacity",
                 }}
               >
-                <div
+                <button type="button" className="reel-trigger"
                   onClick={v.openReel}
                   onMouseEnter={v.previewOn}
                   onMouseLeave={v.previewOff}
                   data-video={"/uploads/reels/08-bland-to-grand.mp4"}
                   data-title={"From bland to grand — before & after"}
-                  role={"button"}
-                  tabIndex={"0"}
                   aria-label={"Play: From bland to grand — before & after"}
                   style={{
                     position: "relative",
@@ -8067,7 +8118,7 @@ export default class DesignPage extends React.Component {
                   >
                     {"08"}
                   </span>
-                </div>
+                </button>
                 <figcaption
                   style={{
                     display: "flex",
@@ -8244,7 +8295,7 @@ export default class DesignPage extends React.Component {
                 letterSpacing: "-0.04em",
               }}
             >
-              {"Client reviews are being verified."}
+              {"Know the work. Meet the team."}
             </h2>
             <p
               style={{
@@ -8255,7 +8306,7 @@ export default class DesignPage extends React.Component {
               }}
             >
               {
-                "Reviews will appear here once ownership and permission are confirmed. Publicly listed reviews for a related business can be read on "
+                "Explore the installations and job-site videos, then ask the team about work relevant to your project. Public reviews for the related Jafet business are available on "
               }
               <a
                 href={
@@ -8266,7 +8317,7 @@ export default class DesignPage extends React.Component {
               >
                 {"Angi"}
               </a>
-              {"; they are not shown as Isaac Stone and Tile reviews."}
+              {". These are Jafet reviews, not verified Isaac Stone and Tile testimonials."}
             </p>
           </div>
         </section>
@@ -8475,9 +8526,9 @@ export default class DesignPage extends React.Component {
                   textDecoration: "none",
                   transition: "transform .4s cubic-bezier(.16,1,.3,1)",
                 }}
-              >
+              ><span className="magnetic-face">
                 {"Call (631) 530-5883"}
-              </a>
+              </span></a>
             </div>
           </div>
         </section>
@@ -8914,7 +8965,7 @@ export default class DesignPage extends React.Component {
                       background: "#a1563f",
                     }}
                   ></span>
-                  {"[ 03c // BEFORE & AFTER ]"}
+                  {"[ 03c // PREPARATION & FINISH ]"}
                 </span>
                 <h2
                   style={{
@@ -9055,7 +9106,7 @@ export default class DesignPage extends React.Component {
                   pointerEvents: "none",
                 }}
               >
-                {"BEFORE"}
+                {"PREPARATION"}
               </span>
               <span
                 style={{
@@ -9070,7 +9121,7 @@ export default class DesignPage extends React.Component {
                   pointerEvents: "none",
                 }}
               >
-                {"AFTER"}
+                {"FINISHED SURFACE"}
               </span>
             </div>
             <p
@@ -9082,7 +9133,7 @@ export default class DesignPage extends React.Component {
               }}
             >
               {
-                "A look at two different projects: preparation and a finished surface. Drag to explore."
+                "Two project examples: structural preparation and a finished stone surface. Drag to explore each."
               }
             </p>
           </div>
@@ -10285,6 +10336,7 @@ export default class DesignPage extends React.Component {
               <form
                 data-rv={""}
                 onSubmit={v.onSubmit}
+                onInput={() => { if (this.state.formDraft) this.setState({ formDraft: null, sent: false, draftCopied: false }); }}
                 style={{
                   display: "flex",
                   flexDirection: "column",
@@ -10502,9 +10554,9 @@ export default class DesignPage extends React.Component {
                     cursor: "pointer",
                     transition: "transform .4s cubic-bezier(.16,1,.3,1)",
                   }}
-                >
+                ><span className="magnetic-face">
                   {"Prepare estimate email"}
-                </button>
+                </span></button>
                 <p
                   aria-live={"polite"}
                   style={{
@@ -10515,6 +10567,18 @@ export default class DesignPage extends React.Component {
                 >
                   {v.formNote}
                 </p>
+                {this.state.formDraft && <section className="estimate-review" aria-label="Review your estimate email">
+                  <h3>Your project, ready to share.</h3>
+                  <pre>{this.state.formDraft.body}</pre>
+                  <div className="estimate-review-actions">
+                    <a href={this.state.formDraft.mailto}>Open email draft ↗</a>
+                    <button type="button" onClick={async () => {
+                      try { await navigator.clipboard.writeText(this.state.formDraft.body); this.setState({ draftCopied: true }); }
+                      catch { this.setState({ formError: 'Select and copy the details above, then paste them into your email.' }); }
+                    }}>{this.state.draftCopied ? 'Copied ✓' : 'Copy details'}</button>
+                  </div>
+                  <p role="status">{this.state.draftCopied ? 'Details copied. Paste them into your preferred email app.' : 'Not sent yet. Send the draft from your email app to complete your request.'}</p>
+                </section>}
               </form>
             </div>
           </div>
@@ -10524,7 +10588,7 @@ export default class DesignPage extends React.Component {
           <>
             <dialog
               ref={(element) => {
-                if (element && !element.open) element.showModal();
+                this.openReelElement(element);
               }}
               onCancel={(event) => {
                 event.preventDefault();
@@ -10549,7 +10613,7 @@ export default class DesignPage extends React.Component {
                 alignItems: "center",
                 justifyContent: "center",
                 padding: "24px",
-                animation: "lbFade .4s ease both",
+                animation: "none",
               }}
             >
               <div
@@ -10562,7 +10626,7 @@ export default class DesignPage extends React.Component {
                   background: "#000",
                   border: "1px solid #322e28",
                   boxShadow: "0 40px 120px rgba(0,0,0,.7)",
-                  animation: "lbIn .7s cubic-bezier(.16,1,.3,1) both",
+                  animation: "none",
                   overflow: "hidden",
                 }}
               >

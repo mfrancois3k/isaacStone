@@ -53,9 +53,6 @@
   background: #29282488;
   backdrop-filter: blur(6px);
 }
-.wamy-dialog[open] {
-  animation: wamy-enter 0.25s cubic-bezier(0.23, 1, 0.32, 1) both;
-}
 .wamy-sheet {
   display: flex;
   flex-direction: column;
@@ -439,4 +436,36 @@
   .wamy-launcher {
     transition: none;
   }
+}
+
+/* These panels retain their nodes, so reversing a toggle retargets its transition. */
+.wamy-reveal {
+  opacity: 1;
+  transform: none;
+  transition: opacity 200ms cubic-bezier(.23,1,.32,1),
+    transform 200ms cubic-bezier(.23,1,.32,1), display 200ms allow-discrete;
+}
+.wamy-reveal[hidden] {
+  display: none;
+  opacity: 0;
+  transform: translateY(6px);
+}
+@starting-style {
+  .wamy-reveal:not([hidden]) { opacity: 0; transform: translateY(6px); }
+}
+.wamy-history::details-content {
+  opacity: 0;
+  transition: opacity 200ms cubic-bezier(.23,1,.32,1), content-visibility 200ms allow-discrete;
+}
+.wamy-history[open]::details-content { opacity: 1; }
+.wamy-dialog button:not(.marble-hit), .wamy-launcher {
+  transition: scale 160ms cubic-bezier(.23,1,.32,1),
+    background-color 160ms ease, transform 200ms ease;
+}
+.wamy-dialog button:not(.marble-hit):not(:disabled):active,
+.wamy-launcher:active { scale: .97; }
+@media (prefers-reduced-motion: reduce) {
+  .wamy-reveal, .wamy-history::details-content { transition: none; transform: none; }
+  .wamy-dialog button:not(.marble-hit):active, .wamy-launcher:active { scale: 1; }
+  .wamy-dialog button:not(.marble-hit), .wamy-launcher { transition: none; }
 }
