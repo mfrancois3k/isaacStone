@@ -323,7 +323,7 @@ export default class DesignPage extends React.Component {
     } else {
       this._inT = setTimeout(() => {
         this.setState({ loaderIn: true, loaderStage: 0 });
-        const steps = [60, 410, 760, 1110, 1460, 3160, 3510, 3860];
+        const steps = [60, 410, 760, 1110, 1460, 3160, 3510, 3860, 5660];
         this._stageTimers = steps.map((delay, index) =>
           setTimeout(() => this.setState({ loaderStage: index + 1 }), delay),
         );
@@ -681,7 +681,7 @@ export default class DesignPage extends React.Component {
       stop: (e) => e.stopPropagation(),
       loaderActive: !s.loaderDone,
       loaderPointer: s.expanding ? "none" : "auto",
-      pieceOpacity: s.expanding ? 0 : s.loaderStage >= 6 ? 1 : 0,
+      pieceOpacity: s.expanding ? 0 : s.loaderStage >= 9 ? 1 : 0,
       imageOpacity: (stage) => (s.expanding ? 0 : s.loaderStage >= stage ? 1 : 0),
       imageShift: (stage) =>
         s.expanding
@@ -1150,7 +1150,7 @@ export default class DesignPage extends React.Component {
                       transform: v.titleShift(6),
                       opacity: v.titleOpacity(6),
                       transition:
-                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s",
+                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity 1.6s cubic-bezier(.6,.01,-.05,.95) 0s",
                     }}
                   >
                     {"Crafted"}
@@ -1164,7 +1164,7 @@ export default class DesignPage extends React.Component {
                       transform: v.titleShift(7),
                       opacity: v.titleOpacity(7),
                       transition:
-                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s",
+                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity 1.6s cubic-bezier(.6,.01,-.05,.95) 0s",
                     }}
                   >
                     {"for your"}
@@ -1180,7 +1180,7 @@ export default class DesignPage extends React.Component {
                       transform: v.titleShift(8),
                       opacity: v.titleOpacity(8),
                       transition:
-                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s",
+                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity 1.6s cubic-bezier(.6,.01,-.05,.95) 0s",
                     }}
                   >
                     {"HOME."}
@@ -1199,7 +1199,7 @@ export default class DesignPage extends React.Component {
                     letterSpacing: "1.6px",
                     color: "#6b6459",
                     opacity: v.pieceOpacity,
-                    transition: "opacity .6s ease 1.75s",
+                    transition: "opacity .6s cubic-bezier(.16,1,.3,1)",
                     pointerEvents: "none",
                   }}
                 >
@@ -1230,7 +1230,7 @@ export default class DesignPage extends React.Component {
                     letterSpacing: "-0.03em",
                     color: "#2a2825",
                     opacity: v.pieceOpacity,
-                    transition: "opacity .6s ease 1.2s",
+                    transition: "opacity .6s cubic-bezier(.16,1,.3,1)",
                     pointerEvents: "none",
                   }}
                 >
