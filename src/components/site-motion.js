@@ -240,7 +240,7 @@ export function startSiteMotion(root, reduced) {
     const viewport = window.innerWidth;
     const x = Math.max(0, Math.min(gallery.scrollWidth - viewport,
       card.offsetLeft + card.offsetWidth / 2 - viewport / 2));
-    if (reduced || touchGallery.matches) {
+    if (reduced) {
       gallery.scrollTo({left:x, behavior:'instant'});
     } else {
       // Keyboard navigation must reveal the focused card immediately. Setting
@@ -256,7 +256,7 @@ export function startSiteMotion(root, reduced) {
     // Stable sizes are cached. Scroll only refreshes viewport-relative positions;
     // idle ticker/cursor frames never remeasure the page.
     const y = window.scrollY, vh = window.innerHeight, vw = window.innerWidth;
-    const native = reduced || touchGallery.matches;
+    const native = reduced;
     const resized = measuredVw !== vw || measuredVh !== vh || previousNative !== native;
     const refresh = geometryDirty || resized || !metrics;
     const moved = measuredY !== y;
@@ -357,7 +357,7 @@ export function startSiteMotion(root, reduced) {
           spans.forEach((w, j) => put(w, 'opacity', String(
             .14 + .86 * clamp((p * (spans.length + 3) - j) / 3))));
         });
-        if (stackRect && !touchGallery.matches) {
+        if (stackRect) {
           let offset = 0;
           panels.forEach((el, i) => {
             const p =
