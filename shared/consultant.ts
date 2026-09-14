@@ -77,6 +77,9 @@ export async function askWamy(turns: ChatTurn[]): Promise<string | null> {
       max_output_tokens: MAX_OUTPUT_TOKENS,
       stream: false,
     }),
+    // A useful instant fallback is better than leaving a homeowner waiting
+    // twenty seconds for a non-streaming text completion.
+    signal: AbortSignal.timeout(9_000),
   });
 
   const data = await response.json().catch(() => null);
