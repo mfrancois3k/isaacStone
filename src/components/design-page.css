@@ -1007,3 +1007,22 @@ textarea.design-effect-43:focus-visible {
     transition: none !important;
   }
 }
+
+/* Scroll-led construction timeline: the active stage becomes the focal point. */
+[data-process] [data-pstep] {
+  transform-origin: left center;
+}
+[data-process] [data-pstep][data-active] h3 {
+  color: #2a2825;
+}
+[data-process] [data-pstep][data-active] p {
+  color: #4c453d;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-process] [data-pstep],
+  [data-process] [data-pstep] > div,
+  [data-process] [data-pstep] > span {
+    transform: none !important;
+    transition: none !important;
+  }
+}
