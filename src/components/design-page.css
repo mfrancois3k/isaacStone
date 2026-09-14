@@ -706,14 +706,8 @@ select {
     scroll-snap-align: start;
   }
 }
-@media (max-width: 768px) and (pointer: coarse) {
-  [data-panel] {
-    position: relative !important;
-    min-height: auto !important;
-    transform: none !important;
-    filter: none !important;
-  }
-}
+/* Keep the signature pinned service motion available on touch devices.
+   Reduced-motion preferences still disable it through the JS motion guard. */
 @media (forced-colors: active) {
   [data-outline] {
     -webkit-text-stroke: 0 !important;
