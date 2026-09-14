@@ -127,6 +127,9 @@ export function WamyDialog() {
     };
   }, [open]);
   useEffect(() => {
+    if (open) void voice.prepare();
+  }, [open, voice.prepare]);
+  useEffect(() => {
     if (typing) input.current?.focus();
   }, [typing]);
   useEffect(() => () => abort.current?.abort(), []);
