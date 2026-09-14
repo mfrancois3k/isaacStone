@@ -323,7 +323,7 @@ export default class DesignPage extends React.Component {
     } else {
       this._inT = setTimeout(() => {
         this.setState({ loaderIn: true, loaderStage: 0 });
-        const steps = [60, 410, 760, 1110, 1460, 3160, 3510, 3860, 4210, 4560];
+        const steps = [60, 410, 760, 1110, 1460, 3160, 3510, 3860];
         this._stageTimers = steps.map((delay, index) =>
           setTimeout(() => this.setState({ loaderStage: index + 1 }), delay),
         );
@@ -1130,14 +1130,14 @@ export default class DesignPage extends React.Component {
                 <h2
                   style={{
                     position: "absolute",
-                    left: "5%",
+                    left: "7%",
                     right: "5%",
-                    top: "7%",
+                    top: "8%",
                     margin: "0",
                     textAlign: "left",
                     font: "700 clamp(42px,9vw,150px)/.8 Arial,sans-serif",
                     letterSpacing: "-0.075em",
-                    color: "#2a2825",
+                    color: "#f6efdd",
                     zIndex: "4",
                     pointerEvents: "none",
                   }}
@@ -1146,63 +1146,44 @@ export default class DesignPage extends React.Component {
                     data-stag={""}
                     style={{
                       display: "block",
+                      fontSize: ".7em",
                       transform: v.titleShift(6),
                       opacity: v.titleOpacity(6),
                       transition:
                         "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s",
                     }}
                   >
-                    {"Tiles"}
+                    {"Crafted"}
                   </span>
                   <span
                     data-stag={""}
                     style={{
                       display: "block",
-                      marginLeft: "12%",
+                      marginLeft: "9%",
+                      fontSize: ".92em",
                       transform: v.titleShift(7),
                       opacity: v.titleOpacity(7),
                       transition:
                         "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s",
                     }}
                   >
-                    {"Tailored"}
+                    {"for your"}
                   </span>
                   <span
                     data-stag={""}
                     style={{
-                      display: "inline-block",
-                      marginLeft: "25%",
+                      display: "block",
+                      marginLeft: "22%",
+                      fontSize: "1.38em",
+                      letterSpacing: "-0.1em",
+                      color: "#b05f44",
                       transform: v.titleShift(8),
                       opacity: v.titleOpacity(8),
                       transition:
                         "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s",
                     }}
                   >
-                    {"to"}
-                  </span>
-                  <span
-                    data-stag={""}
-                    style={{
-                      display: "inline-block",
-                      transform: v.titleShift(9),
-                      opacity: v.titleOpacity(9),
-                      transition:
-                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s",
-                    }}
-                  >
-                    {"Your"}
-                  </span>
-                  <span
-                    data-stag={""}
-                    style={{
-                      display: "inline-block",
-                      transform: v.titleShift(10),
-                      opacity: v.titleOpacity(10),
-                      transition:
-                        "transform 1.6s cubic-bezier(.6,.01,-.05,.95) 0s,opacity .9s cubic-bezier(.6,.01,-.05,.95) 0s",
-                    }}
-                  >
-                    {"Home"}
+                    {"HOME."}
                   </span>
                 </h2>
                 <div
