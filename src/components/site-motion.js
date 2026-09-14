@@ -122,14 +122,19 @@ export function startSiteMotion(root, reduced) {
     io.unobserve(el);
   });
   const heroAnimations = [];
+  // Treat the opening as one composed sequence: a slow camera settle,
+  // then the project frames and the text reveal in the same 0.35s rhythm.
   if (heroImage && !reduced) {
     heroAnimations.push(
       heroImage.animate(
-        [{ clipPath: "inset(0 0 100% 0)" }, { clipPath: "inset(0)" }],
+        [
+          { clipPath: "inset(0 0 100% 0)", opacity: 0.72 },
+          { clipPath: "inset(0)", opacity: 1 },
+        ],
         {
-          duration: 1800,
-          delay: 200,
-          easing: "cubic-bezier(.16,1,.3,1)",
+          duration: 1600,
+          delay: 120,
+          easing: "cubic-bezier(.6,.01,-.05,.95)",
           fill: "backwards",
         },
       ),
@@ -137,15 +142,37 @@ export function startSiteMotion(root, reduced) {
     if (heroImage.firstElementChild)
       heroAnimations.push(
         heroImage.firstElementChild.animate(
-          [{ transform: "scale(1.15)" }, { transform: "scale(1)" }],
+          [
+            { transform: "translateY(3%) scale(1.11)", filter: "saturate(.76) contrast(.9)" },
+            { transform: "translateY(0) scale(1)", filter: "saturate(1) contrast(1)" },
+          ],
           {
             duration: 1800,
-            delay: 200,
+            delay: 120,
             easing: "cubic-bezier(.16,1,.3,1)",
             fill: "backwards",
           },
         ),
       );
+    const heroCards = touchGallery.matches
+      ? all("[data-mobstrip] > a")
+      : all("[data-hero-img] [data-vcol] > a:first-child");
+    heroCards.slice(0, 3).forEach((card, index) => {
+      heroAnimations.push(
+        card.animate(
+          [
+            { clipPath: "inset(0 0 100% 0)", opacity: 0, transform: "translateY(36px) scale(.98)" },
+            { clipPath: "inset(0)", opacity: 1, transform: "translateY(0) scale(1)" },
+          ],
+          {
+            duration: 1600,
+            delay: 350 + index * 350,
+            easing: "cubic-bezier(.6,.01,-.05,.95)",
+            fill: "backwards",
+          },
+        ),
+      );
+    });
   }
   words.forEach((el) => {
     if (!el.dataset.split) {
