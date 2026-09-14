@@ -280,6 +280,54 @@ export default class DesignPage extends React.Component {
     this.reduced =
       window.matchMedia &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    // This proof-point is a conversion detail, so it has an independent
+    // visibility trigger instead of depending on the decorative motion engine.
+    this._experienceRafs = new Set();
+    this._runExperienceCount = (target) => {
+      if (!target || target.dataset.experiencePlayed) return;
+      target.dataset.experiencePlayed = "1";
+      // Prevent the generic counter from racing this conversion-focused one.
+      target.dataset.counted = "1";
+      const goal = Number(target.dataset.count || 25);
+      if (this.reduced) {
+        target.textContent = String(goal);
+        return;
+      }
+      target.textContent = "0";
+      const started = performance.now();
+      const tick = (now) => {
+        const progress = Math.min(1, (now - started) / 1450);
+        const eased = 1 - Math.pow(1 - progress, 4);
+        target.textContent = String(Math.round(goal * eased));
+        if (progress < 1) {
+          const id = requestAnimationFrame(tick);
+          this._experienceRafs.add(id);
+        }
+      };
+      const id = requestAnimationFrame(tick);
+      this._experienceRafs.add(id);
+    };
+    this._watchExperienceCounts = () => {
+      document.querySelectorAll("[data-count]").forEach((target) => {
+        const rect = target.getBoundingClientRect();
+        if (rect.top < window.innerHeight * .82 && rect.bottom > window.innerHeight * .08)
+          this._runExperienceCount(target);
+      });
+    };
+    this._experienceObserver = new IntersectionObserver(
+      (entries) => entries.forEach(({ target, isIntersecting }) => {
+        if (isIntersecting) {
+          this._runExperienceCount(target);
+          this._experienceObserver.unobserve(target);
+        }
+      }),
+      { threshold: .1 },
+    );
+    document.querySelectorAll("[data-count]").forEach((target) =>
+      this._experienceObserver.observe(target),
+    );
+    window.addEventListener("scroll", this._watchExperienceCounts, { passive: true });
+    requestAnimationFrame(this._watchExperienceCounts);
     this._keys = (e) => {
       if (e.key !== "Escape") return;
       if (this.state.lb) {
@@ -349,6 +397,9 @@ export default class DesignPage extends React.Component {
     this._menuAnimation?.cancel();
     this._reelAnimation?.cancel();
     this._disposeMotion?.();
+    this._experienceObserver?.disconnect();
+    window.removeEventListener("scroll", this._watchExperienceCounts);
+    this._experienceRafs?.forEach(cancelAnimationFrame);
     window.removeEventListener("load", this._onLoad);
     this._motionPreference?.removeEventListener(
       "change",
