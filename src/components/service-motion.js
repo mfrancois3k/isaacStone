@@ -11,7 +11,7 @@ export function createServiceMotion(panels) {
       const timeline = gsap.timeline({ paused: true });
       timeline.fromTo(panel,
         { scale: 1, rotationX: 0, y: 0, opacity: 1, transformPerspective: 1400 },
-        { scale: .92, rotationX: -4, y: -12, opacity: .78, duration: .9, ease: 'none' })
+        { scale: .7, rotationX: -9, y: -24, opacity: .5, duration: .9, ease: 'none' })
         .to(panel, { opacity: 0, duration: .1, ease: 'none' });
       const shade = panel.querySelector('[data-shade]');
       if (shade) timeline.fromTo(shade, { opacity: 0 }, { opacity: .4, duration: 1, ease: 'none' }, 0);
