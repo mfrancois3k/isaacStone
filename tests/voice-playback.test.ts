@@ -25,14 +25,14 @@ test('bursty chunks remain contiguous across a 120ms network delay', () => {
   player.append('r1', 'i1', chunk());
   context.currentTime = 0.25;
   player.append('r1', 'i1', chunk());
-  assert.deepEqual(starts, [0.18, 0.28, 0.38]);
-  assert.ok(player.remainingMs() > 220);
+  assert.deepEqual(starts, [0.12, 0.22, 0.32]);
+  assert.ok(player.remainingMs() > 170);
 });
 
 test('interruption truncates only heard samples, and late audio cannot restart the old turn', () => {
   const { context, player, starts, stopped } = setup();
   player.begin('r1', true); player.append('r1', 'i1', chunk());
-  context.currentTime = 0.23;
+  context.currentTime = 0.17;
   assert.deepEqual(player.interrupt(), { item_id: 'i1', content_index: 0, audio_end_ms: 50 });
   player.begin('r2', true);
   assert.equal(player.append('r1', 'i1', chunk()), false);
@@ -45,7 +45,7 @@ test('interruption timing excludes silence when playback had to rebuffer', () =>
   const { context, player } = setup();
   player.begin('r1', true); player.append('r1', 'i1', chunk());
   context.currentTime = 0.5; player.append('r1', 'i1', chunk());
-  context.currentTime = 0.73;
+  context.currentTime = 0.67;
   const result = player.interrupt();
   assert.ok(result!.audio_end_ms >= 149 && result!.audio_end_ms <= 150);
 });

@@ -3,6 +3,7 @@ import { VoicePlayback } from './voice-playback';
 
 type VoiceState = 'idle' | 'connecting' | 'listening' | 'thinking' | 'speaking';
 type Transcript = (id: string, sender: 'user' | 'bot', text: string) => void;
+const VOICE_SESSION_LIMIT_MS = 15 * 60_000;
 interface Call {
   cancelled: boolean;
   ready: boolean;
@@ -101,8 +102,9 @@ export function useVoiceAgent(onTranscript: Transcript) {
           if (!configured) {
             configured = true;
             send({ type: 'session.update', session: {
-              // End a normal turn promptly; keep the louder activation threshold for speakers.
-              turn_detection: { type: 'server_vad', silence_duration_ms: 500, threshold: 0.85 },
+              // A lower activation threshold and short end-of-turn pause make
+              // Wamy respond to normal speaking volume without clipping words.
+              turn_detection: { type: 'server_vad', silence_duration_ms: 350, threshold: 0.62 },
               audio: { input: { format: { type: 'audio/pcm', rate: context.sampleRate } }, output: { format: { type: 'audio/pcm', rate: 24000 } } },
             } });
           } else if (!call.ready && event.session?.audio?.input?.format) {
@@ -115,7 +117,13 @@ export function useVoiceAgent(onTranscript: Transcript) {
             call.capture = new AudioWorkletNode(context, 'voice-capture');
             call.capture.port.onmessage = ({ data: buffer }: MessageEvent<ArrayBuffer>) => {
               if (call.cancelled || mutedRef.current || socket.readyState !== WebSocket.OPEN) return;
-              if (socket.bufferedAmount > 256_000) { fail('The connection is too slow for voice. Please reconnect or type below.'); return; }
+              // Do not end a valuable call because a brief mobile-network
+              // hiccup built up a queue. Drop stale mic packets and let the
+              // current utterance continue once the socket catches up.
+              if (socket.bufferedAmount > 96_000) {
+                setNotice('Connection is catching up — keep speaking normally.');
+                return;
+              }
               const bytes = new Uint8Array(buffer);
               let binary = '';
               for (const byte of bytes) binary += String.fromCharCode(byte);
@@ -124,13 +132,14 @@ export function useVoiceAgent(onTranscript: Transcript) {
             call.source.connect(call.capture);
             call.capture.connect(context.destination);
             setState('listening');
-            send({ type: 'response.create' });
-            // A bounded prototype call also releases the microphone if a tab is forgotten.
+            // The saved agent creates its own greeting. Requesting another
+            // response here caused duplicate startup turns and avoidable lag.
+            // This safety limit prevents an abandoned tab holding the mic all day.
             call.timer = setTimeout(() => {
               if (callRef.current !== call) return;
               stop();
-              setNotice('This voice session ended after five minutes. Start a new conversation anytime.');
-            }, 5 * 60_000);
+              setNotice('This voice session ended after fifteen minutes. Start a new conversation anytime.');
+            }, VOICE_SESSION_LIMIT_MS);
           }
         }
         if (event.type === 'input_audio_buffer.speech_started') {
@@ -155,10 +164,8 @@ export function useVoiceAgent(onTranscript: Transcript) {
           clearTimeout(call.playbackTimer);
           call.playbackTimer = setTimeout(() => { if (!call.cancelled) setState('listening'); }, playback.remainingMs());
         }
-        if (event.type === 'response.function_call_arguments.done' && event.name === 'end_call') {
-          clearTimeout(call.timer);
-          call.timer = setTimeout(stop, playback.remainingMs() + 250);
-        }
+        // A saved-agent end_call tool is not a customer instruction to lose
+        // their microphone. The visitor alone ends the session from the UI.
         if (event.type === 'error') fail('Voice ran into a problem. Please reconnect or type below.');
       };
       socket.onerror = () => fail('Voice could not connect. Please try again or type below.');
