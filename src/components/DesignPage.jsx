@@ -324,11 +324,13 @@ export default class DesignPage extends React.Component {
       this._t0 = performance.now();
       this._tick = setInterval(() => {
         const elapsed = performance.now() - this._t0;
-        const t = clamp01((elapsed - 150) / 1400);
+        // Let the craft-focused reveal breathe. The loader is part of the
+        // first impression, so it should not flash past once the page is warm.
+        const t = clamp01((elapsed - 180) / 2100);
         const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
         const progress = Math.min(
           this._loaded ? 100 : 99,
-          this._loaded && elapsed >= 700 ? 100 : Math.round(eased * 100),
+          this._loaded && elapsed >= 1900 ? 100 : Math.round(eased * 100),
         );
         if (progress !== this.state.progress) this.setState({ progress });
         if (progress === 100) this.finishLoader();
