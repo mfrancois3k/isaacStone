@@ -122,6 +122,27 @@ export function startSiteMotion(root, reduced) {
     io.unobserve(el);
   });
   const heroAnimations = [];
+  // The H1 is the hero's main cinematic beat. Explicit WAAPI timing keeps
+  // the three masked lines staggered even when the loader hands off mid-frame.
+  if (!reduced) {
+    const heroLines = all("#top h1 [data-rv-line]");
+    heroLines.forEach((line, index) => {
+      heroAnimations.push(
+        line.animate(
+          [
+            { opacity: 0, transform: "translateY(112%) scale(.985)" },
+            { opacity: 1, transform: "translateY(0) scale(1)" },
+          ],
+          {
+            duration: 1600,
+            delay: 500 + index * 350,
+            easing: "cubic-bezier(.6,.01,-.05,.95)",
+            fill: "both",
+          },
+        ),
+      );
+    });
+  }
   if (heroImage && !reduced) {
     heroAnimations.push(
       heroImage.animate(
