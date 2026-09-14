@@ -286,6 +286,8 @@ export default class DesignPage extends React.Component {
     this._runExperienceCount = (target) => {
       if (!target || target.dataset.experiencePlayed) return;
       target.dataset.experiencePlayed = "1";
+      // Prevent the generic counter from racing this conversion-focused one.
+      target.dataset.counted = "1";
       const goal = Number(target.dataset.count || 25);
       if (this.reduced) {
         target.textContent = String(goal);
