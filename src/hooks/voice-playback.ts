@@ -34,7 +34,9 @@ export class VoicePlayback {
     source.buffer = buffer;
     source.connect(this.output);
     // Keep chunks contiguous while there is buffered audio. Rebuffer only on underrun.
-    if (this.nextTime <= this.context.currentTime + 0.005) this.nextTime = this.context.currentTime + 0.18;
+    // Keep a small cushion for network jitter without adding a noticeable
+    // delay before Wamy starts speaking.
+    if (this.nextTime <= this.context.currentTime + 0.005) this.nextTime = this.context.currentTime + 0.12;
     const start = this.nextTime;
     this.nextTime += buffer.duration;
     this.segments.push({ responseId, itemId, start, duration: buffer.duration });
