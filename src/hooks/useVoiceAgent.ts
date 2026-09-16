@@ -128,6 +128,8 @@ export function useVoiceAgent(onTranscript: Transcript) {
       call.timeout = setTimeout(() => fail('Voice took too long to connect. Please try again.'), 15_000);
       const transcripts = new Map<string, string>();
       let configured = false;
+      let speechStoppedAt = 0;
+      let firstAudioPending = false;
       const playback = call.playback;
       socket.onmessage = ({ data: raw }) => {
         if (call.cancelled) return;
@@ -135,11 +137,13 @@ export function useVoiceAgent(onTranscript: Transcript) {
         try { event = JSON.parse(raw); } catch { return; }
         if (event.type === 'session.updated') {
           // Keep the saved agent's voice, persona, tools, and connector access.
-          // This update changes browser audio transport only; it must not replace
+          // This update tunes latency and audio transport; it must not replace
           // the agent configuration managed in the xAI console.
           if (!configured) {
             configured = true;
             send({ type: 'session.update', session: {
+              // Intake needs direct responses, not the API's default high reasoning.
+              reasoning: { effort: 'none' },
               // End a normal turn promptly; keep the louder activation threshold for speakers.
               turn_detection: { type: 'server_vad', silence_duration_ms: 350, threshold: 0.85 },
               audio: { input: { format: { type: 'audio/pcm', rate: context.sampleRate } }, output: { format: { type: 'audio/pcm', rate: 24000 } } },
@@ -173,12 +177,18 @@ export function useVoiceAgent(onTranscript: Transcript) {
           }
         }
         if (event.type === 'input_audio_buffer.speech_started') {
+          firstAudioPending = false;
           clearTimeout(call.playbackTimer);
           const truncated = playback.interrupt();
           if (truncated) send({ type: 'conversation.item.truncate', ...truncated });
           setState('listening');
         }
-        if (event.type === 'input_audio_buffer.speech_stopped') setState('thinking');
+        if (event.type === 'input_audio_buffer.speech_stopped') {
+          speechStoppedAt = performance.now();
+          firstAudioPending = true;
+          setState('thinking');
+          console.info('[Voice timing]', { stage: 'speech_stopped' });
+        }
         if (event.type === 'conversation.item.input_audio_transcription.completed' && event.transcript) callback.current(`voice-user-${event.item_id}`, 'user', event.transcript);
         if (event.type === 'response.created') { clearTimeout(call.playbackTimer); playback.begin(event.response.id, call.ready); }
         if (event.type === 'response.output_audio_transcript.delta' && playback.accepts(event.response_id)) {
@@ -187,7 +197,17 @@ export function useVoiceAgent(onTranscript: Transcript) {
           transcripts.set(id, text); callback.current(id, 'bot', text);
         }
         if (event.type === 'response.output_audio.delta') {
-          if (playback.append(event.response_id, event.item_id, event.delta)) setState('speaking');
+          if (playback.append(event.response_id, event.item_id, event.delta)) {
+            if (firstAudioPending) {
+              console.info('[Voice timing]', {
+                stage: 'first_audio',
+                afterSpeechStoppedMs: Math.round(performance.now() - speechStoppedAt),
+                audioContextState: context.state,
+              });
+              firstAudioPending = false;
+            }
+            setState('speaking');
+          }
         }
         if (event.type === 'response.done' && playback.accepts(event.response?.id)) {
           if (event.response?.status === 'failed') { fail('Voice could not answer. Please reconnect or type below.'); return; }
