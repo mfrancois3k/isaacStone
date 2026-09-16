@@ -33,6 +33,7 @@ export function useVoiceAgent(onTranscript: Transcript) {
   const callRef = useRef<Call | null>(null);
   const preparedSession = useRef<VoiceSession | null>(null);
   const preparingSession = useRef<Promise<VoiceSession> | null>(null);
+  const sessionGeneration = useRef(0);
   const callback = useRef(onTranscript);
   callback.current = onTranscript;
   const mutedRef = useRef(false);
@@ -40,6 +41,9 @@ export function useVoiceAgent(onTranscript: Transcript) {
   const stop = useCallback(() => {
     const call = callRef.current;
     callRef.current = null;
+    sessionGeneration.current++;
+    preparedSession.current = null;
+    preparingSession.current = null;
     if (call) {
       call.cancelled = true;
       clearTimeout(call.timer); clearTimeout(call.timeout); clearTimeout(call.playbackTimer);
@@ -65,6 +69,7 @@ export function useVoiceAgent(onTranscript: Transcript) {
     if (cached && cached.expiresAt * 1000 - Date.now() > 15_000) return cached;
     if (preparingSession.current) return preparingSession.current;
 
+    const generation = sessionGeneration.current;
     const request = fetch('/api/voice-session', {
       method: 'POST',
       signal: AbortSignal.timeout(10_000),
@@ -78,7 +83,8 @@ export function useVoiceAgent(onTranscript: Transcript) {
         agentId: data.agentId,
         expiresAt: Number(data.expiresAt) || Math.floor(Date.now() / 1000) + 30,
       };
-      preparedSession.current = session;
+      // A cancelled preparation must never refill the next call's cache.
+      if (generation === sessionGeneration.current) preparedSession.current = session;
       return session;
     });
     preparingSession.current = request;
@@ -95,7 +101,11 @@ export function useVoiceAgent(onTranscript: Transcript) {
     callRef.current = call;
     // Start token minting in parallel with microphone setup. If Wammy was
     // opened moments ago this resolves from the warmed one instead.
-    const sessionPromise = prepare();
+    // Attach rejection handling immediately, even while microphone permission is pending.
+    const sessionPromise = prepare().then(
+      session => ({ session, error: null }),
+      error => ({ session: null, error }),
+    );
     setError(''); setNotice(''); setState('connecting');
     const fail = (message: string) => {
       if (callRef.current !== call) return;
@@ -120,8 +130,12 @@ export function useVoiceAgent(onTranscript: Transcript) {
       call.stream = stream;
       await context.audioWorklet.addModule('/audio/voice-capture.js');
       if (call.cancelled) return;
-      const data = await sessionPromise;
+      const result = await sessionPromise;
       if (call.cancelled) return;
+      if (!result.session) throw result.error;
+      const data = result.session;
+      // Claim this token for this connection only; restart obtains a fresh one.
+      preparedSession.current = null;
       const socket = new WebSocket(`wss://api.x.ai/v1/realtime?agent_id=${encodeURIComponent(data.agentId)}`, [`xai-client-secret.${data.token}`]);
       call.socket = socket;
       clearTimeout(call.timeout);
@@ -220,7 +234,7 @@ export function useVoiceAgent(onTranscript: Transcript) {
         }
         if (event.type === 'error') fail('Voice ran into a problem. Please reconnect or type below.');
       };
-      socket.onerror = () => fail('Voice could not connect. Please try again or type below.');
+      socket.onerror = () => { console.warn('[Voice connection]', { stage: 'socket_error', ready: call.ready }); fail('Voice could not connect. Please try again or type below.'); };
       socket.onclose = () => { if (!call.cancelled) fail('Voice disconnected. Tap to reconnect, or type below.'); };
     } catch (cause) {
       if (call.cancelled) return;
