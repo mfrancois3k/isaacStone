@@ -127,7 +127,9 @@ export function WamyDialog() {
     };
   }, [open]);
   useEffect(() => {
-    if (open) void voice.prepare();
+    if (open) void voice.prepare().catch(() => {
+      // Optional warmup: an explicit Start retries and displays any connection error.
+    });
   }, [open, voice.prepare]);
   useEffect(() => {
     if (typing) input.current?.focus();
