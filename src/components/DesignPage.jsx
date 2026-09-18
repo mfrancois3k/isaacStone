@@ -9311,6 +9311,11 @@ export default class DesignPage extends React.Component {
             boxShadow: "0 -40px 80px rgba(0,0,0,.25)",
           }}
         >
+          <div data-process-indicator={""} aria-hidden={"true"}>
+            <span data-process-index={""}>01</span>
+            <span data-process-rail={""}><i data-process-pin={""}></i></span>
+            <span>{"/ 04"}</span>
+          </div>
           <div
             style={{
               maxWidth: "1400px",

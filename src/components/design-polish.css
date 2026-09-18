@@ -236,6 +236,36 @@ h1[tabindex="-1"]:focus {
   transform-origin: left center;
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
+[data-process-indicator] {
+  position: absolute;
+  top: 0;
+  right: clamp(18px, 3vw, 52px);
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  color: #6b6459;
+  font: 400 10px 'JetBrains Mono', monospace;
+  letter-spacing: 1.5px;
+  will-change: transform;
+  pointer-events: none;
+}
+[data-process-index] { color: #a1563f; min-width: 2.2ch; }
+[data-process-rail] { position: relative; width: 86px; height: 1px; background: #cfc4b5; }
+[data-process-pin] {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: #a1563f;
+  border: 3px solid #efeae1;
+  box-shadow: 0 0 0 1px #a1563f;
+  transform: translateY(0);
+  transition: transform .2s var(--isaac-ease-out);
+  will-change: transform;
+}
 @media (prefers-reduced-motion: reduce) {
   [data-pstep] > span:nth-child(2) {
     color: #a1563f !important;
@@ -305,6 +335,7 @@ h1[tabindex="-1"]:focus {
     position: relative !important;
     top: auto !important;
   }
+  [data-process-indicator] { display: none; }
 }
 @media (max-width: 480px) {
   [data-process] [data-pstep] {
@@ -366,3 +397,8 @@ h1[tabindex="-1"]:focus {
 @keyframes estimate-appear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 @media(hover:hover) and (pointer:fine){#isv-header a:hover::after{transform:scaleX(1);}.work-project-trigger:hover>span:first-child{opacity:1;transform:none;}.work-project-trigger:hover::after,.reel-trigger:hover::after{opacity:1;transform:translateX(112%);}}
 @media(prefers-reduced-motion:reduce){.magnetic-face{transform:none!important;}#isv-header button:active,#contact button:active,#contact a:active,.reel-trigger:active{scale:1;}.estimate-review{animation:none;}#isv-header a::after,.work-project-trigger::after,.reel-trigger::after{transition:none;transform:none;opacity:0;}}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-process-indicator] { display: none; }
+  [data-htrack] > figure img { transform: none !important; }
+}

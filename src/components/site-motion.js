@@ -25,6 +25,7 @@ export function startSiteMotion(root, reduced) {
     strip = one("[data-hstrip]"),
     track = one("[data-htrack]"),
     cards = all("[data-htrack]>figure"),
+    workImages = all("[data-htrack]>figure img"),
     rule = one("[data-hbar]"),
     counter = one("[data-hcount]");
   if (!reduced && panels.length) {
@@ -40,9 +41,13 @@ export function startSiteMotion(root, reduced) {
     reelCount = one("[data-reelcount]");
   const parallax = all("[data-plx]"),
     words = all("[data-words]"),
+    processSection = one("[data-process]"),
     process = one("[data-process] ol"),
     line = one("[data-pline]"),
     steps = all("[data-pstep]"),
+    processIndicator = one("[data-process-indicator]"),
+    processPin = one("[data-process-pin]"),
+    processIndex = one("[data-process-index]"),
     footer = one("[data-footer]"),
     mark = one("[data-fmark]");
   const craft = one('[data-craft-section]'), craftImage = one('[data-craft-image]'),
@@ -152,7 +157,7 @@ export function startSiteMotion(root, reduced) {
           {
             duration: 1600,
             delay: 500 + index * 350,
-            easing: "cubic-bezier(.6,.01,-.05,.95)",
+            easing: "cubic-bezier(.16,1,.3,1)",
             fill: "both",
           },
         ),
@@ -238,7 +243,7 @@ export function startSiteMotion(root, reduced) {
   let metrics, positions, measuredY, measuredVw, measuredVh, previousNative;
   let lastTrackScroll = -1, lastReelScroll = -1;
   const resizeObserver = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(invalidate);
-  [root, track, reelTrack, ...panels, ...cards, ...reelCards, ...tickers.map(t => t.el)]
+  [root, track, reelTrack, processIndicator, ...panels, ...cards, ...reelCards, ...tickers.map(t => t.el)]
     .filter(Boolean).forEach(el => resizeObserver?.observe(el));
   window.addEventListener('resize', invalidate, {passive:true});
   root.addEventListener?.('load', invalidate, true);
@@ -272,7 +277,9 @@ export function startSiteMotion(root, reduced) {
     // Stable sizes are cached. Scroll only refreshes viewport-relative positions;
     // idle ticker/cursor frames never remeasure the page.
     const y = window.scrollY, vh = window.innerHeight, vw = window.innerWidth;
-    const native = reduced;
+    // Coarse-pointer devices use native horizontal swiping; desktop keeps the
+    // pinned vertical-to-horizontal mapping below.
+    const native = reduced || touchGallery.matches;
     const resized = measuredVw !== vw || measuredVh !== vh || previousNative !== native;
     const refresh = geometryDirty || resized || !metrics;
     const moved = measuredY !== y;
@@ -293,6 +300,7 @@ export function startSiteMotion(root, reduced) {
         reelWidth: reelTrack?.scrollWidth || 0,
         reelClient: reelTrack?.clientWidth || vw,
         reelCenters: reelCards.map(c => c.offsetLeft + c.offsetWidth / 2),
+        processIndicatorHeight: processIndicator?.offsetHeight || 0,
         panelHeights: panels.map(p => p.offsetHeight),
         tickerWidths: tickers.map(t => t.el.scrollWidth / 2),
       };
@@ -302,14 +310,14 @@ export function startSiteMotion(root, reduced) {
       positions = {
         stackRect: rect(stack), stripRect: rect(strip), reelRect: rect(reelStrip),
         parallaxRects: parallax.map(e => rect(e.parentElement)),
-        wordRects: words.map(rect), processRect: rect(process), stepRects: steps.map(rect),
+        wordRects: words.map(rect), processSectionRect: rect(processSection), processRect: rect(process), stepRects: steps.map(rect),
         footerRect: rect(footer), craftRect: rect(craft), tickerRects: tickers.map(t => rect(t.el.parentElement || t.el)),
         docH: document.documentElement.scrollHeight - vh,
       };
       measuredY = y;
     }
-    const {trackWidth, trackClient, cardCenters, reelWidth, reelClient, reelCenters, panelHeights, tickerWidths} = metrics;
-    const {stackRect, stripRect, reelRect, parallaxRects, wordRects, processRect, stepRects, footerRect, craftRect, tickerRects, docH} = positions;
+    const {trackWidth, trackClient, cardCenters, reelWidth, reelClient, reelCenters, processIndicatorHeight, panelHeights, tickerWidths} = metrics;
+    const {stackRect, stripRect, reelRect, parallaxRects, wordRects, processSectionRect, processRect, stepRects, footerRect, craftRect, tickerRects, docH} = positions;
     const trackScroll = native ? track?.scrollLeft || 0 : 0;
     const reelScroll = native ? reelTrack?.scrollLeft || 0 : 0;
     // All reads are complete before sizing or motion writes.
@@ -405,6 +413,15 @@ export function startSiteMotion(root, reduced) {
         put(track, "transform", `translateX(${x}px)`);
         put(rule, "transform", `scaleX(${p})`);
         count(counter, nearest(cardCenters, vw / 2 - x));
+        // Images enter enlarged at the edge and settle at the focal point.
+        // Their card shell stays still enough to preserve click hit areas.
+        cards.forEach((card, i) => {
+          const image = workImages[i];
+          if (!image) return;
+          const offset = (cardCenters[i] + x - vw * .5) / vw;
+          const distance = Math.min(1, Math.abs(offset));
+          put(image, "transform", `scale(${1.045 + distance * .11}) translateX(${-offset * 4}%)`);
+        });
       }
       if ((scrubChanged || previousVelocity !== velocity) && reelRect && reelTrack && !native) {
         const p = clamp(
@@ -480,6 +497,14 @@ export function startSiteMotion(root, reduced) {
               put(marker, "boxShadow", isActive ? "0 0 0 7px rgba(161,86,63,.12)" : "none");
             }
           });
+          if (processIndicator && processSectionRect) {
+            const maxPin = Math.max(0, processSectionRect.height - processIndicatorHeight - 48);
+            const pinY = Math.max(0, Math.min(maxPin, -processSectionRect.top + vh * .16));
+            put(processIndicator, "transform", `translateY(${pinY}px)`);
+            put(processPin, "transform", `translateY(${currentStep * 38}px)`);
+            const stepText = String(currentStep + 1).padStart(2, "0");
+            if (processIndex && processIndex.textContent !== stepText) processIndex.textContent = stepText;
+          }
         }
         if (craftRect) {
           const p = clamp(-craftRect.top / Math.max(1, craftRect.height - vh));
