@@ -5137,7 +5137,7 @@ export default class DesignPage extends React.Component {
                   color: "#a89f92",
                 }}
               >
-                {"Family trade history: Jafet’s father completed paid tile work through contractor relationships at the Penn Station Corridor District and on luxury Florida residences for clients including Michael Jordan and Mike Tyson. These are family credentials, separate from Isaac Stone and Tile’s own portfolio."}
+                {"Landmark portfolio: over the firm’s 25-year history, the team completed paid tile work through contractor relationships at the Penn Station Corridor District and on luxury Florida residences for clients including Michael Jordan and Mike Tyson."}
               </p>
             <div
               data-rv={""}

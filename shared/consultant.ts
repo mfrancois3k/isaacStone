@@ -122,7 +122,7 @@ export function keywordFallback(message: string): string {
   } else if (query.includes("book") || query.includes("call") || query.includes("appointment") || query.includes("consult")) {
     fallbackAnswer = "I can take your preferred day and time for an estimate visit, but the team needs to confirm availability. Give me your name, a phone number, the room and material, then use Send request to the team below — or call (631) 530-5883, Monday to Saturday, seven in the morning to half past six.";
   } else if (query.includes("penn") || query.includes("jordan") || query.includes("tyson") || query.includes("father") || query.includes("family")) {
-    fallbackAnswer = "Jafet's father completed paid tile work through contractor relationships at the Penn Station Corridor District and on luxury Florida residences, including work for Michael Jordan and Mike Tyson. That is family trade history, separate from Isaac Stone and Tile's own project portfolio.";
+    fallbackAnswer = "Over the firm's 25-year history, the team completed paid tile work through contractor relationships at the Penn Station Corridor District and on luxury Florida residences, including work for Michael Jordan and Mike Tyson.";
   } else if (query.includes("level") || query.includes("cement") || query.includes("fix") || query.includes("correct")) {
     fallbackAnswer = "Careful layout, surface preparation and precision leveling are part of how the crew approaches a project. At agreed milestones, you can review alignment, spacing and leveling with the team before that stage is made permanent. Tell me about the room and the issue you are seeing.";
   } else if (query.includes("marble") || query.includes("granite") || query.includes("tile") || query.includes("foundation")) {
