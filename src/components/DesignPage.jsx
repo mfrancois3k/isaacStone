@@ -5124,9 +5124,21 @@ export default class DesignPage extends React.Component {
               }}
             >
               {
-                "Tile, marble and stone for homes across New York and Florida — planned carefully, installed precisely, finished to belong."
-              }
-            </p>
+                  "Tile, marble and stone for homes across New York and Florida — planned carefully, installed precisely, finished to belong."
+                }
+              </p>
+              <p
+                style={{
+                  margin: "0",
+                  maxWidth: "62ch",
+                  padding: "14px 16px",
+                  borderLeft: "2px solid #a1563f",
+                  font: "400 15px/1.55 'Source Sans 3',sans-serif",
+                  color: "#a89f92",
+                }}
+              >
+                {"Family trade history: Jafet’s father completed paid tile work through contractor relationships at the Penn Station Corridor District and on luxury Florida residences for clients including Michael Jordan and Mike Tyson. These are family credentials, separate from Isaac Stone and Tile’s own portfolio."}
+              </p>
             <div
               data-rv={""}
               style={{
