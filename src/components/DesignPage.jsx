@@ -1821,7 +1821,7 @@ export default class DesignPage extends React.Component {
                 }}
               >
                 {
-                  "Owner-led tile and stone work for bathrooms, kitchens, floors and custom interior surfaces across Long Island, New York City and Florida."
+                  "Owner-led tile, custom cement and stone work for bathrooms, kitchens, floors and interior surfaces across Long Island, New York City and Florida."
                 }
               </p>
               <span
@@ -5321,7 +5321,7 @@ export default class DesignPage extends React.Component {
                 }}
               >
                 {
-                  "Porcelain, ceramic and mosaic for bathrooms, kitchens and floors. Layout is planned before the first tile is set, and the substrate is checked before installation begins."
+                  "Porcelain, ceramic and mosaic for bathrooms, kitchens and floors. Layout, custom cement preparation and leveling are checked before the first tile is set."
                 }
               </p>
               <div
@@ -9624,7 +9624,7 @@ export default class DesignPage extends React.Component {
                       }}
                     >
                       {
-                        "Itemized: materials, labor, prep. Changes are discussed before additional work proceeds."
+                        "Itemized: materials, labor, prep. Review alignment, spacing and leveling with the crew at agreed milestones; changes are discussed before additional work proceeds."
                       }
                     </p>
                   </div>

@@ -232,7 +232,7 @@ export function startSiteMotion(root, reduced) {
         Math.abs(c - target) < Math.abs(centers[best] - target) ? i : best,
       0,
     );
-  const rect = (el) => el?.getBoundingClientRect();
+  const rect = (el) => typeof el?.getBoundingClientRect === 'function' ? el.getBoundingClientRect() : undefined;
   const originalHeights = [strip, reelStrip].map(el => el?.style.height || '');
   const playRings = reelCards.map(card => card.querySelector('[data-playring]'));
   let metrics, positions, measuredY, measuredVw, measuredVh, previousNative;

@@ -121,8 +121,10 @@ export function keywordFallback(message: string): string {
     fallbackAnswer = "I cannot give you a price. It depends on the material, the square footage, and the state of the floor or wall underneath. We give you the range on the phone before anyone drives out, so call (631) 530-5883, or leave me the room, the material and your number and Jonathan will call you.";
   } else if (query.includes("book") || query.includes("call") || query.includes("appointment") || query.includes("consult")) {
     fallbackAnswer = "I can take your preferred day and time for an estimate visit, but the team needs to confirm availability. Give me your name, a phone number, the room and material, then use Send request to the team below — or call (631) 530-5883, Monday to Saturday, seven in the morning to half past six.";
+  } else if (query.includes("level") || query.includes("cement") || query.includes("fix") || query.includes("correct")) {
+    fallbackAnswer = "Careful layout, surface preparation and precision leveling are part of how the crew approaches a project. At agreed milestones, you can review alignment, spacing and leveling with the team before that stage is made permanent. Tell me about the room and the issue you are seeing.";
   } else if (query.includes("marble") || query.includes("granite") || query.includes("tile") || query.includes("foundation")) {
-    fallbackAnswer = "We do tile, granite and marble installation, and superstructure and foundation work. Which room are you thinking about? If you have a specific material in mind, Jonathan is the one to ask — (631) 530-5883.";
+    fallbackAnswer = "We do tile, granite and marble installation, custom cement work, and superstructure and foundation work. Which room are you thinking about? If you have a specific material in mind, Jonathan is the one to ask — (631) 530-5883.";
   } else if (query.includes("hour") || query.includes("open") || query.includes("saturday")) {
     fallbackAnswer = "We are open Monday to Saturday, seven in the morning to half past six. The number is (631) 530-5883 and someone here answers it.";
   } else if (query.includes("area") || query.includes("location") || query.includes("hamptons") || query.includes("where")) {
